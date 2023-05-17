@@ -3,7 +3,7 @@ before:
     - go mod tidy
 builds:
   - id: db-unit-extractor
-    binary: brutils
+    binary: db-unit-extractor
     ldflags:
       - -s -w -X github.com/aureliano/db-unit-extractor/cmd.version={{.Version}}
     env:
