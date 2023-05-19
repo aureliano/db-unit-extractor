@@ -1,0 +1,18 @@
+---
+tables:
+  - name: orders
+    filters:
+      - name: customer_id
+        value: ${customers.id}
+  - name: orders_products
+    filters:
+      - name: order_id
+        value: ${orders.id}
+  - name: customers
+    filters:
+      - name: id
+        value: 1
+  - name: products
+    filters:
+      - name: id
+        value: ${orders_products.product_id}

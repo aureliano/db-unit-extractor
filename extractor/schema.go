@@ -12,8 +12,12 @@ import (
 
 const NameMaxLength = 80
 
-var ErrSchemaValidation = errors.New("validation")
-var nameRegExp = regexp.MustCompile(`^[a-zA-Z_]\w+$`)
+var (
+	ErrSchemaValidation    = errors.New("validation")
+	ErrTableClassification = errors.New("classification")
+	nameRegExp             = regexp.MustCompile(`^[a-zA-Z_]\w+$`)
+	filterReferenceRegExp  = regexp.MustCompile(`^\$\{\w+\.\w+\}$`)
+)
 
 type ConverterSchema string
 type ColumnSchema string
@@ -25,6 +29,7 @@ type FilterSchema struct {
 }
 
 type TableSchema struct {
+	GroupID int
 	Name    string         `yaml:"name"`
 	Filters []FilterSchema `yaml:"filters"`
 	Columns []ColumnSchema `yaml:"columns"`
@@ -38,6 +43,10 @@ type Schema struct {
 
 type SchemaValidator interface {
 	Validate() error
+}
+
+type GroupClassifier interface {
+	Classify() error
 }
 
 func DigestSchema(fpath string) (Schema, error) {
@@ -117,6 +126,37 @@ func (c ColumnSchema) Validate() error {
 
 func (c IgnoreSchema) Validate() error {
 	return validateName(string(c))
+}
+
+func (s Schema) Classify() error {
+	indexes, err := classifyGroupOne(s)
+	if err != nil {
+		return fmt.Errorf("%w: %w", ErrTableClassification, err)
+	}
+
+	for i := 0; i < len(indexes); i++ {
+		s.Tables[indexes[i]].GroupID = 1
+	}
+
+	return nil
+}
+
+func classifyGroupOne(s Schema) ([]int, error) {
+	indexes := make([]int, 0, len(s.Tables))
+
+	for i, table := range s.Tables {
+		for _, filter := range table.Filters {
+			if !filterReferenceRegExp.MatchString(filter.Value) {
+				indexes = append(indexes, i)
+			}
+		}
+	}
+
+	if len(indexes) == 0 {
+		return indexes, fmt.Errorf("couldn't find any level one tables")
+	}
+
+	return indexes, nil
 }
 
 func validateConverters(converters []ConverterSchema) error {

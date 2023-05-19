@@ -263,3 +263,25 @@ func TestIgnoreSchema(t *testing.T) {
 	assert.ErrorIs(t, err, extractor.ErrSchemaValidation)
 	assert.Contains(t, err.Error(), "'' invalid name")
 }
+
+func TestClassifyGroupOneNotClassified(t *testing.T) {
+	s := extractor.Schema{
+		Tables: []extractor.TableSchema{
+			{Name: "t1", Filters: []extractor.FilterSchema{{Name: "id", Value: "${table.column}"}}},
+		},
+	}
+
+	err := s.Classify()
+	assert.ErrorIs(t, err, extractor.ErrTableClassification)
+}
+
+func TestClassify(t *testing.T) {
+	schema, err := extractor.DigestSchema("../test/unit/schema_test_grouping.yml")
+	require.Nil(t, err)
+
+	err = schema.Classify()
+	assert.Nil(t, err)
+
+	table := schema.Tables[2]
+	assert.Equal(t, 1, table.GroupID)
+}
