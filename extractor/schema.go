@@ -52,7 +52,7 @@ func DigestSchema(fpath string) (Schema, error) {
 		return schema, err
 	}
 
-	return schema, nil
+	return schema, schema.Validate()
 }
 
 func (s Schema) Validate() error {

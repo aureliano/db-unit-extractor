@@ -26,6 +26,8 @@ func TestDigestSchemaUnmarshalError(t *testing.T) {
 }
 
 func TestDigestSchema(t *testing.T) {
+	dataconv.RegisterConverter("conv_date_time", DummyConverter(""))
+	dataconv.RegisterConverter("conv_timestamp", DummyConverter(""))
 	schema, err := extractor.DigestSchema("../test/unit/schema_test.yml")
 
 	require.Nil(t, err)
