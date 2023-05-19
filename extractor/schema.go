@@ -67,7 +67,7 @@ func (s Schema) Validate() error {
 
 func (c ConverterSchema) Validate() error {
 	if !dataconv.ConverterExists(string(c)) {
-		return errors.Join(ErrSchemaValidation, fmt.Errorf("converter '%s' not found", c))
+		return fmt.Errorf("%w: converter '%s' not found", ErrSchemaValidation, c)
 	}
 
 	return nil
@@ -80,25 +80,24 @@ func (t TableSchema) Validate() error {
 
 	for _, filter := range t.Filters {
 		if err := filter.Validate(); err != nil {
-			return errors.Join(fmt.Errorf("table '%s'", t.Name), err)
+			return fmt.Errorf("table '%s' %w", t.Name, err)
 		}
 	}
 
 	for _, column := range t.Columns {
 		if err := column.Validate(); err != nil {
-			return errors.Join(fmt.Errorf("table '%s'", t.Name), err)
+			return fmt.Errorf("table '%s' %w", t.Name, err)
 		}
 	}
 
 	for _, column := range t.Ignore {
 		if err := column.Validate(); err != nil {
-			return errors.Join(fmt.Errorf("table '%s'", t.Name), err)
+			return fmt.Errorf("table '%s' %w", t.Name, err)
 		}
 	}
 
 	if len(t.Columns) > 0 && len(t.Ignore) > 0 {
-		return errors.Join(ErrSchemaValidation,
-			fmt.Errorf("table '%s' with columns and ignore set (excludents)", t.Name))
+		return fmt.Errorf("%w: table '%s' with columns and ignore set (excludents)", ErrSchemaValidation, t.Name)
 	}
 
 	return nil
@@ -106,7 +105,7 @@ func (t TableSchema) Validate() error {
 
 func (f FilterSchema) Validate() error {
 	if len(f.Value) == 0 {
-		return errors.Join(ErrSchemaValidation, fmt.Errorf("empty filter value '%s'", f.Name))
+		return fmt.Errorf("%w: empty filter value '%s'", ErrSchemaValidation, f.Name)
 	}
 
 	return validateName(f.Name)
@@ -132,7 +131,7 @@ func validateConverters(converters []ConverterSchema) error {
 
 func validateTables(tables []TableSchema) error {
 	if len(tables) == 0 {
-		return errors.Join(ErrSchemaValidation, errors.New("no table provided"))
+		return fmt.Errorf("%w: no table provided", ErrSchemaValidation)
 	}
 
 	for _, table := range tables {
@@ -146,11 +145,11 @@ func validateTables(tables []TableSchema) error {
 
 func validateName(name string) error {
 	if len(name) > NameMaxLength {
-		return errors.Join(ErrSchemaValidation, fmt.Errorf("'%s' invalid name size", name))
+		return fmt.Errorf("%w: '%s' invalid name size", ErrSchemaValidation, name)
 	}
 
 	if !nameRegExp.MatchString(name) {
-		return errors.Join(ErrSchemaValidation, fmt.Errorf("'%s' invalid name", name))
+		return fmt.Errorf("%w: '%s' invalid name", ErrSchemaValidation, name)
 	}
 
 	return nil

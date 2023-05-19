@@ -178,7 +178,7 @@ func TestTableSchemaValidateColumns(t *testing.T) {
 	}
 	err := s.Validate()
 	assert.ErrorIs(t, err, extractor.ErrSchemaValidation)
-	assert.Contains(t, err.Error(), "table 'tbl'\nvalidation\n'a' invalid name")
+	assert.Contains(t, err.Error(), "table 'tbl' validation: 'a' invalid name")
 }
 
 func TestTableSchemaValidateIgnore(t *testing.T) {
@@ -188,7 +188,7 @@ func TestTableSchemaValidateIgnore(t *testing.T) {
 	}
 	err := s.Validate()
 	assert.ErrorIs(t, err, extractor.ErrSchemaValidation)
-	assert.Contains(t, err.Error(), "table 'tbl'\nvalidation\n'a' invalid name")
+	assert.Contains(t, err.Error(), "table 'tbl' validation: 'a' invalid name")
 }
 
 func TestTableSchemaValidateFilter(t *testing.T) {
@@ -198,7 +198,7 @@ func TestTableSchemaValidateFilter(t *testing.T) {
 	}
 	err := s.Validate()
 	assert.ErrorIs(t, err, extractor.ErrSchemaValidation)
-	assert.Contains(t, err.Error(), "table 'tbl'\nvalidation\n'x' invalid name")
+	assert.Contains(t, err.Error(), "table 'tbl' validation: 'x' invalid name")
 }
 
 func TestFilterSchemaValidate(t *testing.T) {
