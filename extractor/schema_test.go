@@ -25,6 +25,11 @@ func TestDigestSchemaUnmarshalError(t *testing.T) {
 	assert.Contains(t, err.Error(), "yaml: unmarshal errors")
 }
 
+func TestDigestSchemaUnmarshalErrorUnknownField(t *testing.T) {
+	_, err := extractor.DigestSchema("../test/unit/schema_test_unmarshal_error_unknown_field.yml")
+	assert.Contains(t, err.Error(), "line 7: field ArbitraryField not found in type extractor.TableSchema")
+}
+
 func TestDigestSchemaValidationError(t *testing.T) {
 	_, err := extractor.DigestSchema("../test/unit/schema_test.yml")
 	assert.ErrorIs(t, err, extractor.ErrSchemaValidation)

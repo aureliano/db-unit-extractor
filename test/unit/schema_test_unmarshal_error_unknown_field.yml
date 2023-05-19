@@ -1,0 +1,34 @@
+---
+converters:
+  - conv_date_time
+  - conv_timestamp
+tables:
+  - name: customers
+    ArbitraryField: Any value
+    filters:
+      - name: id
+        value: 1
+    columns:
+      - id
+      - first_name
+      - last_name
+  - name: orders
+    filters:
+      - name: customer_id
+        value: 1
+    ignore:
+      - order_fax
+  - name: orders_products
+    filters:
+      - name: order_id
+        value: 5
+      - name: product_id
+        value: 3
+  - name: products
+    filters:
+      - name: id
+        value: 3
+    columns:
+      - name
+      - description
+      - price
