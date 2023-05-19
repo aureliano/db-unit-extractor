@@ -62,7 +62,11 @@ func DigestSchema(fpath string) (Schema, error) {
 		return schema, err
 	}
 
-	return schema, schema.Validate()
+	if err = schema.Validate(); err != nil {
+		return schema, err
+	}
+
+	return schema, schema.Classify()
 }
 
 func (s Schema) Validate() error {

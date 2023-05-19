@@ -25,6 +25,11 @@ func TestDigestSchemaUnmarshalError(t *testing.T) {
 	assert.Contains(t, err.Error(), "yaml: unmarshal errors")
 }
 
+func TestDigestSchemaValidationError(t *testing.T) {
+	_, err := extractor.DigestSchema("../test/unit/schema_test.yml")
+	assert.ErrorIs(t, err, extractor.ErrSchemaValidation)
+}
+
 func TestDigestSchema(t *testing.T) {
 	dataconv.RegisterConverter("conv_date_time", DummyConverter(""))
 	dataconv.RegisterConverter("conv_timestamp", DummyConverter(""))
