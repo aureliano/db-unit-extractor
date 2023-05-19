@@ -1,18 +1,57 @@
 ---
 tables:
-  - name: orders
+  - name: b11
     filters:
-      - name: customer_id
-        value: ${customers.id}
-  - name: orders_products
+      - name: b1_fk
+        value: ${b1.id}
+  - name: b1
     filters:
-      - name: order_id
-        value: ${orders.id}
-  - name: customers
+      - name: id
+        value: ${b1_id}
+  - name: a111
+    filters:
+      - name: a11_fk
+        value: ${a11.id}
+  - name: a1
     filters:
       - name: id
         value: 1
-  - name: products
+  - name: b13121
     filters:
-      - name: id
-        value: ${orders_products.product_id}
+      - name: b1312_fk
+        value: ${b1312.id}
+  - name: a11
+    filters:
+      - name: a1_fk
+        value: ${a1.id}
+  - name: b12
+    filters:
+      - name: b1_fk
+        value: ${b1.id}
+  - name: c1
+  - name: b13
+    filters:
+      - name: b1_fk
+        value: ${b1.id}
+  - name: b131
+    filters:
+      - name: b1_fk
+        value: ${b1.id}
+      - name: b13_fk
+        value: ${b13.id}
+  - name: b1311
+    filters:
+      - name: b131_fk
+        value: ${b131.id}
+      - name: c1_fk
+        value: ${c1.id}
+  - name: b1312
+    filters:
+      - name: b131_fk
+        value: ${b131.id}
+  - name: a112
+    filters:
+      - name: any
+        value: 5
+      - name: a11_fk
+        value: ${a11.id}
