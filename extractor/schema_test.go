@@ -115,3 +115,21 @@ func TestDigestSchema(t *testing.T) {
 	ignore = table.Ignore
 	assert.Empty(t, ignore)
 }
+func TestDigestSchemaReferences(t *testing.T) {
+	schema, err := extractor.DigestSchema("../test/unit/schema_test_grouping.yml")
+	require.Nil(t, err)
+
+	keys := make([]string, 0, len(schema.Refs))
+	for k := range schema.Refs {
+		keys = append(keys, k)
+	}
+
+	assert.Len(t, keys, 7)
+	assert.Contains(t, schema.Refs, "b1.id")
+	assert.Contains(t, schema.Refs, "a11.id")
+	assert.Contains(t, schema.Refs, "b1312.id")
+	assert.Contains(t, schema.Refs, "a1.id")
+	assert.Contains(t, schema.Refs, "b13.id")
+	assert.Contains(t, schema.Refs, "b131.id")
+	assert.Contains(t, schema.Refs, "c1.id")
+}

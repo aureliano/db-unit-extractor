@@ -2,6 +2,7 @@ package extractor
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"regexp"
 
@@ -35,6 +36,7 @@ type TableSchema struct {
 }
 
 type Schema struct {
+	Refs       map[string]interface{}
 	Converters []ConverterSchema `yaml:"converters"`
 	Tables     []TableSchema     `yaml:"tables"`
 }
@@ -63,5 +65,23 @@ func DigestSchema(fpath string) (Schema, error) {
 		return schema, err
 	}
 
+	schema.Refs = fetchReferences(schema)
+
 	return schema, schema.Classify()
+}
+
+func fetchReferences(s Schema) map[string]interface{} {
+	refs := make(map[string]interface{})
+
+	for _, table := range s.Tables {
+		for _, filter := range table.Filters {
+			matches := filterReferenceRegExp.FindAllStringSubmatch(filter.Value, -1)
+			if matches != nil {
+				key := fmt.Sprintf("%s.%s", matches[0][1], matches[0][2])
+				refs[key] = nil
+			}
+		}
+	}
+
+	return refs
 }
