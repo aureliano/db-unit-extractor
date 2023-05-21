@@ -1,6 +1,9 @@
 package reader
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
 
 type DecimalColumn struct {
 	Precision int64
@@ -26,12 +29,14 @@ type DataSource struct {
 	MaxIdleConn int
 }
 
+var ErrUnsupportedDBReader = errors.New("unsupported database")
+
 type DBReader interface {
 	FetchColumnsMetadata(table string, fieldsIn, fieldsOut []string) ([]DBColumn, error)
 	FetchData(table string, fields []DBColumn, converters []string,
 		filters [][]interface{}) ([]map[string]interface{}, error)
 }
 
-func NewReader(_ DataSource) (DBReader, error) {
-	return nil, fmt.Errorf("not implemented yet")
+func NewReader(ds DataSource) (DBReader, error) {
+	return nil, fmt.Errorf("%w: %s", ErrUnsupportedDBReader, ds.DBMSName)
 }

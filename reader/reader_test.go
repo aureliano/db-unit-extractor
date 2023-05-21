@@ -9,5 +9,5 @@ import (
 
 func TestNewReader(t *testing.T) {
 	_, err := reader.NewReader(reader.DataSource{})
-	assert.Equal(t, "not implemented yet", err.Error())
+	assert.ErrorIs(t, err, reader.ErrUnsupportedDBReader)
 }
