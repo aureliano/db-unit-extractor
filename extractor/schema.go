@@ -48,6 +48,7 @@ type SchemaValidator interface {
 
 type SchemaClassifier interface {
 	Classify() error
+	GroupedTables() [][]TableSchema
 }
 
 func DigestSchema(fpath string) (Schema, error) {

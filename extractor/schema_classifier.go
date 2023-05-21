@@ -36,6 +36,30 @@ func (s Schema) Classify() error {
 	return nil
 }
 
+func (s Schema) GroupedTables() [][]TableSchema {
+	group := make([][]TableSchema, 0, len(s.Tables))
+	ig := 0
+
+	for {
+		tables := make([]TableSchema, 0)
+		ig++
+
+		for _, table := range s.Tables {
+			if ig == table.GroupID {
+				tables = append(tables, table)
+			}
+		}
+
+		if len(tables) == 0 {
+			break
+		}
+
+		group = append(group, tables)
+	}
+
+	return group
+}
+
 func classifyGroupOne(s Schema) ([]int, error) {
 	indexes := make([]int, 0, len(s.Tables))
 
