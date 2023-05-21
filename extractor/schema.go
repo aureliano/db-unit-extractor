@@ -12,6 +12,7 @@ import (
 const NameMaxLength = 80
 
 var (
+	ErrSchemaFile          = errors.New("schema-file")
 	ErrSchemaValidation    = errors.New("validation")
 	ErrTableClassification = errors.New("classification")
 	nameRegExp             = regexp.MustCompile(`^[a-zA-Z_]\w+$`)
@@ -54,11 +55,11 @@ func DigestSchema(fpath string) (Schema, error) {
 	yml, err := os.ReadFile(fpath)
 
 	if err != nil {
-		return schema, err
+		return schema, fmt.Errorf("%w: %w", ErrSchemaFile, err)
 	}
 
 	if err = yaml.UnmarshalStrict(yml, &schema); err != nil {
-		return schema, err
+		return schema, fmt.Errorf("%w: %w", ErrSchemaFile, err)
 	}
 
 	if err = schema.Validate(); err != nil {

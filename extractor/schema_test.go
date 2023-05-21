@@ -17,11 +17,13 @@ func (DummyConverter) Convert(_ interface{}, _ *interface{}) {
 
 func TestDigestSchemaFileNotFound(t *testing.T) {
 	_, err := extractor.DigestSchema("/path/to/unknown/file.yml")
+	assert.ErrorIs(t, err, extractor.ErrSchemaFile)
 	assert.ErrorIs(t, err, os.ErrNotExist)
 }
 
 func TestDigestSchemaUnmarshalError(t *testing.T) {
 	_, err := extractor.DigestSchema("../test/unit/schema_test_unmarshal_error.yml")
+	assert.ErrorIs(t, err, extractor.ErrSchemaFile)
 	assert.Contains(t, err.Error(), "yaml: unmarshal errors")
 }
 
