@@ -27,7 +27,7 @@ func Extract(conf Conf) error {
 	return extract(conf.DataSource, schema, db)
 }
 
-func extract(ds reader.DataSource, schema schema.Schema, db reader.DBReader) error {
+func extract(ds reader.DataSource, schema schema.Model, db reader.DBReader) error {
 	groupedTables := schema.GroupedTables()
 	var wg sync.WaitGroup
 

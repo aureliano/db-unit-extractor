@@ -9,9 +9,9 @@ import (
 )
 
 func TestClassifyGroupOneNotClassified(t *testing.T) {
-	s := schema.Schema{
-		Tables: []schema.TableSchema{
-			{Name: "t1", Filters: []schema.FilterSchema{{Name: "id", Value: "${table.column}"}}},
+	s := schema.Model{
+		Tables: []schema.Table{
+			{Name: "t1", Filters: []schema.Filter{{Name: "id", Value: "${table.column}"}}},
 		},
 	}
 
@@ -21,10 +21,10 @@ func TestClassifyGroupOneNotClassified(t *testing.T) {
 }
 
 func TestClassifyReferenceNotFound(t *testing.T) {
-	s := schema.Schema{
-		Tables: []schema.TableSchema{
-			{Name: "t1", Filters: []schema.FilterSchema{{Name: "id", Value: "1"}}},
-			{Name: "t2", Filters: []schema.FilterSchema{{Name: "id", Value: "${table.column}"}}},
+	s := schema.Model{
+		Tables: []schema.Table{
+			{Name: "t1", Filters: []schema.Filter{{Name: "id", Value: "1"}}},
+			{Name: "t2", Filters: []schema.Filter{{Name: "id", Value: "${table.column}"}}},
 		},
 	}
 

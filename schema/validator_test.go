@@ -9,7 +9,7 @@ import (
 )
 
 func TestValidateSchemaConverter(t *testing.T) {
-	s := schema.Schema{
+	s := schema.Model{
 		Converters: []schema.ConverterSchema{"???"},
 	}
 	err := s.Validate()
@@ -20,7 +20,7 @@ func TestValidateSchemaConverter(t *testing.T) {
 func TestValidateSchemaNoTableProvided(t *testing.T) {
 	dataconv.RegisterConverter("dummy", DummyConverter(""))
 
-	s := schema.Schema{
+	s := schema.Model{
 		Converters: []schema.ConverterSchema{"dummy"},
 	}
 	err := s.Validate()
@@ -31,9 +31,9 @@ func TestValidateSchemaNoTableProvided(t *testing.T) {
 func TestValidateSchemaInvalidTable(t *testing.T) {
 	dataconv.RegisterConverter("dummy", DummyConverter(""))
 
-	s := schema.Schema{
+	s := schema.Model{
 		Converters: []schema.ConverterSchema{"dummy"},
-		Tables:     []schema.TableSchema{{Name: "z"}},
+		Tables:     []schema.Table{{Name: "z"}},
 	}
 	err := s.Validate()
 	assert.ErrorIs(t, err, schema.ErrSchemaValidation)
@@ -43,29 +43,29 @@ func TestValidateSchemaInvalidTable(t *testing.T) {
 func TestValidateSchema(t *testing.T) {
 	dataconv.RegisterConverter("dummy", DummyConverter(""))
 
-	s := schema.Schema{
+	s := schema.Model{
 		Converters: []schema.ConverterSchema{"dummy"},
-		Tables:     []schema.TableSchema{{Name: "tbl"}},
+		Tables:     []schema.Table{{Name: "tbl"}},
 	}
 	err := s.Validate()
 	assert.Nil(t, err)
 }
 
 func TestTableSchemaValidate(t *testing.T) {
-	s := schema.TableSchema{Name: "tbl_1"}
+	s := schema.Table{Name: "tbl_1"}
 	err := s.Validate()
 	assert.Nil(t, err)
 }
 
 func TestTableSchemaValidateName(t *testing.T) {
-	s := schema.TableSchema{}
+	s := schema.Table{}
 	err := s.Validate()
 	assert.ErrorIs(t, err, schema.ErrSchemaValidation)
 	assert.Contains(t, err.Error(), "'' invalid name")
 }
 
 func TestTableSchemaValidateColumnsAndIgnoreProvided(t *testing.T) {
-	s := schema.TableSchema{
+	s := schema.Table{
 		Name:    "tbl",
 		Columns: []schema.ColumnSchema{"a1"},
 		Ignore:  []schema.IgnoreSchema{"b1"},
@@ -76,7 +76,7 @@ func TestTableSchemaValidateColumnsAndIgnoreProvided(t *testing.T) {
 }
 
 func TestTableSchemaValidateColumns(t *testing.T) {
-	s := schema.TableSchema{
+	s := schema.Table{
 		Name:    "tbl",
 		Columns: []schema.ColumnSchema{"a", "b1"},
 	}
@@ -86,7 +86,7 @@ func TestTableSchemaValidateColumns(t *testing.T) {
 }
 
 func TestTableSchemaValidateIgnore(t *testing.T) {
-	s := schema.TableSchema{
+	s := schema.Table{
 		Name:   "tbl",
 		Ignore: []schema.IgnoreSchema{"a", "b1"},
 	}
@@ -96,9 +96,9 @@ func TestTableSchemaValidateIgnore(t *testing.T) {
 }
 
 func TestTableSchemaValidateFilter(t *testing.T) {
-	s := schema.TableSchema{
+	s := schema.Table{
 		Name:    "tbl",
-		Filters: []schema.FilterSchema{{Name: "x", Value: "value"}},
+		Filters: []schema.Filter{{Name: "x", Value: "value"}},
 	}
 	err := s.Validate()
 	assert.ErrorIs(t, err, schema.ErrSchemaValidation)
@@ -106,17 +106,17 @@ func TestTableSchemaValidateFilter(t *testing.T) {
 }
 
 func TestFilterSchemaValidate(t *testing.T) {
-	s := schema.FilterSchema{Name: "", Value: "1"}
+	s := schema.Filter{Name: "", Value: "1"}
 	err := s.Validate()
 	assert.ErrorIs(t, err, schema.ErrSchemaValidation)
 	assert.Contains(t, err.Error(), "'' invalid name")
 
-	s = schema.FilterSchema{Name: "name", Value: ""}
+	s = schema.Filter{Name: "name", Value: ""}
 	err = s.Validate()
 	assert.ErrorIs(t, err, schema.ErrSchemaValidation)
 	assert.Contains(t, err.Error(), "empty filter value 'name'")
 
-	s = schema.FilterSchema{Name: "name", Value: "value"}
+	s = schema.Filter{Name: "name", Value: "value"}
 	err = s.Validate()
 	assert.Nil(t, err)
 }

@@ -23,23 +23,23 @@ type ConverterSchema string
 type ColumnSchema string
 type IgnoreSchema string
 
-type FilterSchema struct {
+type Filter struct {
 	Name  string `yaml:"name"`
 	Value string `yaml:"value"`
 }
 
-type TableSchema struct {
+type Table struct {
 	GroupID int
 	Name    string         `yaml:"name"`
-	Filters []FilterSchema `yaml:"filters"`
+	Filters []Filter       `yaml:"filters"`
 	Columns []ColumnSchema `yaml:"columns"`
 	Ignore  []IgnoreSchema `yaml:"ignore"`
 }
 
-type Schema struct {
+type Model struct {
 	Refs       map[string]interface{}
 	Converters []ConverterSchema `yaml:"converters"`
-	Tables     []TableSchema     `yaml:"tables"`
+	Tables     []Table           `yaml:"tables"`
 }
 
 type Validator interface {
@@ -48,11 +48,11 @@ type Validator interface {
 
 type Classifier interface {
 	Classify() error
-	GroupedTables() [][]TableSchema
+	GroupedTables() [][]Table
 }
 
-func DigestSchema(fpath string) (Schema, error) {
-	schema := Schema{}
+func DigestSchema(fpath string) (Model, error) {
+	schema := Model{}
 	yml, err := os.ReadFile(fpath)
 
 	if err != nil {
@@ -72,7 +72,7 @@ func DigestSchema(fpath string) (Schema, error) {
 	return schema, schema.Classify()
 }
 
-func fetchReferences(s Schema) map[string]interface{} {
+func fetchReferences(s Model) map[string]interface{} {
 	refs := make(map[string]interface{})
 
 	for _, table := range s.Tables {

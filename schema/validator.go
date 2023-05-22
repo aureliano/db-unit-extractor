@@ -6,7 +6,7 @@ import (
 	"github.com/aureliano/db-unit-extractor/dataconv"
 )
 
-func (s Schema) Validate() error {
+func (s Model) Validate() error {
 	if len(s.Converters) > 0 {
 		if err := validateConverters(s.Converters); err != nil {
 			return err
@@ -24,7 +24,7 @@ func (c ConverterSchema) Validate() error {
 	return nil
 }
 
-func (t TableSchema) Validate() error {
+func (t Table) Validate() error {
 	if err := validateName(t.Name); err != nil {
 		return err
 	}
@@ -54,7 +54,7 @@ func (t TableSchema) Validate() error {
 	return nil
 }
 
-func (f FilterSchema) Validate() error {
+func (f Filter) Validate() error {
 	if len(f.Value) == 0 {
 		return fmt.Errorf("%w: empty filter value '%s'", ErrSchemaValidation, f.Name)
 	}
@@ -70,7 +70,7 @@ func (c IgnoreSchema) Validate() error {
 	return validateName(string(c))
 }
 
-func validateTables(tables []TableSchema) error {
+func validateTables(tables []Table) error {
 	if len(tables) == 0 {
 		return fmt.Errorf("%w: no table provided", ErrSchemaValidation)
 	}
