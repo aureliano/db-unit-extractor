@@ -1,6 +1,12 @@
 package extractor
 
-import "github.com/aureliano/db-unit-extractor/reader"
+import (
+	"fmt"
+	"sync"
+
+	"github.com/aureliano/db-unit-extractor/reader"
+	"github.com/aureliano/db-unit-extractor/schema"
+)
 
 type Conf struct {
 	SchemaPath string
@@ -8,7 +14,7 @@ type Conf struct {
 }
 
 func Extract(conf Conf) error {
-	schema, err := DigestSchema(conf.SchemaPath)
+	schema, err := schema.DigestSchema(conf.SchemaPath)
 	if err != nil {
 		return err
 	}
@@ -18,9 +24,27 @@ func Extract(conf Conf) error {
 		return err
 	}
 
-	return extract(schema, db)
+	return extract(conf.DataSource, schema, db)
 }
 
-func extract(schema Schema, db reader.DBReader) error {
+func extract(ds reader.DataSource, schema schema.Schema, db reader.DBReader) error {
+	groupedTables := schema.GroupedTables()
+	var wg sync.WaitGroup
+
+	for _, tables := range groupedTables {
+		for _, table := range tables {
+			fmt.Println(table)
+		}
+
+		/*wg.Add(1)
+		go func(table TableSchema) {
+			defer wg.Done()
+
+			db.FetchColumnsMetadata(table.Name, table.Columns, table.Ignore)
+		}(table)*/
+	}
+
+	wg.Wait()
+
 	return nil
 }

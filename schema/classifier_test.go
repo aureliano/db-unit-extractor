@@ -1,40 +1,40 @@
-package extractor_test
+package schema_test
 
 import (
 	"testing"
 
-	"github.com/aureliano/db-unit-extractor/extractor"
+	"github.com/aureliano/db-unit-extractor/schema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestClassifyGroupOneNotClassified(t *testing.T) {
-	s := extractor.Schema{
-		Tables: []extractor.TableSchema{
-			{Name: "t1", Filters: []extractor.FilterSchema{{Name: "id", Value: "${table.column}"}}},
+	s := schema.Schema{
+		Tables: []schema.TableSchema{
+			{Name: "t1", Filters: []schema.FilterSchema{{Name: "id", Value: "${table.column}"}}},
 		},
 	}
 
 	err := s.Classify()
-	assert.ErrorIs(t, err, extractor.ErrTableClassification)
+	assert.ErrorIs(t, err, schema.ErrTableClassification)
 	assert.Contains(t, err.Error(), "couldn't find any level one tables")
 }
 
 func TestClassifyReferenceNotFound(t *testing.T) {
-	s := extractor.Schema{
-		Tables: []extractor.TableSchema{
-			{Name: "t1", Filters: []extractor.FilterSchema{{Name: "id", Value: "1"}}},
-			{Name: "t2", Filters: []extractor.FilterSchema{{Name: "id", Value: "${table.column}"}}},
+	s := schema.Schema{
+		Tables: []schema.TableSchema{
+			{Name: "t1", Filters: []schema.FilterSchema{{Name: "id", Value: "1"}}},
+			{Name: "t2", Filters: []schema.FilterSchema{{Name: "id", Value: "${table.column}"}}},
 		},
 	}
 
 	err := s.Classify()
-	assert.ErrorIs(t, err, extractor.ErrTableClassification)
+	assert.ErrorIs(t, err, schema.ErrTableClassification)
 	assert.Contains(t, err.Error(), "t2.id points to unresolvable reference '${table.column}'")
 }
 
 func TestClassify(t *testing.T) {
-	schema, err := extractor.DigestSchema("../test/unit/schema_test_grouping.yml")
+	schema, err := schema.DigestSchema("../test/unit/schema_test_grouping.yml")
 	require.Nil(t, err)
 
 	err = schema.Classify()
@@ -60,7 +60,7 @@ func TestClassify(t *testing.T) {
 }
 
 func TestGroupedTables(t *testing.T) {
-	schema, err := extractor.DigestSchema("../test/unit/schema_test_grouping.yml")
+	schema, err := schema.DigestSchema("../test/unit/schema_test_grouping.yml")
 	require.Nil(t, err)
 
 	group := schema.GroupedTables()

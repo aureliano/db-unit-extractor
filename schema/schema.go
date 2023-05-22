@@ -1,4 +1,4 @@
-package extractor
+package schema
 
 import (
 	"errors"
@@ -42,11 +42,11 @@ type Schema struct {
 	Tables     []TableSchema     `yaml:"tables"`
 }
 
-type SchemaValidator interface {
+type Validator interface {
 	Validate() error
 }
 
-type SchemaClassifier interface {
+type Classifier interface {
 	Classify() error
 	GroupedTables() [][]TableSchema
 }
