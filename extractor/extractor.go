@@ -3,6 +3,7 @@ package extractor
 import (
 	"errors"
 	"fmt"
+	"regexp"
 
 	"github.com/aureliano/db-unit-extractor/reader"
 	"github.com/aureliano/db-unit-extractor/schema"
@@ -11,16 +12,19 @@ import (
 type Conf struct {
 	SchemaPath string
 	reader.DataSource
+	References map[string]interface{}
 }
 
 type dbResponse struct {
-	table   string
-	filters [][]interface{}
-	data    []map[string]interface{}
-	err     error
+	table string
+	data  []map[string]interface{}
+	err   error
 }
 
-var ErrExtractor = errors.New("extractor")
+var (
+	ErrExtractor      = errors.New("extractor")
+	filterValueRegExp = regexp.MustCompile(`^\$\{([^\}]+)\}$`)
+)
 
 func Extract(conf Conf, db reader.DBReader) error {
 	schema, err := schema.DigestSchema(conf.SchemaPath)
@@ -35,30 +39,41 @@ func Extract(conf Conf, db reader.DBReader) error {
 		}
 	}
 
+	for k, v := range conf.References {
+		schema.Refs[k] = v
+	}
+
 	return extract(schema, db)
 }
 
 func extract(model schema.Model, db reader.DBReader) error {
-	references := prepareReferences(model)
-	respChan := make(chan dbResponse)
-
-	defer close(respChan)
-
 	for _, tables := range model.GroupedTables() {
+		respChan := make(chan dbResponse)
 		responses := make([]dbResponse, 0, len(tables))
+		tbSize := len(tables)
 
 		for _, table := range tables {
-			filters := resolveTableFilters(table, references)
+			filters, err := resolveTableFilters(table, model.Refs)
+			if err != nil {
+				return fmt.Errorf("%w: %w", ErrExtractor, err)
+			}
 
+			fmt.Println("Filters:", filters)
 			go fetchData(respChan, table, db, convToStr(model.Converters), filters)
 		}
 
+		counter := 0
 		for res := range respChan {
 			if res.err != nil {
 				return fmt.Errorf("%w: %w", ErrExtractor, res.err)
 			}
 
 			responses = append(responses, res)
+			counter++
+
+			if counter >= tbSize {
+				close(respChan)
+			}
 		}
 	}
 
@@ -80,23 +95,46 @@ func fetchData(c chan dbResponse, table schema.Table,
 	}
 
 	c <- dbResponse{
-		table:   table.Name,
-		filters: updateReferences(data),
-		data:    data,
-		err:     err,
+		table: table.Name,
+		data:  data,
+		err:   err,
 	}
 }
 
-func updateReferences(_ []map[string]interface{}) [][]interface{} {
+func updateReference(_ []map[string]interface{}) [][]interface{} {
 	panic("unimplemented")
 }
 
-func resolveTableFilters(_ schema.Table, _ map[string]interface{}) [][]interface{} {
-	panic("unimplemented")
-}
+func resolveTableFilters(table schema.Table, references map[string]interface{}) ([][]interface{}, error) {
+	fmt.Println(references, table.Name)
+	size := len(table.Filters)
+	filters := make([][]interface{}, size)
+	for i := range filters {
+		filters[i] = make([]interface{}, 2)
+	}
 
-func prepareReferences(_ schema.Model) map[string]interface{} {
-	panic("unimplemented")
+	for i := 0; i < size; i++ {
+		filter := table.Filters[i]
+		var value interface{}
+
+		matches := filterValueRegExp.FindAllStringSubmatch(filter.Value, -1)
+		if matches != nil {
+			key := matches[0][1]
+
+			if v, exists := references[key]; exists {
+				value = v
+			} else {
+				return nil, fmt.Errorf("%w: filter %s.%s not found", ErrExtractor, table.Name, filter.Name)
+			}
+		} else {
+			value = filter.Value
+		}
+
+		filters[i][0] = filter.Name
+		filters[i][1] = value
+	}
+
+	return filters, nil
 }
 
 func convToStr(conv []schema.Converter) []string {
