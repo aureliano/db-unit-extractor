@@ -19,9 +19,9 @@ var (
 	filterReferenceRegExp  = regexp.MustCompile(`^\$\{(\w+)\.(\w+)\}$`)
 )
 
-type ConverterSchema string
-type ColumnSchema string
-type IgnoreSchema string
+type Converter string
+type Column string
+type Ignore string
 
 type Filter struct {
 	Name  string `yaml:"name"`
@@ -30,16 +30,16 @@ type Filter struct {
 
 type Table struct {
 	GroupID int
-	Name    string         `yaml:"name"`
-	Filters []Filter       `yaml:"filters"`
-	Columns []ColumnSchema `yaml:"columns"`
-	Ignore  []IgnoreSchema `yaml:"ignore"`
+	Name    string   `yaml:"name"`
+	Filters []Filter `yaml:"filters"`
+	Columns []Column `yaml:"columns"`
+	Ignore  []Ignore `yaml:"ignore"`
 }
 
 type Model struct {
 	Refs       map[string]interface{}
-	Converters []ConverterSchema `yaml:"converters"`
-	Tables     []Table           `yaml:"tables"`
+	Converters []Converter `yaml:"converters"`
+	Tables     []Table     `yaml:"tables"`
 }
 
 type Validator interface {

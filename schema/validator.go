@@ -16,7 +16,7 @@ func (s Model) Validate() error {
 	return validateTables(s.Tables)
 }
 
-func (c ConverterSchema) Validate() error {
+func (c Converter) Validate() error {
 	if !dataconv.ConverterExists(string(c)) {
 		return fmt.Errorf("%w: converter '%s' not found", ErrSchemaValidation, c)
 	}
@@ -62,11 +62,11 @@ func (f Filter) Validate() error {
 	return validateName(f.Name)
 }
 
-func (c ColumnSchema) Validate() error {
+func (c Column) Validate() error {
 	return validateName(string(c))
 }
 
-func (c IgnoreSchema) Validate() error {
+func (c Ignore) Validate() error {
 	return validateName(string(c))
 }
 
@@ -84,7 +84,7 @@ func validateTables(tables []Table) error {
 	return nil
 }
 
-func validateConverters(converters []ConverterSchema) error {
+func validateConverters(converters []Converter) error {
 	for _, converter := range converters {
 		if err := converter.Validate(); err != nil {
 			return err
