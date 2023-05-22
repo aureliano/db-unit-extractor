@@ -3,6 +3,8 @@ package reader
 import (
 	"errors"
 	"fmt"
+
+	"github.com/aureliano/db-unit-extractor/schema"
 )
 
 type DecimalColumn struct {
@@ -32,7 +34,7 @@ type DataSource struct {
 var ErrUnsupportedDBReader = errors.New("unsupported database")
 
 type DBReader interface {
-	FetchColumnsMetadata(table string, fieldsIn, fieldsOut []string) ([]DBColumn, error)
+	FetchColumnsMetadata(table schema.Table) ([]DBColumn, error)
 	FetchData(table string, fields []DBColumn, converters []string,
 		filters [][]interface{}) ([]map[string]interface{}, error)
 }
