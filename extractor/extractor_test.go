@@ -10,11 +10,11 @@ import (
 )
 
 func TestExtractSchemaFileNotFound(t *testing.T) {
-	err := extractor.Extract(extractor.Conf{SchemaPath: ""})
+	err := extractor.Extract(extractor.Conf{SchemaPath: ""}, nil)
 	assert.ErrorIs(t, err, schema.ErrSchemaFile)
 }
 
 func TestExtractUnsupportedReader(t *testing.T) {
-	err := extractor.Extract(extractor.Conf{SchemaPath: "../test/unit/schema_test_grouping.yml"})
+	err := extractor.Extract(extractor.Conf{SchemaPath: "../test/unit/schema_test_grouping.yml"}, nil)
 	assert.ErrorIs(t, err, reader.ErrUnsupportedDBReader)
 }

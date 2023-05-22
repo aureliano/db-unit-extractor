@@ -22,15 +22,17 @@ type dbResponse struct {
 
 var ErrExtractor = errors.New("extractor")
 
-func Extract(conf Conf) error {
+func Extract(conf Conf, db reader.DBReader) error {
 	schema, err := schema.DigestSchema(conf.SchemaPath)
 	if err != nil {
 		return err
 	}
 
-	db, err := reader.NewReader(conf.DataSource)
-	if err != nil {
-		return err
+	if db == (reader.DBReader)(nil) {
+		db, err = reader.NewReader(conf.DataSource)
+		if err != nil {
+			return err
+		}
 	}
 
 	return extract(schema, db)
