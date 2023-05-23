@@ -51,6 +51,26 @@ func (t Table) Validate() error {
 		return fmt.Errorf("%w: table '%s' with columns and ignore set (excludents)", ErrSchemaValidation, t.Name)
 	}
 
+	cols := make([]string, len(t.Columns))
+	for i, c := range t.Columns {
+		cols[i] = string(c)
+	}
+
+	c := repeatedValue(cols)
+	if c != "" {
+		return fmt.Errorf("%w: repeated column '%s' in table '%s", ErrSchemaValidation, c, t.Name)
+	}
+
+	cols = make([]string, len(t.Ignore))
+	for i, c := range t.Ignore {
+		cols[i] = string(c)
+	}
+
+	c = repeatedValue(cols)
+	if c != "" {
+		return fmt.Errorf("%w: repeated ignore column '%s' in table '%s", ErrSchemaValidation, c, t.Name)
+	}
+
 	return nil
 }
 
@@ -81,6 +101,16 @@ func validateTables(tables []Table) error {
 		}
 	}
 
+	tbls := make([]string, len(tables))
+	for i, t := range tables {
+		tbls[i] = t.Name
+	}
+
+	tb := repeatedValue(tbls)
+	if tb != "" {
+		return fmt.Errorf("%w: repeated table '%s'", ErrSchemaValidation, tb)
+	}
+
 	return nil
 }
 
@@ -89,6 +119,16 @@ func validateConverters(converters []Converter) error {
 		if err := converter.Validate(); err != nil {
 			return err
 		}
+	}
+
+	convs := make([]string, len(converters))
+	for i, c := range converters {
+		convs[i] = string(c)
+	}
+
+	conv := repeatedValue(convs)
+	if conv != "" {
+		return fmt.Errorf("%w: repeated converter '%s'", ErrSchemaValidation, conv)
 	}
 
 	return nil
@@ -104,4 +144,16 @@ func validateName(name string) error {
 	}
 
 	return nil
+}
+
+func repeatedValue(values []string) string {
+	for i, value := range values {
+		for j, str := range values {
+			if i != j && value == str {
+				return value
+			}
+		}
+	}
+
+	return ""
 }

@@ -40,6 +40,36 @@ func TestValidateSchemaInvalidTable(t *testing.T) {
 	assert.Contains(t, err.Error(), "'z' invalid name")
 }
 
+func TestValidateSchemaRepeatedConverter(t *testing.T) {
+	dataconv.RegisterConverter("dummy", DummyConverter(""))
+	dataconv.RegisterConverter("test1", DummyConverter(""))
+	dataconv.RegisterConverter("test2", DummyConverter(""))
+	dataconv.RegisterConverter("dummy", DummyConverter(""))
+	dataconv.RegisterConverter("test3", DummyConverter(""))
+
+	s := schema.Model{
+		Converters: []schema.Converter{"dummy", "test1", "test2", "dummy", "test3"},
+		Tables:     []schema.Table{{Name: "tbl"}},
+	}
+	err := s.Validate()
+	assert.ErrorIs(t, err, schema.ErrSchemaValidation)
+	assert.Contains(t, err.Error(), "repeated converter 'dummy'")
+}
+
+func TestValidateSchemaRepeatedTables(t *testing.T) {
+	dataconv.RegisterConverter("dummy", DummyConverter(""))
+
+	s := schema.Model{
+		Converters: []schema.Converter{"dummy"},
+		Tables: []schema.Table{
+			{Name: "tbl_1"}, {Name: "tbl_2"}, {Name: "tbl_3"}, {Name: "tbl_4"}, {Name: "tbl_2"},
+		},
+	}
+	err := s.Validate()
+	assert.ErrorIs(t, err, schema.ErrSchemaValidation)
+	assert.Contains(t, err.Error(), "repeated table 'tbl_2'")
+}
+
 func TestValidateSchema(t *testing.T) {
 	dataconv.RegisterConverter("dummy", DummyConverter(""))
 
@@ -103,6 +133,26 @@ func TestTableSchemaValidateFilter(t *testing.T) {
 	err := s.Validate()
 	assert.ErrorIs(t, err, schema.ErrSchemaValidation)
 	assert.Contains(t, err.Error(), "table 'tbl' validation: 'x' invalid name")
+}
+
+func TestTableSchemaValidateRepeatedColumn(t *testing.T) {
+	s := schema.Table{
+		Name:    "tbl",
+		Columns: []schema.Column{"a1", "b1", "c1", "b1", "e1", "f1"},
+	}
+	err := s.Validate()
+	assert.ErrorIs(t, err, schema.ErrSchemaValidation)
+	assert.Contains(t, err.Error(), "repeated column 'b1' in table 'tbl")
+}
+
+func TestTableSchemaValidateRepeatedIgnoreColumn(t *testing.T) {
+	s := schema.Table{
+		Name:   "tbl",
+		Ignore: []schema.Ignore{"a1", "b1", "c1", "b1", "e1", "f1"},
+	}
+	err := s.Validate()
+	assert.ErrorIs(t, err, schema.ErrSchemaValidation)
+	assert.Contains(t, err.Error(), "repeated ignore column 'b1' in table 'tbl")
 }
 
 func TestFilterSchemaValidate(t *testing.T) {
