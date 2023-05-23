@@ -58,7 +58,6 @@ func extract(model schema.Model, db reader.DBReader) error {
 				return fmt.Errorf("%w: %w", ErrExtractor, err)
 			}
 
-			fmt.Println("Filters:", filters)
 			go fetchData(respChan, table, db, convToStr(model.Converters), filters)
 		}
 
@@ -75,6 +74,8 @@ func extract(model schema.Model, db reader.DBReader) error {
 				close(respChan)
 			}
 		}
+
+		updateReferences(model, responses)
 	}
 
 	return nil
@@ -101,16 +102,26 @@ func fetchData(c chan dbResponse, table schema.Table,
 	}
 }
 
-func updateReference(_ []map[string]interface{}) [][]interface{} {
-	panic("unimplemented")
+func updateReferences(model schema.Model, responses []dbResponse) {
+	for _, response := range responses {
+		for _, record := range response.data {
+			for k, v := range record {
+				key := fmt.Sprintf("%s.%s", response.table, k)
+				if _, exist := model.Refs[key]; exist {
+					model.Refs[key] = v
+				}
+			}
+		}
+	}
 }
 
 func resolveTableFilters(table schema.Table, references map[string]interface{}) ([][]interface{}, error) {
-	fmt.Println(references, table.Name)
 	size := len(table.Filters)
 	filters := make([][]interface{}, size)
+	const pair = 2
+
 	for i := range filters {
-		filters[i] = make([]interface{}, 2)
+		filters[i] = make([]interface{}, pair)
 	}
 
 	for i := 0; i < size; i++ {
@@ -124,7 +135,8 @@ func resolveTableFilters(table schema.Table, references map[string]interface{}) 
 			if v, exists := references[key]; exists {
 				value = v
 			} else {
-				return nil, fmt.Errorf("%w: filter %s.%s not found", ErrExtractor, table.Name, filter.Name)
+				return nil, fmt.Errorf("%w: filter %s.%s not found '%s'",
+					ErrExtractor, table.Name, filter.Name, filter.Value)
 			}
 		} else {
 			value = filter.Value
