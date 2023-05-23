@@ -56,6 +56,20 @@ func TestValidateSchemaRepeatedConverter(t *testing.T) {
 	assert.Contains(t, err.Error(), "repeated converter 'dummy'")
 }
 
+func TestValidateSchemaRepeatedTables(t *testing.T) {
+	dataconv.RegisterConverter("dummy", DummyConverter(""))
+
+	s := schema.Model{
+		Converters: []schema.Converter{"dummy"},
+		Tables: []schema.Table{
+			{Name: "tbl_1"}, {Name: "tbl_2"}, {Name: "tbl_3"}, {Name: "tbl_4"}, {Name: "tbl_2"},
+		},
+	}
+	err := s.Validate()
+	assert.ErrorIs(t, err, schema.ErrSchemaValidation)
+	assert.Contains(t, err.Error(), "repeated table 'tbl_2'")
+}
+
 func TestValidateSchema(t *testing.T) {
 	dataconv.RegisterConverter("dummy", DummyConverter(""))
 

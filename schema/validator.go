@@ -86,6 +86,11 @@ func validateTables(tables []Table) error {
 		tbls[i] = t.Name
 	}
 
+	tb := repeatedValue(tbls)
+	if tb != "" {
+		return fmt.Errorf("%w: repeated table '%s'", ErrSchemaValidation, tb)
+	}
+
 	return nil
 }
 
