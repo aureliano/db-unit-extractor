@@ -81,6 +81,11 @@ func validateTables(tables []Table) error {
 		}
 	}
 
+	tbls := make([]string, len(tables))
+	for i, t := range tables {
+		tbls[i] = t.Name
+	}
+
 	return nil
 }
 
@@ -89,6 +94,16 @@ func validateConverters(converters []Converter) error {
 		if err := converter.Validate(); err != nil {
 			return err
 		}
+	}
+
+	convs := make([]string, len(converters))
+	for i, c := range converters {
+		convs[i] = string(c)
+	}
+
+	conv := repeatedValue(convs)
+	if conv != "" {
+		return fmt.Errorf("%w: repeated converter '%s'", ErrSchemaValidation, conv)
 	}
 
 	return nil
@@ -104,4 +119,16 @@ func validateName(name string) error {
 	}
 
 	return nil
+}
+
+func repeatedValue(values []string) string {
+	for i, value := range values {
+		for j, str := range values {
+			if i != j && value == str {
+				return value
+			}
+		}
+	}
+
+	return ""
 }
