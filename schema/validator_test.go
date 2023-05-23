@@ -135,6 +135,16 @@ func TestTableSchemaValidateFilter(t *testing.T) {
 	assert.Contains(t, err.Error(), "table 'tbl' validation: 'x' invalid name")
 }
 
+func TestTableSchemaValidateRepeatedColumn(t *testing.T) {
+	s := schema.Table{
+		Name:    "tbl",
+		Columns: []schema.Column{"a1", "b1", "c1", "b1", "e1", "f1"},
+	}
+	err := s.Validate()
+	assert.ErrorIs(t, err, schema.ErrSchemaValidation)
+	assert.Contains(t, err.Error(), "repeated column 'b1' in table 'tbl")
+}
+
 func TestFilterSchemaValidate(t *testing.T) {
 	s := schema.Filter{Name: "", Value: "1"}
 	err := s.Validate()
