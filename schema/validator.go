@@ -61,6 +61,16 @@ func (t Table) Validate() error {
 		return fmt.Errorf("%w: repeated column '%s' in table '%s", ErrSchemaValidation, c, t.Name)
 	}
 
+	cols = make([]string, len(t.Ignore))
+	for i, c := range t.Ignore {
+		cols[i] = string(c)
+	}
+
+	c = repeatedValue(cols)
+	if c != "" {
+		return fmt.Errorf("%w: repeated ignore column '%s' in table '%s", ErrSchemaValidation, c, t.Name)
+	}
+
 	return nil
 }
 
