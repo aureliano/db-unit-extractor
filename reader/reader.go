@@ -3,6 +3,7 @@ package reader
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/aureliano/db-unit-extractor/schema"
 )
@@ -40,5 +41,9 @@ type DBReader interface {
 }
 
 func NewReader(ds DataSource) (DBReader, error) {
+	if strings.ToLower(ds.DBMSName) == "oracle" {
+		return OracleReader{}, nil
+	}
+
 	return nil, fmt.Errorf("%w: %s", ErrUnsupportedDBReader, ds.DBMSName)
 }
