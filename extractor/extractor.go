@@ -135,8 +135,7 @@ func resolveTableFilters(table schema.Table, references map[string]interface{}) 
 			if v, exists := references[key]; exists {
 				value = v
 			} else {
-				return nil, fmt.Errorf("%w: filter %s.%s not found '%s'",
-					ErrExtractor, table.Name, filter.Name, filter.Value)
+				return nil, fmt.Errorf("filter %s.%s not found '%s'", table.Name, filter.Name, filter.Value)
 			}
 		} else {
 			value = filter.Value

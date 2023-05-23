@@ -1,15 +1,26 @@
 package extractor_test
 
 import (
+	"fmt"
 	"testing"
 
+	"github.com/aureliano/db-unit-extractor/dataconv"
 	"github.com/aureliano/db-unit-extractor/extractor"
 	"github.com/aureliano/db-unit-extractor/reader"
 	"github.com/aureliano/db-unit-extractor/schema"
 	"github.com/stretchr/testify/assert"
 )
 
+type DummyConverter string
+
+func (DummyConverter) Convert(_ interface{}, _ *interface{}) {
+}
+
 type DummyReader struct{}
+
+type FetchMetadataErrorDummyReader struct{}
+
+type FetchDataErrorDummyReader struct{}
 
 func (DummyReader) FetchColumnsMetadata(table schema.Table) ([]reader.DBColumn, error) {
 	switch {
@@ -41,6 +52,14 @@ func (DummyReader) FetchColumnsMetadata(table schema.Table) ([]reader.DBColumn, 
 	default:
 		return []reader.DBColumn{}, nil
 	}
+}
+
+func (FetchMetadataErrorDummyReader) FetchColumnsMetadata(_ schema.Table) ([]reader.DBColumn, error) {
+	return nil, fmt.Errorf("fetch metadata error")
+}
+
+func (FetchDataErrorDummyReader) FetchColumnsMetadata(_ schema.Table) ([]reader.DBColumn, error) {
+	return []reader.DBColumn{}, nil
 }
 
 func (DummyReader) FetchData(table string, _ []reader.DBColumn, _ []string,
@@ -76,6 +95,16 @@ func (DummyReader) FetchData(table string, _ []reader.DBColumn, _ []string,
 	}
 }
 
+func (FetchMetadataErrorDummyReader) FetchData(_ string, _ []reader.DBColumn, _ []string,
+	_ [][]interface{}) ([]map[string]interface{}, error) {
+	return []map[string]interface{}{}, nil
+}
+
+func (FetchDataErrorDummyReader) FetchData(_ string, _ []reader.DBColumn, _ []string,
+	_ [][]interface{}) ([]map[string]interface{}, error) {
+	return nil, fmt.Errorf("fetch data error")
+}
+
 func TestExtractSchemaFileNotFound(t *testing.T) {
 	err := extractor.Extract(extractor.Conf{SchemaPath: ""}, nil)
 	assert.ErrorIs(t, err, schema.ErrSchemaFile)
@@ -86,7 +115,52 @@ func TestExtractUnsupportedReader(t *testing.T) {
 	assert.ErrorIs(t, err, reader.ErrUnsupportedDBReader)
 }
 
+func TestExtractUnresolvableFilter(t *testing.T) {
+	dataconv.RegisterConverter("conv_date_time", DummyConverter(""))
+	err := extractor.Extract(
+		extractor.Conf{
+			SchemaPath: "../test/unit/extractor_test.yml",
+		}, DummyReader{},
+	)
+
+	assert.ErrorIs(t, err, extractor.ErrExtractor)
+	assert.Contains(t, err.Error(), "filter customers.id not found '${customer_id}")
+}
+
+func TestExtractFetchMetadataError(t *testing.T) {
+	dataconv.RegisterConverter("conv_date_time", DummyConverter(""))
+	refs := make(map[string]interface{})
+	refs["customer_id"] = 34
+
+	err := extractor.Extract(
+		extractor.Conf{
+			SchemaPath: "../test/unit/extractor_test.yml",
+			References: refs,
+		}, FetchMetadataErrorDummyReader{},
+	)
+
+	assert.ErrorIs(t, err, extractor.ErrExtractor)
+	assert.Contains(t, err.Error(), "fetch metadata error")
+}
+
+func TestExtractFetchDataError(t *testing.T) {
+	dataconv.RegisterConverter("conv_date_time", DummyConverter(""))
+	refs := make(map[string]interface{})
+	refs["customer_id"] = 34
+
+	err := extractor.Extract(
+		extractor.Conf{
+			SchemaPath: "../test/unit/extractor_test.yml",
+			References: refs,
+		}, FetchDataErrorDummyReader{},
+	)
+
+	assert.ErrorIs(t, err, extractor.ErrExtractor)
+	assert.Contains(t, err.Error(), "fetch data error")
+}
+
 func TestExtract(t *testing.T) {
+	dataconv.RegisterConverter("conv_date_time", DummyConverter(""))
 	refs := make(map[string]interface{})
 	refs["customer_id"] = 34
 
