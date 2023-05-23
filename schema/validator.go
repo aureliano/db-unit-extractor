@@ -1,4 +1,4 @@
-package extractor
+package schema
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"github.com/aureliano/db-unit-extractor/dataconv"
 )
 
-func (s Schema) Validate() error {
+func (s Model) Validate() error {
 	if len(s.Converters) > 0 {
 		if err := validateConverters(s.Converters); err != nil {
 			return err
@@ -16,7 +16,7 @@ func (s Schema) Validate() error {
 	return validateTables(s.Tables)
 }
 
-func (c ConverterSchema) Validate() error {
+func (c Converter) Validate() error {
 	if !dataconv.ConverterExists(string(c)) {
 		return fmt.Errorf("%w: converter '%s' not found", ErrSchemaValidation, c)
 	}
@@ -24,7 +24,7 @@ func (c ConverterSchema) Validate() error {
 	return nil
 }
 
-func (t TableSchema) Validate() error {
+func (t Table) Validate() error {
 	if err := validateName(t.Name); err != nil {
 		return err
 	}
@@ -54,7 +54,7 @@ func (t TableSchema) Validate() error {
 	return nil
 }
 
-func (f FilterSchema) Validate() error {
+func (f Filter) Validate() error {
 	if len(f.Value) == 0 {
 		return fmt.Errorf("%w: empty filter value '%s'", ErrSchemaValidation, f.Name)
 	}
@@ -62,15 +62,15 @@ func (f FilterSchema) Validate() error {
 	return validateName(f.Name)
 }
 
-func (c ColumnSchema) Validate() error {
+func (c Column) Validate() error {
 	return validateName(string(c))
 }
 
-func (c IgnoreSchema) Validate() error {
+func (c Ignore) Validate() error {
 	return validateName(string(c))
 }
 
-func validateTables(tables []TableSchema) error {
+func validateTables(tables []Table) error {
 	if len(tables) == 0 {
 		return fmt.Errorf("%w: no table provided", ErrSchemaValidation)
 	}
@@ -84,7 +84,7 @@ func validateTables(tables []TableSchema) error {
 	return nil
 }
 
-func validateConverters(converters []ConverterSchema) error {
+func validateConverters(converters []Converter) error {
 	for _, converter := range converters {
 		if err := converter.Validate(); err != nil {
 			return err

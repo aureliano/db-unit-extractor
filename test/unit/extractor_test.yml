@@ -1,0 +1,33 @@
+---
+converters:
+  - conv_date_time
+tables:
+  - name: customers
+    filters:
+      - name: id
+        value: ${customer_id}
+    columns:
+      - id
+      - first_name
+      - last_name
+  - name: orders
+    filters:
+      - name: customer_id
+        value: ${customers.id}
+    ignore:
+      - order_fax
+  - name: orders_products
+    filters:
+      - name: order_id
+        value: ${orders.id}
+      - name: product_id
+        value: ${products.id}
+  - name: products
+    filters:
+      - name: id
+        value: 3
+    columns:
+      - id
+      - name
+      - description
+      - price

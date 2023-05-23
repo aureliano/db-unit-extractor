@@ -1,4 +1,4 @@
-package extractor
+package schema
 
 import (
 	"errors"
@@ -12,53 +12,55 @@ import (
 const NameMaxLength = 80
 
 var (
+	ErrSchemaFile          = errors.New("schema-file")
 	ErrSchemaValidation    = errors.New("validation")
 	ErrTableClassification = errors.New("classification")
 	nameRegExp             = regexp.MustCompile(`^[a-zA-Z_]\w+$`)
 	filterReferenceRegExp  = regexp.MustCompile(`^\$\{(\w+)\.(\w+)\}$`)
 )
 
-type ConverterSchema string
-type ColumnSchema string
-type IgnoreSchema string
+type Converter string
+type Column string
+type Ignore string
 
-type FilterSchema struct {
+type Filter struct {
 	Name  string `yaml:"name"`
 	Value string `yaml:"value"`
 }
 
-type TableSchema struct {
+type Table struct {
 	GroupID int
-	Name    string         `yaml:"name"`
-	Filters []FilterSchema `yaml:"filters"`
-	Columns []ColumnSchema `yaml:"columns"`
-	Ignore  []IgnoreSchema `yaml:"ignore"`
+	Name    string   `yaml:"name"`
+	Filters []Filter `yaml:"filters"`
+	Columns []Column `yaml:"columns"`
+	Ignore  []Ignore `yaml:"ignore"`
 }
 
-type Schema struct {
+type Model struct {
 	Refs       map[string]interface{}
-	Converters []ConverterSchema `yaml:"converters"`
-	Tables     []TableSchema     `yaml:"tables"`
+	Converters []Converter `yaml:"converters"`
+	Tables     []Table     `yaml:"tables"`
 }
 
-type SchemaValidator interface {
+type Validator interface {
 	Validate() error
 }
 
-type SchemaClassifier interface {
+type Classifier interface {
 	Classify() error
+	GroupedTables() [][]Table
 }
 
-func DigestSchema(fpath string) (Schema, error) {
-	schema := Schema{}
+func DigestSchema(fpath string) (Model, error) {
+	schema := Model{}
 	yml, err := os.ReadFile(fpath)
 
 	if err != nil {
-		return schema, err
+		return schema, fmt.Errorf("%w: %w", ErrSchemaFile, err)
 	}
 
 	if err = yaml.UnmarshalStrict(yml, &schema); err != nil {
-		return schema, err
+		return schema, fmt.Errorf("%w: %w", ErrSchemaFile, err)
 	}
 
 	if err = schema.Validate(); err != nil {
@@ -70,7 +72,7 @@ func DigestSchema(fpath string) (Schema, error) {
 	return schema, schema.Classify()
 }
 
-func fetchReferences(s Schema) map[string]interface{} {
+func fetchReferences(s Model) map[string]interface{} {
 	refs := make(map[string]interface{})
 
 	for _, table := range s.Tables {

@@ -1,11 +1,11 @@
-package extractor_test
+package schema_test
 
 import (
 	"os"
 	"testing"
 
 	"github.com/aureliano/db-unit-extractor/dataconv"
-	"github.com/aureliano/db-unit-extractor/extractor"
+	"github.com/aureliano/db-unit-extractor/schema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -16,29 +16,31 @@ func (DummyConverter) Convert(_ interface{}, _ *interface{}) {
 }
 
 func TestDigestSchemaFileNotFound(t *testing.T) {
-	_, err := extractor.DigestSchema("/path/to/unknown/file.yml")
+	_, err := schema.DigestSchema("/path/to/unknown/file.yml")
+	assert.ErrorIs(t, err, schema.ErrSchemaFile)
 	assert.ErrorIs(t, err, os.ErrNotExist)
 }
 
 func TestDigestSchemaUnmarshalError(t *testing.T) {
-	_, err := extractor.DigestSchema("../test/unit/schema_test_unmarshal_error.yml")
+	_, err := schema.DigestSchema("../test/unit/schema_test_unmarshal_error.yml")
+	assert.ErrorIs(t, err, schema.ErrSchemaFile)
 	assert.Contains(t, err.Error(), "yaml: unmarshal errors")
 }
 
 func TestDigestSchemaUnmarshalErrorUnknownField(t *testing.T) {
-	_, err := extractor.DigestSchema("../test/unit/schema_test_unmarshal_error_unknown_field.yml")
-	assert.Contains(t, err.Error(), "line 7: field ArbitraryField not found in type extractor.TableSchema")
+	_, err := schema.DigestSchema("../test/unit/schema_test_unmarshal_error_unknown_field.yml")
+	assert.Contains(t, err.Error(), "line 7: field ArbitraryField not found in type schema.Table")
 }
 
 func TestDigestSchemaValidationError(t *testing.T) {
-	_, err := extractor.DigestSchema("../test/unit/schema_test.yml")
-	assert.ErrorIs(t, err, extractor.ErrSchemaValidation)
+	_, err := schema.DigestSchema("../test/unit/schema_test.yml")
+	assert.ErrorIs(t, err, schema.ErrSchemaValidation)
 }
 
 func TestDigestSchema(t *testing.T) {
 	dataconv.RegisterConverter("conv_date_time", DummyConverter(""))
 	dataconv.RegisterConverter("conv_timestamp", DummyConverter(""))
-	schema, err := extractor.DigestSchema("../test/unit/schema_test.yml")
+	schema, err := schema.DigestSchema("../test/unit/schema_test.yml")
 
 	require.Nil(t, err)
 
@@ -116,7 +118,7 @@ func TestDigestSchema(t *testing.T) {
 	assert.Empty(t, ignore)
 }
 func TestDigestSchemaReferences(t *testing.T) {
-	schema, err := extractor.DigestSchema("../test/unit/schema_test_grouping.yml")
+	schema, err := schema.DigestSchema("../test/unit/schema_test_grouping.yml")
 	require.Nil(t, err)
 
 	keys := make([]string, 0, len(schema.Refs))

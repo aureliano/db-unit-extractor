@@ -1,11 +1,11 @@
-package extractor
+package schema
 
 import (
 	"fmt"
 	"strings"
 )
 
-func (s Schema) Classify() error {
+func (s Model) Classify() error {
 	indexes, err := classifyGroupOne(s)
 	if err != nil {
 		return fmt.Errorf("%w: %w", ErrTableClassification, err)
@@ -36,7 +36,31 @@ func (s Schema) Classify() error {
 	return nil
 }
 
-func classifyGroupOne(s Schema) ([]int, error) {
+func (s Model) GroupedTables() [][]Table {
+	group := make([][]Table, 0, len(s.Tables))
+	ig := 0
+
+	for {
+		tables := make([]Table, 0)
+		ig++
+
+		for _, table := range s.Tables {
+			if ig == table.GroupID {
+				tables = append(tables, table)
+			}
+		}
+
+		if len(tables) == 0 {
+			break
+		}
+
+		group = append(group, tables)
+	}
+
+	return group
+}
+
+func classifyGroupOne(s Model) ([]int, error) {
 	indexes := make([]int, 0, len(s.Tables))
 
 	for i, table := range s.Tables {
@@ -63,7 +87,7 @@ func classifyGroupOne(s Schema) ([]int, error) {
 	return indexes, nil
 }
 
-func classifyGroupsButOne(s Schema, group int) ([]int, error) {
+func classifyGroupsButOne(s Model, group int) ([]int, error) {
 	indexes := make([]int, 0, len(s.Tables))
 
 	for i, table := range s.Tables {
@@ -88,7 +112,7 @@ func classifyGroupsButOne(s Schema, group int) ([]int, error) {
 	return indexes, nil
 }
 
-func findTableByName(s Schema, tname string) int {
+func findTableByName(s Model, tname string) int {
 	for i, table := range s.Tables {
 		name := strings.ToLower(table.Name)
 		if tname == name {
