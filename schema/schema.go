@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strings"
 
 	"gopkg.in/yaml.v2"
 )
@@ -51,6 +52,11 @@ type Classifier interface {
 	GroupedTables() [][]Table
 }
 
+type DataTable interface {
+	SelectColumns() []string
+	FormattedSelectColumns() string
+}
+
 func DigestSchema(fpath string) (Model, error) {
 	schema := Model{}
 	yml, err := os.ReadFile(fpath)
@@ -70,6 +76,28 @@ func DigestSchema(fpath string) (Model, error) {
 	schema.Refs = fetchReferences(schema)
 
 	return schema, schema.Classify()
+}
+
+func (t Table) SelectColumns() []string {
+	var columns []string
+
+	if len(t.Columns) > 0 {
+		columns = make([]string, len(t.Columns))
+		for i, c := range t.Columns {
+			columns[i] = string(c)
+		}
+	} else {
+		columns = make([]string, len(t.Ignore))
+		for i, c := range t.Ignore {
+			columns[i] = string(c)
+		}
+	}
+
+	return columns
+}
+
+func (t Table) FormattedSelectColumns() string {
+	return fmt.Sprintf("'%s'", strings.Join(t.SelectColumns(), "', '"))
 }
 
 func fetchReferences(s Model) map[string]interface{} {

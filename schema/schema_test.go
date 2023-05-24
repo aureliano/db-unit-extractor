@@ -135,3 +135,38 @@ func TestDigestSchemaReferences(t *testing.T) {
 	assert.Contains(t, schema.Refs, "b131.id")
 	assert.Contains(t, schema.Refs, "c1.id")
 }
+
+func TestSelectColumns(t *testing.T) {
+	table := schema.Table{
+		Columns: []schema.Column{"id", "name", "description"},
+	}
+
+	columns := table.SelectColumns()
+	assert.Len(t, columns, 3)
+	assert.EqualValues(t, "id", columns[0])
+	assert.EqualValues(t, "name", columns[1])
+	assert.EqualValues(t, "description", columns[2])
+
+	table = schema.Table{
+		Ignore: []schema.Ignore{"tax", "total"},
+	}
+
+	columns = table.SelectColumns()
+	assert.Len(t, columns, 2)
+	assert.EqualValues(t, "tax", columns[0])
+	assert.EqualValues(t, "total", columns[1])
+}
+
+func TestFormattedSelectColumns(t *testing.T) {
+	table := schema.Table{
+		Columns: []schema.Column{"id", "name", "description"},
+	}
+
+	assert.Equal(t, "'id', 'name', 'description'", table.FormattedSelectColumns())
+
+	table = schema.Table{
+		Ignore: []schema.Ignore{"tax", "total"},
+	}
+
+	assert.Equal(t, "'tax', 'total'", table.FormattedSelectColumns())
+}
