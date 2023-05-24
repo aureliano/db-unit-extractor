@@ -1,6 +1,7 @@
 package reader
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 	"strings"
@@ -40,9 +41,9 @@ type DBReader interface {
 		filters [][]interface{}) ([]map[string]interface{}, error)
 }
 
-func NewReader(ds DataSource) (DBReader, error) {
+func NewReader(ds DataSource, db *sql.DB) (DBReader, error) {
 	if strings.ToLower(ds.DBMSName) == "oracle" {
-		return OracleReader{}, nil
+		return OracleReader{db: db}, nil
 	}
 
 	return nil, fmt.Errorf("%w: %s", ErrUnsupportedDBReader, ds.DBMSName)

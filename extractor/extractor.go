@@ -33,7 +33,7 @@ func Extract(conf Conf, db reader.DBReader) error {
 	}
 
 	if db == (reader.DBReader)(nil) {
-		db, err = reader.NewReader(conf.DataSource)
+		db, err = reader.NewReader(conf.DataSource, nil)
 		if err != nil {
 			return err
 		}
