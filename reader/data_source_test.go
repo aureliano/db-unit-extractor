@@ -18,3 +18,28 @@ func TestNewDataSource(t *testing.T) {
 	assert.Equal(t, 1, ds.MaxOpenConn)
 	assert.Equal(t, 1, ds.MaxIdleConn)
 }
+
+func TestDSNameSqlite3(t *testing.T) {
+	ds := reader.NewDataSource()
+	ds.DBMSName = "sqlite3"
+
+	expected := "file:test.db?cache=shared&mode=memory"
+	actual := ds.DSName()
+
+	assert.Equal(t, expected, actual)
+}
+
+func TestDSNameOracle(t *testing.T) {
+	ds := reader.NewDataSource()
+	ds.DBMSName = "oracle"
+	ds.Username = "usr"
+	ds.Password = "pwd"
+	ds.Hostname = "localhost"
+	ds.Port = 1521
+	ds.Database = "db_name"
+
+	expected := "oracle://usr:pwd@localhost:1521/db_name"
+	actual := ds.DSName()
+
+	assert.Equal(t, expected, actual)
+}
