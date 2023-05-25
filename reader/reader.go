@@ -22,17 +22,6 @@ type DBColumn struct {
 	DecimalSize DecimalColumn
 }
 
-type DataSource struct {
-	DBMSName    string
-	Username    string
-	Password    string
-	Database    string
-	Hostname    string
-	Port        int
-	MaxOpenConn int
-	MaxIdleConn int
-}
-
 var ErrUnsupportedDBReader = errors.New("unsupported database")
 
 type DBReader interface {
