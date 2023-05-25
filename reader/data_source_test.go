@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/aureliano/db-unit-extractor/reader"
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -42,4 +43,37 @@ func TestDSNameOracle(t *testing.T) {
 	actual := ds.DSName()
 
 	assert.Equal(t, expected, actual)
+}
+
+func TestConnect(t *testing.T) {
+	ds := reader.NewDataSource()
+	ds.DBMSName = "sqlite3"
+
+	err := ds.Connect(reader.MaxDBTimeout)
+	assert.Nil(t, err)
+
+	assert.True(t, ds.IsConnected())
+
+	err = ds.Connect(reader.MaxDBTimeout)
+	assert.Nil(t, err)
+}
+
+func TestConnectOpenError(t *testing.T) {
+	ds := reader.NewDataSource()
+	ds.DBMSName = "test"
+
+	err := ds.Connect(reader.MaxDBTimeout)
+	assert.Contains(t, err.Error(), "sql: unknown driver \"test\" (forgotten import?)")
+
+	assert.False(t, ds.IsConnected())
+}
+
+func TestConnectPingError(t *testing.T) {
+	ds := reader.NewDataSource()
+	ds.DBMSName = "sqlite3"
+
+	err := ds.Connect(0)
+	assert.Contains(t, err.Error(), "context deadline exceeded")
+
+	assert.False(t, ds.IsConnected())
 }

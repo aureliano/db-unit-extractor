@@ -1,8 +1,11 @@
 package reader
 
 import (
+	"context"
+	"database/sql"
 	"fmt"
 	"strings"
+	"time"
 )
 
 type DataSource struct {
@@ -14,22 +17,31 @@ type DataSource struct {
 	Port        int
 	MaxOpenConn int
 	MaxIdleConn int
+	db          *sql.DB
 }
 
 type DSN interface {
 	DSName() string
 }
 
-const dsnTemplate = "%s://%s:%s@%s:%d/%s"
+type DBConnector interface {
+	Connect() error
+	IsConnected() bool
+}
 
-func NewDataSource() DataSource {
-	return DataSource{
+const (
+	dsnTemplate  = "%s://%s:%s@%s:%d/%s"
+	MaxDBTimeout = time.Second * 30
+)
+
+func NewDataSource() *DataSource {
+	return &DataSource{
 		MaxOpenConn: 1,
 		MaxIdleConn: 1,
 	}
 }
 
-func (ds DataSource) DSName() string {
+func (ds *DataSource) DSName() string {
 	if ds.DBMSName == "sqlite3" {
 		return "file:test.db?cache=shared&mode=memory"
 	}
@@ -43,4 +55,34 @@ func (ds DataSource) DSName() string {
 		ds.Port,
 		ds.Database,
 	)
+}
+
+func (ds *DataSource) Connect(timeout time.Duration) error {
+	if ds.db != nil {
+		return nil
+	}
+
+	db, err := sql.Open(ds.DBMSName, ds.DSName())
+	if err != nil {
+		return err
+	}
+
+	db.SetMaxOpenConns(ds.MaxOpenConn)
+	db.SetMaxIdleConns(ds.MaxIdleConn)
+
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	err = db.PingContext(ctx)
+	if err != nil {
+		return err
+	}
+
+	ds.db = db
+
+	return nil
+}
+
+func (ds *DataSource) IsConnected() bool {
+	return ds.db != nil
 }
