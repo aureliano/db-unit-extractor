@@ -37,7 +37,7 @@ var ErrUnsupportedDBReader = errors.New("unsupported database")
 
 type DBReader interface {
 	FetchColumnsMetadata(table schema.Table) ([]DBColumn, error)
-	FetchData(table string, fields []DBColumn, converters []string,
+	FetchData(table string, fields []DBColumn, converters []schema.Converter,
 		filters [][]interface{}) ([]map[string]interface{}, error)
 }
 

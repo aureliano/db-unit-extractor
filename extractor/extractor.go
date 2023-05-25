@@ -58,7 +58,7 @@ func extract(model schema.Model, db reader.DBReader) error {
 				return fmt.Errorf("%w: %w", ErrExtractor, err)
 			}
 
-			go fetchData(respChan, table, db, convToStr(model.Converters), filters)
+			go fetchData(respChan, table, db, model.Converters, filters)
 		}
 
 		counter := 0
@@ -82,7 +82,7 @@ func extract(model schema.Model, db reader.DBReader) error {
 }
 
 func fetchData(c chan dbResponse, table schema.Table,
-	db reader.DBReader, converters []string, filters [][]interface{}) {
+	db reader.DBReader, converters []schema.Converter, filters [][]interface{}) {
 	columns, err := db.FetchColumnsMetadata(table)
 	if err != nil {
 		c <- dbResponse{err: err}
@@ -146,13 +146,4 @@ func resolveTableFilters(table schema.Table, references map[string]interface{}) 
 	}
 
 	return filters, nil
-}
-
-func convToStr(conv []schema.Converter) []string {
-	res := make([]string, len(conv))
-	for i, c := range conv {
-		res[i] = string(c)
-	}
-
-	return res
 }
