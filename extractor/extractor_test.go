@@ -62,7 +62,7 @@ func (FetchDataErrorDummyReader) FetchColumnsMetadata(_ schema.Table) ([]reader.
 	return []reader.DBColumn{}, nil
 }
 
-func (DummyReader) FetchData(table string, _ []reader.DBColumn, _ []string,
+func (DummyReader) FetchData(table string, _ []reader.DBColumn, _ []schema.Converter,
 	_ [][]interface{}) ([]map[string]interface{}, error) {
 	switch {
 	case table == "customers":
@@ -95,12 +95,12 @@ func (DummyReader) FetchData(table string, _ []reader.DBColumn, _ []string,
 	}
 }
 
-func (FetchMetadataErrorDummyReader) FetchData(_ string, _ []reader.DBColumn, _ []string,
+func (FetchMetadataErrorDummyReader) FetchData(_ string, _ []reader.DBColumn, _ []schema.Converter,
 	_ [][]interface{}) ([]map[string]interface{}, error) {
 	return []map[string]interface{}{}, nil
 }
 
-func (FetchDataErrorDummyReader) FetchData(_ string, _ []reader.DBColumn, _ []string,
+func (FetchDataErrorDummyReader) FetchData(_ string, _ []reader.DBColumn, _ []schema.Converter,
 	_ [][]interface{}) ([]map[string]interface{}, error) {
 	return nil, fmt.Errorf("fetch data error")
 }
