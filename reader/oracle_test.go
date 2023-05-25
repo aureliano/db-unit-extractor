@@ -156,10 +156,94 @@ func TestFetchColumnsMetadataRowsError(t *testing.T) {
 }
 
 func TestFetchData(t *testing.T) {
-	r, _ := reader.NewReader(reader.DataSource{DBMSName: "oracle"}, nil)
-	assert.Panics(
-		t,
-		func() { r.FetchData("", []reader.DBColumn{}, []string{}, [][]interface{}{}) },
-		"not implemented yet",
-	)
+	db, mock, err := sqlmock.New()
+
+	require.Nil(t, err)
+	defer db.Close()
+
+	r, _ := reader.NewReader(reader.DataSource{DBMSName: "oracle"}, db)
+
+	fields := []reader.DBColumn{
+		{Name: "ID", Type: "NUMBER", Nullable: false, Length: 22,
+			DecimalSize: reader.DecimalColumn{Precision: 2, Scale: 0}},
+		{Name: "USER_ID", Type: "NUMBER", Nullable: false, Length: 22,
+			DecimalSize: reader.DecimalColumn{Precision: 2, Scale: 0}},
+		{Name: "STATUS", Type: "VARCHAR2", Nullable: true, Length: 15},
+		{Name: "TOTAL", Type: "NUMBER", Nullable: false, Length: 22,
+			DecimalSize: reader.DecimalColumn{Precision: 17, Scale: 2}},
+	}
+	converters := []schema.Converter{}
+	filters := [][]interface{}{{"ID", 4}, {"STATUS", "SOLD"}}
+
+	rows := sqlmock.
+		NewRows([]string{"ID", "USER_ID", "STATUS", "TOTAL"}).
+		AddRow(4, 375, "SOLD", 2243.72)
+
+	sql := "^SELECT (.+) FROM ORDERS WHERE ID = :1 AND STATUS = :2$"
+	mock.ExpectPrepare(sql).ExpectQuery().WillReturnRows(rows)
+
+	data, err := r.FetchData("ORDERS", fields, converters, filters)
+	require.Nil(t, err)
+
+	assert.Len(t, data, 1)
+	assert.EqualValues(t, 4, data[0]["ID"])
+	assert.EqualValues(t, 375, data[0]["USER_ID"])
+	assert.Equal(t, "SOLD", data[0]["STATUS"])
+	assert.EqualValues(t, 2243.72, data[0]["TOTAL"])
+}
+
+func TestFetchDataPrepareError(t *testing.T) {
+	db, mock, err := sqlmock.New()
+
+	require.Nil(t, err)
+	defer db.Close()
+
+	r, _ := reader.NewReader(reader.DataSource{DBMSName: "oracle"}, db)
+
+	fields := []reader.DBColumn{
+		{Name: "ID", Type: "NUMBER", Nullable: false, Length: 22,
+			DecimalSize: reader.DecimalColumn{Precision: 2, Scale: 0}},
+		{Name: "USER_ID", Type: "NUMBER", Nullable: false, Length: 22,
+			DecimalSize: reader.DecimalColumn{Precision: 2, Scale: 0}},
+		{Name: "STATUS", Type: "VARCHAR2", Nullable: true, Length: 15},
+		{Name: "TOTAL", Type: "NUMBER", Nullable: false, Length: 22,
+			DecimalSize: reader.DecimalColumn{Precision: 19, Scale: 2}},
+	}
+	converters := []schema.Converter{}
+	filters := [][]interface{}{}
+
+	errTest := errors.New("prepare error")
+	sql := "^SELECT (.+) FROM ORDERS$"
+	mock.ExpectPrepare(sql).WillReturnError(errTest)
+
+	_, err = r.FetchData("ORDERS", fields, converters, filters)
+	assert.ErrorIs(t, err, errTest)
+}
+
+func TestFetchDataPrepareQueryError(t *testing.T) {
+	db, mock, err := sqlmock.New()
+
+	require.Nil(t, err)
+	defer db.Close()
+
+	r, _ := reader.NewReader(reader.DataSource{DBMSName: "oracle"}, db)
+
+	fields := []reader.DBColumn{
+		{Name: "ID", Type: "NUMBER", Nullable: false, Length: 22,
+			DecimalSize: reader.DecimalColumn{Precision: 2, Scale: 0}},
+		{Name: "USER_ID", Type: "NUMBER", Nullable: false, Length: 22,
+			DecimalSize: reader.DecimalColumn{Precision: 2, Scale: 0}},
+		{Name: "STATUS", Type: "VARCHAR2", Nullable: true, Length: 15},
+		{Name: "TOTAL", Type: "NUMBER", Nullable: false, Length: 22,
+			DecimalSize: reader.DecimalColumn{Precision: 18, Scale: 2}},
+	}
+	converters := []schema.Converter{}
+	filters := [][]interface{}{}
+
+	errTest := errors.New("prepare query error")
+	sql := "^SELECT (.+) FROM ORDERS$"
+	mock.ExpectPrepare(sql).ExpectQuery().WillReturnError(errTest)
+
+	_, err = r.FetchData("ORDERS", fields, converters, filters)
+	assert.ErrorIs(t, err, errTest)
 }
