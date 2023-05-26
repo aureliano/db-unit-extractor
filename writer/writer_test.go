@@ -12,21 +12,8 @@ func TestNewWriter(t *testing.T) {
 	assert.ErrorIs(t, err, writer.ErrUnsupportedFileWriter)
 }
 
-func TestNewWriterDummy(_ *testing.T) {
-	_, _ = writer.NewWriter(writer.FileConf{Type: "dummy"})
-}
-
-func TestWriteHeader(_ *testing.T) {
-	w := writer.DummyWriter{}
-	w.WriteHeader()
-}
-
-func TestWriteFooter(_ *testing.T) {
-	w := writer.DummyWriter{}
-	w.WriteFooter()
-}
-
-func TestWrite(_ *testing.T) {
-	w := writer.DummyWriter{}
-	_ = w.Write("", nil)
+func TestNewWriterConsole(t *testing.T) {
+	w, err := writer.NewWriter(writer.FileConf{Type: "console"})
+	assert.Nil(t, err)
+	assert.IsType(t, writer.ConsoleWriter{}, w)
 }

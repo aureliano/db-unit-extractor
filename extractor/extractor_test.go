@@ -224,7 +224,7 @@ func TestExtract(t *testing.T) {
 		extractor.Conf{
 			SchemaPath: "../test/unit/extractor_test.yml",
 			References: refs,
-			Outputs:    []extractor.OutputConf{{Type: "dummy"}},
+			Outputs:    []extractor.OutputConf{{Type: "console"}},
 		}, DummyReader{}, nil, func(err error) {},
 	)
 
