@@ -7,7 +7,13 @@ import (
 
 	"github.com/aureliano/db-unit-extractor/reader"
 	"github.com/aureliano/db-unit-extractor/schema"
+	"github.com/aureliano/db-unit-extractor/writer"
 )
+
+type OutputConf struct {
+	Type      string
+	Formatted bool
+}
 
 type Conf struct {
 	SchemaPath  string
@@ -19,6 +25,7 @@ type Conf struct {
 	Port        int
 	MaxOpenConn int
 	MaxIdleConn int
+	Outputs     []OutputConf
 	References  map[string]interface{}
 }
 
@@ -33,7 +40,7 @@ var (
 	filterValueRegExp = regexp.MustCompile(`^\$\{([^\}]+)\}$`)
 )
 
-func Extract(conf Conf, db reader.DBReader) error {
+func Extract(conf Conf, db reader.DBReader, writers []writer.FileWriter, panicHandler func(error)) error {
 	schema, err := schema.DigestSchema(conf.SchemaPath)
 	if err != nil {
 		return err
@@ -56,17 +63,54 @@ func Extract(conf Conf, db reader.DBReader) error {
 		}
 	}
 
+	if len(writers) == 0 {
+		writers = make([]writer.FileWriter, len(conf.Outputs))
+
+		for i, output := range conf.Outputs {
+			fc := writer.FileConf{Type: output.Type, Formatted: output.Formatted}
+			fw, e := writer.NewWriter(fc)
+			if e != nil {
+				return e
+			}
+			writers[i] = fw
+		}
+	}
+
 	for k, v := range conf.References {
 		schema.Refs[k] = v
 	}
 
-	return extract(schema, db)
+	return extract(schema, db, writers, panicHandler)
 }
 
-func extract(model schema.Model, db reader.DBReader) error {
+func extract(model schema.Model, db reader.DBReader, writers []writer.FileWriter, panicHandler func(error)) error {
+	cw := launchWriters(writers, panicHandler)
+
+	if err := launchReaders(model, db, cw); err != nil {
+		return err
+	}
+
+	for _, w := range cw {
+		w <- dbResponse{}
+	}
+
+	return nil
+}
+
+func launchWriters(writers []writer.FileWriter, panicHandler func(error)) []chan dbResponse {
+	chanWriters := make([]chan dbResponse, len(writers))
+
+	for i, w := range writers {
+		chanWriters[i] = make(chan dbResponse)
+		go writeData(chanWriters[i], w, panicHandler)
+	}
+
+	return chanWriters
+}
+
+func launchReaders(model schema.Model, db reader.DBReader, writers []chan dbResponse) error {
 	for _, tables := range model.GroupedTables() {
 		respChan := make(chan dbResponse)
-		responses := make([]dbResponse, 0, len(tables))
 		tbSize := len(tables)
 
 		for _, table := range tables {
@@ -84,15 +128,17 @@ func extract(model schema.Model, db reader.DBReader) error {
 				return fmt.Errorf("%w: %w", ErrExtractor, res.err)
 			}
 
-			responses = append(responses, res)
+			updateReferences(model, res)
 			counter++
 
 			if counter >= tbSize {
 				close(respChan)
 			}
-		}
 
-		updateReferences(model, responses)
+			for _, w := range writers {
+				w <- res
+			}
+		}
 	}
 
 	return nil
@@ -119,14 +165,26 @@ func fetchData(c chan dbResponse, table schema.Table,
 	}
 }
 
-func updateReferences(model schema.Model, responses []dbResponse) {
-	for _, response := range responses {
-		for _, record := range response.data {
-			for k, v := range record {
-				key := fmt.Sprintf("%s.%s", response.table, k)
-				if _, exist := model.Refs[key]; exist {
-					model.Refs[key] = v
-				}
+func writeData(c chan dbResponse, w writer.FileWriter, panicHandler func(error)) {
+	w.WriteHeader()
+	for res := range c {
+		if res.data != nil {
+			err := w.Write(res.table, res.data)
+			if err != nil {
+				panicHandler(fmt.Errorf("%w: %w", ErrExtractor, err))
+			}
+		} else {
+			w.WriteFooter()
+		}
+	}
+}
+
+func updateReferences(model schema.Model, response dbResponse) {
+	for _, record := range response.data {
+		for k, v := range record {
+			key := fmt.Sprintf("%s.%s", response.table, k)
+			if _, exist := model.Refs[key]; exist {
+				model.Refs[key] = v
 			}
 		}
 	}

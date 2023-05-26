@@ -8,6 +8,7 @@ import (
 	"github.com/aureliano/db-unit-extractor/extractor"
 	"github.com/aureliano/db-unit-extractor/reader"
 	"github.com/aureliano/db-unit-extractor/schema"
+	"github.com/aureliano/db-unit-extractor/writer"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -21,6 +22,10 @@ type DummyReader struct{}
 type FetchMetadataErrorDummyReader struct{}
 
 type FetchDataErrorDummyReader struct{}
+
+type DummyWriter struct{}
+
+type WriteDataErrorDummyWriter struct{}
 
 func (DummyReader) FetchColumnsMetadata(table schema.Table) ([]reader.DBColumn, error) {
 	switch {
@@ -105,14 +110,48 @@ func (FetchDataErrorDummyReader) FetchData(_ string, _ []reader.DBColumn, _ []sc
 	return nil, fmt.Errorf("fetch data error")
 }
 
+func (DummyWriter) WriteHeader() {}
+
+func (WriteDataErrorDummyWriter) WriteHeader() {}
+
+func (DummyWriter) WriteFooter() {}
+
+func (WriteDataErrorDummyWriter) WriteFooter() {}
+
+func (DummyWriter) Write(_ string, _ []map[string]interface{}) error {
+	return nil
+}
+
+func (WriteDataErrorDummyWriter) Write(_ string, _ []map[string]interface{}) error {
+	return fmt.Errorf("write data error")
+}
+
 func TestExtractSchemaFileNotFound(t *testing.T) {
-	err := extractor.Extract(extractor.Conf{SchemaPath: ""}, nil)
+	err := extractor.Extract(extractor.Conf{SchemaPath: ""}, nil, nil, func(err error) {})
 	assert.ErrorIs(t, err, schema.ErrSchemaFile)
 }
 
 func TestExtractUnsupportedReader(t *testing.T) {
-	err := extractor.Extract(extractor.Conf{SchemaPath: "../test/unit/schema_test_grouping.yml"}, nil)
+	err := extractor.Extract(
+		extractor.Conf{SchemaPath: "../test/unit/schema_test_grouping.yml"}, nil, nil, func(err error) {},
+	)
 	assert.ErrorIs(t, err, reader.ErrUnsupportedDBReader)
+}
+
+func TestExtractUnsupportedWriter(t *testing.T) {
+	dataconv.RegisterConverter("conv_date_time", DummyConverter(""))
+	refs := make(map[string]interface{})
+	refs["customer_id"] = 34
+
+	err := extractor.Extract(
+		extractor.Conf{
+			SchemaPath: "../test/unit/extractor_test.yml",
+			References: refs,
+			Outputs:    []extractor.OutputConf{{Type: "unknown"}},
+		}, DummyReader{}, nil, func(err error) {},
+	)
+
+	assert.ErrorIs(t, err, writer.ErrUnsupportedFileWriter)
 }
 
 func TestExtractUnresolvableFilter(t *testing.T) {
@@ -120,7 +159,7 @@ func TestExtractUnresolvableFilter(t *testing.T) {
 	err := extractor.Extract(
 		extractor.Conf{
 			SchemaPath: "../test/unit/extractor_test.yml",
-		}, DummyReader{},
+		}, DummyReader{}, nil, func(err error) {},
 	)
 
 	assert.ErrorIs(t, err, extractor.ErrExtractor)
@@ -136,7 +175,7 @@ func TestExtractFetchMetadataError(t *testing.T) {
 		extractor.Conf{
 			SchemaPath: "../test/unit/extractor_test.yml",
 			References: refs,
-		}, FetchMetadataErrorDummyReader{},
+		}, FetchMetadataErrorDummyReader{}, nil, func(err error) {},
 	)
 
 	assert.ErrorIs(t, err, extractor.ErrExtractor)
@@ -152,11 +191,28 @@ func TestExtractFetchDataError(t *testing.T) {
 		extractor.Conf{
 			SchemaPath: "../test/unit/extractor_test.yml",
 			References: refs,
-		}, FetchDataErrorDummyReader{},
+		}, FetchDataErrorDummyReader{}, nil, func(err error) {},
 	)
 
 	assert.ErrorIs(t, err, extractor.ErrExtractor)
 	assert.Contains(t, err.Error(), "fetch data error")
+}
+
+func TestExtractWriteDataError(t *testing.T) {
+	dataconv.RegisterConverter("conv_date_time", DummyConverter(""))
+	refs := make(map[string]interface{})
+	refs["customer_id"] = 34
+
+	conf := extractor.Conf{
+		SchemaPath: "../test/unit/extractor_test.yml",
+		References: refs,
+	}
+
+	var handledError error
+	_ = extractor.Extract(
+		conf, DummyReader{}, []writer.FileWriter{WriteDataErrorDummyWriter{}}, func(err error) { handledError = err },
+	)
+	assert.NotNil(t, handledError)
 }
 
 func TestExtract(t *testing.T) {
@@ -168,7 +224,8 @@ func TestExtract(t *testing.T) {
 		extractor.Conf{
 			SchemaPath: "../test/unit/extractor_test.yml",
 			References: refs,
-		}, DummyReader{},
+			Outputs:    []extractor.OutputConf{{Type: "dummy"}},
+		}, DummyReader{}, nil, func(err error) {},
 	)
 
 	assert.Nil(t, err)
