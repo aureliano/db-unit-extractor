@@ -9,13 +9,13 @@ import (
 )
 
 type OracleReader struct {
-	db *sql.DB
+	ds *DataSource
 }
 
 func (r OracleReader) FetchColumnsMetadata(table schema.Table) ([]DBColumn, error) {
 	query := buildOracleSQLQueryColumnsMetadata(table)
 
-	rows, err := r.db.Query(query)
+	rows, err := r.ds.DB.Query(query)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func (r OracleReader) FetchData(table string, fields []DBColumn, _ []schema.Conv
 	filters [][]interface{}) ([]map[string]interface{}, error) {
 	query := buildOracleSQLQueryColumns(table, fields, filters)
 
-	stmt, err := r.db.Prepare(query)
+	stmt, err := r.ds.DB.Prepare(query)
 	if err != nil {
 		return nil, err
 	}

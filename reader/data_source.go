@@ -17,7 +17,7 @@ type DataSource struct {
 	Port        int
 	MaxOpenConn int
 	MaxIdleConn int
-	db          *sql.DB
+	DB          *sql.DB
 }
 
 type DSN interface {
@@ -58,7 +58,7 @@ func (ds *DataSource) DSName() string {
 }
 
 func (ds *DataSource) Connect(timeout time.Duration) error {
-	if ds.db != nil {
+	if ds.DB != nil {
 		return nil
 	}
 
@@ -78,11 +78,11 @@ func (ds *DataSource) Connect(timeout time.Duration) error {
 		return err
 	}
 
-	ds.db = db
+	ds.DB = db
 
 	return nil
 }
 
 func (ds *DataSource) IsConnected() bool {
-	return ds.db != nil
+	return ds.DB != nil
 }
