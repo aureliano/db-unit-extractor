@@ -1,7 +1,6 @@
 package reader
 
 import (
-	"database/sql"
 	"errors"
 	"fmt"
 	"strings"
@@ -22,17 +21,6 @@ type DBColumn struct {
 	DecimalSize DecimalColumn
 }
 
-type DataSource struct {
-	DBMSName    string
-	Username    string
-	Password    string
-	Database    string
-	Hostname    string
-	Port        int
-	MaxOpenConn int
-	MaxIdleConn int
-}
-
 var ErrUnsupportedDBReader = errors.New("unsupported database")
 
 type DBReader interface {
@@ -41,9 +29,9 @@ type DBReader interface {
 		filters [][]interface{}) ([]map[string]interface{}, error)
 }
 
-func NewReader(ds DataSource, db *sql.DB) (DBReader, error) {
+func NewReader(ds *DataSource) (DBReader, error) {
 	if strings.ToLower(ds.DBMSName) == "oracle" {
-		return OracleReader{db: db}, nil
+		return OracleReader{db: ds.DB}, nil
 	}
 
 	return nil, fmt.Errorf("%w: %s", ErrUnsupportedDBReader, ds.DBMSName)

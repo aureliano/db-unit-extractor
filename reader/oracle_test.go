@@ -17,7 +17,7 @@ func TestFetchColumnsMetadata(t *testing.T) {
 	require.Nil(t, err)
 	defer db.Close()
 
-	r, _ := reader.NewReader(reader.DataSource{DBMSName: "oracle"}, db)
+	r, _ := reader.NewReader(&reader.DataSource{DBMSName: "oracle", DB: db})
 
 	rows := sqlmock.NewRows([]string{
 		"COLUMN_NAME", "DATA_TYPE", "NULLABLE", "DATA_LENGTH", "DATA_PRECISION", "DATA_SCALE",
@@ -71,7 +71,7 @@ func TestFetchColumnsMetadataIgnore(t *testing.T) {
 	require.Nil(t, err)
 	defer db.Close()
 
-	r, _ := reader.NewReader(reader.DataSource{DBMSName: "oracle"}, db)
+	r, _ := reader.NewReader(&reader.DataSource{DBMSName: "oracle", DB: db})
 
 	rows := sqlmock.NewRows([]string{
 		"COLUMN_NAME", "DATA_TYPE", "NULLABLE", "DATA_LENGTH", "DATA_PRECISION", "DATA_SCALE",
@@ -109,7 +109,7 @@ func TestFetchColumnsMetadataQueryError(t *testing.T) {
 	require.Nil(t, err)
 	defer db.Close()
 
-	r, _ := reader.NewReader(reader.DataSource{DBMSName: "oracle"}, db)
+	r, _ := reader.NewReader(&reader.DataSource{DBMSName: "oracle", DB: db})
 	sqlErr := errors.New("ORA-00923 invalid query")
 
 	mock.ExpectQuery("^SELECT (.+) FROM  ALL_TAB_COLS").WillReturnError(sqlErr)
@@ -124,7 +124,7 @@ func TestFetchColumnsMetadataScanRowError(t *testing.T) {
 	require.Nil(t, err)
 	defer db.Close()
 
-	r, _ := reader.NewReader(reader.DataSource{DBMSName: "oracle"}, db)
+	r, _ := reader.NewReader(&reader.DataSource{DBMSName: "oracle", DB: db})
 
 	rows := sqlmock.NewRows([]string{
 		"COLUMN_NAME", "DATA_TYPE", "NULLABLE", "DATA_LENGTH", "DATA_PRECISION", "DATA_SCALE",
@@ -142,7 +142,7 @@ func TestFetchColumnsMetadataRowsError(t *testing.T) {
 	require.Nil(t, err)
 	defer db.Close()
 
-	r, _ := reader.NewReader(reader.DataSource{DBMSName: "oracle"}, db)
+	r, _ := reader.NewReader(&reader.DataSource{DBMSName: "oracle", DB: db})
 	sqlErr := errors.New("rows error")
 
 	rows := sqlmock.NewRows([]string{
@@ -161,7 +161,7 @@ func TestFetchData(t *testing.T) {
 	require.Nil(t, err)
 	defer db.Close()
 
-	r, _ := reader.NewReader(reader.DataSource{DBMSName: "oracle"}, db)
+	r, _ := reader.NewReader(&reader.DataSource{DBMSName: "oracle", DB: db})
 
 	fields := []reader.DBColumn{
 		{Name: "ID", Type: "NUMBER", Nullable: false, Length: 22,
@@ -198,7 +198,7 @@ func TestFetchDataPrepareError(t *testing.T) {
 	require.Nil(t, err)
 	defer db.Close()
 
-	r, _ := reader.NewReader(reader.DataSource{DBMSName: "oracle"}, db)
+	r, _ := reader.NewReader(&reader.DataSource{DBMSName: "oracle", DB: db})
 
 	fields := []reader.DBColumn{
 		{Name: "ID", Type: "NUMBER", Nullable: false, Length: 22,
@@ -226,7 +226,7 @@ func TestFetchDataPrepareQueryError(t *testing.T) {
 	require.Nil(t, err)
 	defer db.Close()
 
-	r, _ := reader.NewReader(reader.DataSource{DBMSName: "oracle"}, db)
+	r, _ := reader.NewReader(&reader.DataSource{DBMSName: "oracle", DB: db})
 
 	fields := []reader.DBColumn{
 		{Name: "ID", Type: "NUMBER", Nullable: false, Length: 22,

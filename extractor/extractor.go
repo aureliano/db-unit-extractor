@@ -10,9 +10,16 @@ import (
 )
 
 type Conf struct {
-	SchemaPath string
-	reader.DataSource
-	References map[string]interface{}
+	SchemaPath  string
+	DBMSName    string
+	User        string
+	Pwd         string
+	Database    string
+	Host        string
+	Port        int
+	MaxOpenConn int
+	MaxIdleConn int
+	References  map[string]interface{}
 }
 
 type dbResponse struct {
@@ -33,7 +40,17 @@ func Extract(conf Conf, db reader.DBReader) error {
 	}
 
 	if db == (reader.DBReader)(nil) {
-		db, err = reader.NewReader(conf.DataSource, nil)
+		ds := reader.NewDataSource()
+		ds.DBMSName = conf.DBMSName
+		ds.Username = conf.User
+		ds.Password = conf.Pwd
+		ds.Hostname = conf.Host
+		ds.Port = conf.Port
+		ds.Database = conf.Database
+		ds.MaxOpenConn = conf.MaxOpenConn
+		ds.MaxIdleConn = conf.MaxIdleConn
+
+		db, err = reader.NewReader(ds)
 		if err != nil {
 			return err
 		}

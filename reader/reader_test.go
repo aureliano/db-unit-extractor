@@ -8,12 +8,12 @@ import (
 )
 
 func TestNewReader(t *testing.T) {
-	_, err := reader.NewReader(reader.DataSource{}, nil)
+	_, err := reader.NewReader(&reader.DataSource{})
 	assert.ErrorIs(t, err, reader.ErrUnsupportedDBReader)
 }
 
 func TestNewOracleReader(t *testing.T) {
-	r, err := reader.NewReader(reader.DataSource{DBMSName: "Oracle"}, nil)
+	r, err := reader.NewReader(&reader.DataSource{DBMSName: "Oracle"})
 	assert.Nil(t, err)
 	assert.IsType(t, reader.OracleReader{}, r)
 }
