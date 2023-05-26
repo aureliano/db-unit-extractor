@@ -17,11 +17,14 @@ func (ConsoleWriter) WriteFooter() {
 
 func (ConsoleWriter) Write(table string, rows []map[string]interface{}) error {
 	fmt.Fprintln(os.Stdout, " >", table)
+
 	for _, row := range rows {
 		for name, value := range row {
 			fmt.Fprintf(os.Stdout, "   %s: %v\n", name, value)
 		}
 	}
+
+	fmt.Fprintln(os.Stdout)
 
 	return nil
 }
