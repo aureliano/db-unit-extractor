@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"runtime"
 
 	"github.com/spf13/cobra"
 )
@@ -32,7 +33,12 @@ func NewRootCommand() *cobra.Command {
 		Short: "Database extractor for unit testing.",
 		Long:  "Database extractor for unit testing.",
 		Run: func(cmd *cobra.Command, args []string) {
-			_ = cmd.Help()
+			version, _ := cmd.Flags().GetBool("version")
+			if version {
+				printVersion(cmd)
+			} else {
+				_ = cmd.Help()
+			}
 		},
 	}
 
@@ -41,4 +47,15 @@ func NewRootCommand() *cobra.Command {
 	cmd.Flags().BoolP("version", "v", false, fmt.Sprintf("Print %s version", project.name))
 
 	return cmd
+}
+
+func printVersion(cmd *cobra.Command) {
+	goVersion := runtime.Version()
+	osName := runtime.GOOS
+	osArch := runtime.GOARCH
+
+	w := cmd.OutOrStdout()
+	_, _ = w.Write([]byte(fmt.Sprintf("Version:       %s\n", version)))
+	_, _ = w.Write([]byte(fmt.Sprintf("Go version:    %s\n", goVersion)))
+	_, _ = w.Write([]byte(fmt.Sprintf("OS/Arch:       %s/%s\n", osName, osArch)))
 }
