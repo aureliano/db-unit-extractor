@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"runtime"
 
+	"github.com/aureliano/caravela"
 	"github.com/spf13/cobra"
 )
 
@@ -43,6 +44,7 @@ func NewRootCommand() *cobra.Command {
 	}
 
 	cmd.CompletionOptions.DisableDefaultCmd = true
+	cmd.AddCommand(NewUpdateCommand(caravela.Update))
 
 	cmd.Flags().BoolP("version", "v", false, fmt.Sprintf("Print %s version", project.name))
 
