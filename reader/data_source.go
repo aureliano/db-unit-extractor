@@ -3,36 +3,25 @@ package reader
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"strings"
 	"time"
 )
 
 type DataSource struct {
-	DBMSName    string
-	Username    string
-	Password    string
-	Database    string
-	Hostname    string
-	Port        int
+	DSN         string
 	MaxOpenConn int
 	MaxIdleConn int
 	DB          *sql.DB
 }
 
-type DSN interface {
-	DSName() string
-}
-
 type DBConnector interface {
 	Connect() error
 	IsConnected() bool
+	DriverName() string
+	ConnectionURL() string
 }
 
-const (
-	dsnTemplate  = "%s://%s:%s@%s:%d/%s"
-	MaxDBTimeout = time.Second * 30
-)
+const MaxDBTimeout = time.Second * 30
 
 func NewDataSource() *DataSource {
 	return &DataSource{
@@ -41,28 +30,12 @@ func NewDataSource() *DataSource {
 	}
 }
 
-func (ds *DataSource) DSName() string {
-	if ds.DBMSName == "sqlite3" {
-		return "file:test.db?cache=shared&mode=memory"
-	}
-
-	return fmt.Sprintf(
-		dsnTemplate,
-		strings.ToLower(ds.DBMSName),
-		ds.Username,
-		ds.Password,
-		ds.Hostname,
-		ds.Port,
-		ds.Database,
-	)
-}
-
 func (ds *DataSource) Connect(timeout time.Duration) error {
 	if ds.DB != nil {
 		return nil
 	}
 
-	db, err := sql.Open(ds.DBMSName, ds.DSName())
+	db, err := sql.Open(ds.DriverName(), ds.ConnectionURL())
 	if err != nil {
 		return err
 	}
@@ -85,4 +58,26 @@ func (ds *DataSource) Connect(timeout time.Duration) error {
 
 func (ds *DataSource) IsConnected() bool {
 	return ds.DB != nil
+}
+
+func (ds *DataSource) DriverName() string {
+	if ds.DSN == "" {
+		return ""
+	}
+
+	index := strings.Index(ds.DSN, "://")
+	return ds.DSN[:index]
+}
+
+func (ds *DataSource) ConnectionURL() string {
+	if ds.DSN == "" {
+		return ""
+	}
+
+	const sqlite3Prefix = "sqlite3://"
+	if strings.HasPrefix(ds.DSN, sqlite3Prefix) {
+		return ds.DSN[len(sqlite3Prefix):]
+	}
+
+	return ds.DSN
 }

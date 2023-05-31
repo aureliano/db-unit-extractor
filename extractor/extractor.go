@@ -12,12 +12,7 @@ import (
 
 type Conf struct {
 	SchemaPath      string
-	DBMSName        string
-	User            string
-	Pwd             string
-	Database        string
-	Host            string
-	Port            int
+	DSN             string
 	MaxOpenConn     int
 	MaxIdleConn     int
 	OutputTypes     []string
@@ -45,12 +40,7 @@ func Extract(conf Conf, db reader.DBReader, writers []writer.FileWriter, panicHa
 
 	if db == (reader.DBReader)(nil) {
 		ds := reader.NewDataSource()
-		ds.DBMSName = conf.DBMSName
-		ds.Username = conf.User
-		ds.Password = conf.Pwd
-		ds.Hostname = conf.Host
-		ds.Port = conf.Port
-		ds.Database = conf.Database
+		ds.DSN = conf.DSN
 		ds.MaxOpenConn = conf.MaxOpenConn
 		ds.MaxIdleConn = conf.MaxIdleConn
 
