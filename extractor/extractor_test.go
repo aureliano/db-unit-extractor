@@ -145,9 +145,9 @@ func TestExtractUnsupportedWriter(t *testing.T) {
 
 	err := extractor.Extract(
 		extractor.Conf{
-			SchemaPath: "../test/unit/extractor_test.yml",
-			References: refs,
-			Outputs:    []extractor.OutputConf{{Type: "unknown"}},
+			SchemaPath:  "../test/unit/extractor_test.yml",
+			References:  refs,
+			OutputTypes: []string{"unknown"},
 		}, DummyReader{}, nil, func(err error) {},
 	)
 
@@ -222,9 +222,9 @@ func TestExtract(t *testing.T) {
 
 	err := extractor.Extract(
 		extractor.Conf{
-			SchemaPath: "../test/unit/extractor_test.yml",
-			References: refs,
-			Outputs:    []extractor.OutputConf{{Type: "console"}},
+			SchemaPath:  "../test/unit/extractor_test.yml",
+			References:  refs,
+			OutputTypes: []string{"console"},
 		}, DummyReader{}, nil, func(err error) {},
 	)
 

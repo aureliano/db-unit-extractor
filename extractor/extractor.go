@@ -10,23 +10,19 @@ import (
 	"github.com/aureliano/db-unit-extractor/writer"
 )
 
-type OutputConf struct {
-	Type      string
-	Formatted bool
-}
-
 type Conf struct {
-	SchemaPath  string
-	DBMSName    string
-	User        string
-	Pwd         string
-	Database    string
-	Host        string
-	Port        int
-	MaxOpenConn int
-	MaxIdleConn int
-	Outputs     []OutputConf
-	References  map[string]interface{}
+	SchemaPath      string
+	DBMSName        string
+	User            string
+	Pwd             string
+	Database        string
+	Host            string
+	Port            int
+	MaxOpenConn     int
+	MaxIdleConn     int
+	OutputTypes     []string
+	FormattedOutput bool
+	References      map[string]interface{}
 }
 
 type dbResponse struct {
@@ -64,10 +60,10 @@ func Extract(conf Conf, db reader.DBReader, writers []writer.FileWriter, panicHa
 	}
 
 	if len(writers) == 0 {
-		writers = make([]writer.FileWriter, len(conf.Outputs))
+		writers = make([]writer.FileWriter, len(conf.OutputTypes))
 
-		for i, output := range conf.Outputs {
-			fc := writer.FileConf{Type: output.Type, Formatted: output.Formatted}
+		for i, outputTp := range conf.OutputTypes {
+			fc := writer.FileConf{Type: outputTp, Formatted: conf.FormattedOutput}
 			fw, e := writer.NewWriter(fc)
 			if e != nil {
 				return e
