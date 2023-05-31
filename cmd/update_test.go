@@ -35,7 +35,10 @@ func TestNewUpdateCommandError(t *testing.T) {
 	c.SetArgs([]string{"update"})
 	c.SetOut(output)
 
-	assert.PanicsWithValue(t, "os.Exit called", func() { c.Execute() }, "os.Exit was not called")
+	assert.PanicsWithValue(t, "os.Exit called", func() {
+		err := c.Execute()
+		assert.Nil(t, err)
+	}, "os.Exit was not called")
 	txt := output.String()
 	assert.Equal(t, txt, "Program update failed! update error\n")
 }
