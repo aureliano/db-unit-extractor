@@ -3,10 +3,12 @@ package cmd_test
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"strings"
 	"testing"
 	"time"
 
+	"bou.ke/monkey"
 	"github.com/aureliano/caravela"
 	"github.com/aureliano/caravela/provider"
 	"github.com/aureliano/db-unit-extractor/cmd"
@@ -14,6 +16,12 @@ import (
 )
 
 func TestNewUpdateCommandError(t *testing.T) {
+	fakeExit := func(int) {
+		panic("os.Exit called")
+	}
+	patch := monkey.Patch(os.Exit, fakeExit)
+	defer patch.Unpatch()
+
 	upcmd := func(c caravela.Conf) (*provider.Release, error) {
 		return nil, fmt.Errorf("update error")
 	}
@@ -26,9 +34,8 @@ func TestNewUpdateCommandError(t *testing.T) {
 	output := new(bytes.Buffer)
 	c.SetArgs([]string{"update"})
 	c.SetOut(output)
-	err := c.Execute()
-	assert.Nil(t, err)
 
+	assert.PanicsWithValue(t, "os.Exit called", func() { c.Execute() }, "os.Exit was not called")
 	txt := output.String()
 	assert.Equal(t, txt, "Program update failed! update error\n")
 }

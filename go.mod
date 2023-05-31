@@ -3,6 +3,7 @@ module github.com/aureliano/db-unit-extractor
 go 1.20
 
 require (
+	bou.ke/monkey v1.0.2
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/aureliano/caravela v1.0.0
 	github.com/mattn/go-sqlite3 v1.14.16
