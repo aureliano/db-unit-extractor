@@ -37,11 +37,11 @@ func update(cmd *cobra.Command, upcmd func(c caravela.Conf) (*provider.Release, 
 	if err != nil {
 		_, _ = w.Write([]byte(fmt.Sprintf("Program update failed! %s\n", err)))
 		os.Exit(1)
-	} else {
-		_, _ = w.Write([]byte(fmt.Sprintf("Release %s of %s.\n\n", release.Name,
-			release.ReleasedAt.Format("02/01/2006 15:04:05"))))
-		_, _ = w.Write([]byte(fmt.Sprintln(release.Description)))
-		_, _ = w.Write([]byte(fmt.Sprintf("\nUpdate from version %s to %s successfully completed!\n",
-			project.version, release.Name)))
 	}
+
+	_, _ = w.Write([]byte(fmt.Sprintf("Release %s of %s.\n\n", release.Name,
+		release.ReleasedAt.Format("02/01/2006 15:04:05"))))
+	_, _ = w.Write([]byte(fmt.Sprintln(release.Description)))
+	_, _ = w.Write([]byte(fmt.Sprintf("\nUpdate from version %s to %s successfully completed!\n",
+		project.version, release.Name)))
 }
