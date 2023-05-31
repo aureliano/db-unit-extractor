@@ -30,9 +30,9 @@ type DBReader interface {
 }
 
 func NewReader(ds *DataSource) (DBReader, error) {
-	if strings.ToLower(ds.DBMSName) == "oracle" {
+	if strings.ToLower(ds.DriverName()) == "oracle" {
 		return OracleReader{db: ds.DB}, nil
 	}
 
-	return nil, fmt.Errorf("%w: %s", ErrUnsupportedDBReader, ds.DBMSName)
+	return nil, fmt.Errorf("%w: %s", ErrUnsupportedDBReader, ds.DriverName())
 }

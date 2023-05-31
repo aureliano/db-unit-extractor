@@ -3,6 +3,7 @@ package extractor
 import (
 	"errors"
 	"fmt"
+	"os"
 	"regexp"
 
 	"github.com/aureliano/db-unit-extractor/reader"
@@ -10,23 +11,15 @@ import (
 	"github.com/aureliano/db-unit-extractor/writer"
 )
 
-type OutputConf struct {
-	Type      string
-	Formatted bool
-}
-
 type Conf struct {
-	SchemaPath  string
-	DBMSName    string
-	User        string
-	Pwd         string
-	Database    string
-	Host        string
-	Port        int
-	MaxOpenConn int
-	MaxIdleConn int
-	Outputs     []OutputConf
-	References  map[string]interface{}
+	SchemaPath      string
+	DSN             string
+	MaxOpenConn     int
+	MaxIdleConn     int
+	OutputTypes     []string
+	FormattedOutput bool
+	OutputDir       string
+	References      map[string]interface{}
 }
 
 type dbResponse struct {
@@ -40,7 +33,7 @@ var (
 	filterValueRegExp = regexp.MustCompile(`^\$\{([^\}]+)\}$`)
 )
 
-func Extract(conf Conf, db reader.DBReader, writers []writer.FileWriter, panicHandler func(error)) error {
+func Extract(conf Conf, db reader.DBReader, writers []writer.FileWriter) error {
 	schema, err := schema.DigestSchema(conf.SchemaPath)
 	if err != nil {
 		return err
@@ -48,12 +41,7 @@ func Extract(conf Conf, db reader.DBReader, writers []writer.FileWriter, panicHa
 
 	if db == (reader.DBReader)(nil) {
 		ds := reader.NewDataSource()
-		ds.DBMSName = conf.DBMSName
-		ds.Username = conf.User
-		ds.Password = conf.Pwd
-		ds.Hostname = conf.Host
-		ds.Port = conf.Port
-		ds.Database = conf.Database
+		ds.DSN = conf.DSN
 		ds.MaxOpenConn = conf.MaxOpenConn
 		ds.MaxIdleConn = conf.MaxIdleConn
 
@@ -64,10 +52,10 @@ func Extract(conf Conf, db reader.DBReader, writers []writer.FileWriter, panicHa
 	}
 
 	if len(writers) == 0 {
-		writers = make([]writer.FileWriter, len(conf.Outputs))
+		writers = make([]writer.FileWriter, len(conf.OutputTypes))
 
-		for i, output := range conf.Outputs {
-			fc := writer.FileConf{Type: output.Type, Formatted: output.Formatted}
+		for i, outputTp := range conf.OutputTypes {
+			fc := writer.FileConf{Type: outputTp, Formatted: conf.FormattedOutput}
 			fw, e := writer.NewWriter(fc)
 			if e != nil {
 				return e
@@ -80,11 +68,11 @@ func Extract(conf Conf, db reader.DBReader, writers []writer.FileWriter, panicHa
 		schema.Refs[k] = v
 	}
 
-	return extract(schema, db, writers, panicHandler)
+	return extract(schema, db, writers)
 }
 
-func extract(model schema.Model, db reader.DBReader, writers []writer.FileWriter, panicHandler func(error)) error {
-	cw := launchWriters(writers, panicHandler)
+func extract(model schema.Model, db reader.DBReader, writers []writer.FileWriter) error {
+	cw := launchWriters(writers)
 
 	if err := launchReaders(model, db, cw); err != nil {
 		return err
@@ -97,12 +85,12 @@ func extract(model schema.Model, db reader.DBReader, writers []writer.FileWriter
 	return nil
 }
 
-func launchWriters(writers []writer.FileWriter, panicHandler func(error)) []chan dbResponse {
+func launchWriters(writers []writer.FileWriter) []chan dbResponse {
 	chanWriters := make([]chan dbResponse, len(writers))
 
 	for i, w := range writers {
 		chanWriters[i] = make(chan dbResponse)
-		go writeData(chanWriters[i], w, panicHandler)
+		go writeData(chanWriters[i], w)
 	}
 
 	return chanWriters
@@ -165,13 +153,14 @@ func fetchData(c chan dbResponse, table schema.Table,
 	}
 }
 
-func writeData(c chan dbResponse, w writer.FileWriter, panicHandler func(error)) {
+func writeData(c chan dbResponse, w writer.FileWriter) {
 	w.WriteHeader()
 	for res := range c {
 		if res.data != nil {
 			err := w.Write(res.table, res.data)
 			if err != nil {
-				panicHandler(fmt.Errorf("%w: %w", ErrExtractor, err))
+				fmt.Fprintf(os.Stdout, "%s: %s", ErrExtractor.Error(), err.Error())
+				os.Exit(1)
 			}
 		} else {
 			w.WriteFooter()

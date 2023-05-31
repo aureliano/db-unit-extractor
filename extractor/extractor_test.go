@@ -2,8 +2,10 @@ package extractor_test
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
+	"bou.ke/monkey"
 	"github.com/aureliano/db-unit-extractor/dataconv"
 	"github.com/aureliano/db-unit-extractor/extractor"
 	"github.com/aureliano/db-unit-extractor/reader"
@@ -127,13 +129,13 @@ func (WriteDataErrorDummyWriter) Write(_ string, _ []map[string]interface{}) err
 }
 
 func TestExtractSchemaFileNotFound(t *testing.T) {
-	err := extractor.Extract(extractor.Conf{SchemaPath: ""}, nil, nil, func(err error) {})
+	err := extractor.Extract(extractor.Conf{SchemaPath: ""}, nil, nil)
 	assert.ErrorIs(t, err, schema.ErrSchemaFile)
 }
 
 func TestExtractUnsupportedReader(t *testing.T) {
 	err := extractor.Extract(
-		extractor.Conf{SchemaPath: "../test/unit/schema_test_grouping.yml"}, nil, nil, func(err error) {},
+		extractor.Conf{SchemaPath: "../test/unit/schema_test_grouping.yml"}, nil, nil,
 	)
 	assert.ErrorIs(t, err, reader.ErrUnsupportedDBReader)
 }
@@ -145,10 +147,10 @@ func TestExtractUnsupportedWriter(t *testing.T) {
 
 	err := extractor.Extract(
 		extractor.Conf{
-			SchemaPath: "../test/unit/extractor_test.yml",
-			References: refs,
-			Outputs:    []extractor.OutputConf{{Type: "unknown"}},
-		}, DummyReader{}, nil, func(err error) {},
+			SchemaPath:  "../test/unit/extractor_test.yml",
+			References:  refs,
+			OutputTypes: []string{"unknown"},
+		}, DummyReader{}, nil,
 	)
 
 	assert.ErrorIs(t, err, writer.ErrUnsupportedFileWriter)
@@ -159,7 +161,7 @@ func TestExtractUnresolvableFilter(t *testing.T) {
 	err := extractor.Extract(
 		extractor.Conf{
 			SchemaPath: "../test/unit/extractor_test.yml",
-		}, DummyReader{}, nil, func(err error) {},
+		}, DummyReader{}, nil,
 	)
 
 	assert.ErrorIs(t, err, extractor.ErrExtractor)
@@ -175,7 +177,7 @@ func TestExtractFetchMetadataError(t *testing.T) {
 		extractor.Conf{
 			SchemaPath: "../test/unit/extractor_test.yml",
 			References: refs,
-		}, FetchMetadataErrorDummyReader{}, nil, func(err error) {},
+		}, FetchMetadataErrorDummyReader{}, nil,
 	)
 
 	assert.ErrorIs(t, err, extractor.ErrExtractor)
@@ -191,7 +193,7 @@ func TestExtractFetchDataError(t *testing.T) {
 		extractor.Conf{
 			SchemaPath: "../test/unit/extractor_test.yml",
 			References: refs,
-		}, FetchDataErrorDummyReader{}, nil, func(err error) {},
+		}, FetchDataErrorDummyReader{}, nil,
 	)
 
 	assert.ErrorIs(t, err, extractor.ErrExtractor)
@@ -199,6 +201,13 @@ func TestExtractFetchDataError(t *testing.T) {
 }
 
 func TestExtractWriteDataError(t *testing.T) {
+	var handledError error
+	fakeExit := func(int) {
+		handledError = fmt.Errorf("write data panic")
+	}
+	patchExit := monkey.Patch(os.Exit, fakeExit)
+	defer patchExit.Unpatch()
+
 	dataconv.RegisterConverter("conv_date_time", DummyConverter(""))
 	refs := make(map[string]interface{})
 	refs["customer_id"] = 34
@@ -208,11 +217,8 @@ func TestExtractWriteDataError(t *testing.T) {
 		References: refs,
 	}
 
-	var handledError error
-	_ = extractor.Extract(
-		conf, DummyReader{}, []writer.FileWriter{WriteDataErrorDummyWriter{}}, func(err error) { handledError = err },
-	)
-	assert.NotNil(t, handledError)
+	_ = extractor.Extract(conf, DummyReader{}, []writer.FileWriter{WriteDataErrorDummyWriter{}})
+	assert.Contains(t, handledError.Error(), "write data panic")
 }
 
 func TestExtract(t *testing.T) {
@@ -222,10 +228,10 @@ func TestExtract(t *testing.T) {
 
 	err := extractor.Extract(
 		extractor.Conf{
-			SchemaPath: "../test/unit/extractor_test.yml",
-			References: refs,
-			Outputs:    []extractor.OutputConf{{Type: "console"}},
-		}, DummyReader{}, nil, func(err error) {},
+			SchemaPath:  "../test/unit/extractor_test.yml",
+			References:  refs,
+			OutputTypes: []string{"console"},
+		}, DummyReader{}, nil,
 	)
 
 	assert.Nil(t, err)

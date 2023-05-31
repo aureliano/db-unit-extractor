@@ -13,7 +13,7 @@ func TestNewReader(t *testing.T) {
 }
 
 func TestNewOracleReader(t *testing.T) {
-	r, err := reader.NewReader(&reader.DataSource{DBMSName: "Oracle"})
+	r, err := reader.NewReader(&reader.DataSource{DSN: "oracle://usr:pwd@localhost:1521/dbname"})
 	assert.Nil(t, err)
 	assert.IsType(t, reader.OracleReader{}, r)
 }
