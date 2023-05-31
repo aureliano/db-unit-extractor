@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"runtime"
 
 	"github.com/aureliano/caravela"
@@ -60,4 +61,11 @@ func printVersion(cmd *cobra.Command) {
 	_, _ = w.Write([]byte(fmt.Sprintf("Version:       %s\n", version)))
 	_, _ = w.Write([]byte(fmt.Sprintf("Go version:    %s\n", goVersion)))
 	_, _ = w.Write([]byte(fmt.Sprintf("OS/Arch:       %s/%s\n", osName, osArch)))
+}
+
+func shutdown(cmd *cobra.Command, msg string, params ...any) {
+	msgBytes := []byte(fmt.Sprintf(msg, params...))
+	_, _ = cmd.OutOrStdout().Write(msgBytes)
+
+	os.Exit(1)
 }

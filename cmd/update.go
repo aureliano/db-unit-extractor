@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/aureliano/caravela"
 	"github.com/aureliano/caravela/provider"
@@ -35,8 +34,7 @@ func update(cmd *cobra.Command, upcmd func(c caravela.Conf) (*provider.Release, 
 	w := cmd.OutOrStdout()
 
 	if err != nil {
-		_, _ = w.Write([]byte(fmt.Sprintf("Program update failed! %s\n", err)))
-		os.Exit(1)
+		shutdown(cmd, "Program update failed! %s\n", err.Error())
 	}
 
 	_, _ = w.Write([]byte(fmt.Sprintf("Release %s of %s.\n\n", release.Name,
