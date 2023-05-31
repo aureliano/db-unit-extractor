@@ -17,3 +17,9 @@ func TestNewWriterConsole(t *testing.T) {
 	assert.Nil(t, err)
 	assert.IsType(t, writer.ConsoleWriter{}, w)
 }
+
+func TestNewWriterXML(t *testing.T) {
+	w, err := writer.NewWriter(writer.FileConf{Type: "xml"})
+	assert.Nil(t, err)
+	assert.IsType(t, writer.XMLWriter{}, w)
+}

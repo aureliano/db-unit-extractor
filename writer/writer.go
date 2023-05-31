@@ -20,9 +20,12 @@ type FileWriter interface {
 }
 
 func NewWriter(conf FileConf) (FileWriter, error) {
-	if conf.Type == "console" {
+	switch {
+	case conf.Type == "console":
 		return ConsoleWriter{}, nil
+	case conf.Type == "xml":
+		return XMLWriter{}, nil
+	default:
+		return nil, fmt.Errorf("%w: %s", ErrUnsupportedFileWriter, conf.Type)
 	}
-
-	return nil, fmt.Errorf("%w: %s", ErrUnsupportedFileWriter, conf.Type)
 }
