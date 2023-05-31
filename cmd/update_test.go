@@ -28,8 +28,8 @@ func TestNewUpdateCommandError(t *testing.T) {
 
 	c := cmd.NewUpdateCommand(upcmd)
 	assert.Equal(t, "update", c.Use)
-	assert.Equal(t, "Updates this program", c.Short)
-	assert.Equal(t, "Checks for a newer version of this program and updates it if necessary.", c.Long)
+	assert.Equal(t, "Update this program", c.Short)
+	assert.Equal(t, "Check for a newer version of this program and updates it if necessary.", c.Long)
 
 	output := new(bytes.Buffer)
 	c.SetArgs([]string{"update"})
@@ -55,8 +55,8 @@ func TestNewUpdateCommand(t *testing.T) {
 
 	c := cmd.NewUpdateCommand(upcmd)
 	assert.Equal(t, "update", c.Use)
-	assert.Equal(t, "Updates this program", c.Short)
-	assert.Equal(t, "Checks for a newer version of this program and updates it if necessary.", c.Long)
+	assert.Equal(t, "Update this program", c.Short)
+	assert.Equal(t, "Check for a newer version of this program and updates it if necessary.", c.Long)
 
 	output := new(bytes.Buffer)
 	c.SetArgs([]string{"update"})

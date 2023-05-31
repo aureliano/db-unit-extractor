@@ -211,8 +211,8 @@ func TestNewExtractCommand(t *testing.T) {
 
 	c := cmd.NewExtractCommand()
 	assert.Equal(t, "extract", c.Use)
-	assert.Equal(t, "Extracts data-set from database", c.Short)
-	assert.Equal(t, "Extracts data-set from a database to any supported file.", c.Long)
+	assert.Equal(t, "Extract data-set from database", c.Short)
+	assert.Equal(t, "Extract data-set from a database to any supported file.", c.Long)
 
 	exampleLines := strings.Split(c.Example, "\n")
 	assert.Equal(t, "# Extract data-set from PostgreSQL and write to the console.", strings.TrimLeft(exampleLines[0], " "))
