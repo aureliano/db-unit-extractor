@@ -118,7 +118,6 @@ func validateConf(conf extractor.Conf) error {
 	}
 
 	info, err = os.Stat(conf.OutputDir)
-	info.Mode().IsDir()
 	if !(os.IsNotExist(err) || info.IsDir()) {
 		return fmt.Errorf("%s is not a directory", conf.OutputDir)
 	}
