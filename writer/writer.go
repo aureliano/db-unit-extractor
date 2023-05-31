@@ -8,6 +8,7 @@ import (
 type FileConf struct {
 	Type      string
 	Formatted bool
+	Directory string
 }
 
 var ErrUnsupportedFileWriter = errors.New("unsupported file type")

@@ -22,6 +22,7 @@ type Conf struct {
 	MaxIdleConn     int
 	OutputTypes     []string
 	FormattedOutput bool
+	OutputDir       string
 	References      map[string]interface{}
 }
 
