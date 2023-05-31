@@ -3,6 +3,7 @@ package extractor
 import (
 	"errors"
 	"fmt"
+	"os"
 	"regexp"
 
 	"github.com/aureliano/db-unit-extractor/reader"
@@ -32,7 +33,7 @@ var (
 	filterValueRegExp = regexp.MustCompile(`^\$\{([^\}]+)\}$`)
 )
 
-func Extract(conf Conf, db reader.DBReader, writers []writer.FileWriter, panicHandler func(error)) error {
+func Extract(conf Conf, db reader.DBReader, writers []writer.FileWriter) error {
 	schema, err := schema.DigestSchema(conf.SchemaPath)
 	if err != nil {
 		return err
@@ -67,11 +68,11 @@ func Extract(conf Conf, db reader.DBReader, writers []writer.FileWriter, panicHa
 		schema.Refs[k] = v
 	}
 
-	return extract(schema, db, writers, panicHandler)
+	return extract(schema, db, writers)
 }
 
-func extract(model schema.Model, db reader.DBReader, writers []writer.FileWriter, panicHandler func(error)) error {
-	cw := launchWriters(writers, panicHandler)
+func extract(model schema.Model, db reader.DBReader, writers []writer.FileWriter) error {
+	cw := launchWriters(writers)
 
 	if err := launchReaders(model, db, cw); err != nil {
 		return err
@@ -84,12 +85,12 @@ func extract(model schema.Model, db reader.DBReader, writers []writer.FileWriter
 	return nil
 }
 
-func launchWriters(writers []writer.FileWriter, panicHandler func(error)) []chan dbResponse {
+func launchWriters(writers []writer.FileWriter) []chan dbResponse {
 	chanWriters := make([]chan dbResponse, len(writers))
 
 	for i, w := range writers {
 		chanWriters[i] = make(chan dbResponse)
-		go writeData(chanWriters[i], w, panicHandler)
+		go writeData(chanWriters[i], w)
 	}
 
 	return chanWriters
@@ -152,13 +153,14 @@ func fetchData(c chan dbResponse, table schema.Table,
 	}
 }
 
-func writeData(c chan dbResponse, w writer.FileWriter, panicHandler func(error)) {
+func writeData(c chan dbResponse, w writer.FileWriter) {
 	w.WriteHeader()
 	for res := range c {
 		if res.data != nil {
 			err := w.Write(res.table, res.data)
 			if err != nil {
-				panicHandler(fmt.Errorf("%w: %w", ErrExtractor, err))
+				fmt.Fprintf(os.Stdout, "%s: %s", ErrExtractor.Error(), err.Error())
+				os.Exit(1)
 			}
 		} else {
 			w.WriteFooter()
