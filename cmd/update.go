@@ -11,8 +11,8 @@ import (
 func NewUpdateCommand(upcmd func(c caravela.Conf) (*provider.Release, error)) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update",
-		Short: "Updates this program",
-		Long:  "Checks for a newer version of this program and updates it if necessary.",
+		Short: "Update this program",
+		Long:  "Check for a newer version of this program and updates it if necessary.",
 		Run: func(cmd *cobra.Command, args []string) {
 			update(cmd, upcmd)
 		},

@@ -46,6 +46,7 @@ func NewRootCommand() *cobra.Command {
 
 	cmd.CompletionOptions.DisableDefaultCmd = true
 	cmd.AddCommand(NewUpdateCommand(caravela.Update))
+	cmd.AddCommand(NewExtractCommand())
 
 	cmd.Flags().BoolP("version", "v", false, fmt.Sprintf("Print %s version", project.name))
 
