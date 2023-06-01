@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 type XMLWriter struct {
@@ -13,7 +14,7 @@ type XMLWriter struct {
 	file      *os.File
 }
 
-func (w XMLWriter) WriteHeader() error {
+func (w *XMLWriter) WriteHeader() error {
 	err := os.MkdirAll(w.Directory, os.ModePerm)
 	if err != nil {
 		return err
@@ -25,13 +26,41 @@ func (w XMLWriter) WriteHeader() error {
 		return err
 	}
 
-	return nil
+	_, err = w.file.Write([]byte("<?xml version=\"1.0\" encoding=\"UTF-8\"?><dataset>"))
+	if err != nil {
+		_ = w.file.Close()
+	}
+
+	return err
 }
 
-func (XMLWriter) WriteFooter() error {
-	return nil
+func (w *XMLWriter) WriteFooter() error {
+	_, err := w.file.Write([]byte("</dataset>"))
+	if err != nil {
+		_ = w.file.Close()
+		return err
+	}
+
+	return w.file.Close()
 }
 
-func (XMLWriter) Write(table string, rows []map[string]interface{}) error {
-	return nil
+func (w *XMLWriter) Write(table string, rows []map[string]interface{}) error {
+	sb := strings.Builder{}
+
+	sb.WriteString(fmt.Sprintf("<%s", table))
+
+	for _, row := range rows {
+		for name, value := range row {
+			sb.WriteString(fmt.Sprintf(" %s=\"%v\"", name, value))
+		}
+	}
+
+	sb.WriteString("/>")
+	_, err := w.file.Write([]byte(sb.String()))
+
+	if err != nil {
+		_ = w.file.Close()
+	}
+
+	return err
 }
