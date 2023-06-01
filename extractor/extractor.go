@@ -164,9 +164,7 @@ func writeData(c chan dbResponse, w writer.FileWriter) {
 				shutdown(err)
 			}
 		} else {
-			if err := w.WriteFooter(); err != nil {
-				shutdown(err)
-			}
+			_ = w.WriteFooter()
 		}
 	}
 }
@@ -216,6 +214,6 @@ func resolveTableFilters(table schema.Table, references map[string]interface{}) 
 }
 
 func shutdown(err error) {
-	fmt.Fprintf(os.Stdout, "%s: %s", ErrExtractor.Error(), err.Error())
+	fmt.Fprintf(os.Stdout, "%s: %s\n", ErrExtractor.Error(), err.Error())
 	os.Exit(1)
 }
