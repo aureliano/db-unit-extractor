@@ -154,16 +154,19 @@ func fetchData(c chan dbResponse, table schema.Table,
 }
 
 func writeData(c chan dbResponse, w writer.FileWriter) {
-	w.WriteHeader()
+	if err := w.WriteHeader(); err != nil {
+		shutdown(err)
+	}
+
 	for res := range c {
 		if res.data != nil {
-			err := w.Write(res.table, res.data)
-			if err != nil {
-				fmt.Fprintf(os.Stdout, "%s: %s", ErrExtractor.Error(), err.Error())
-				os.Exit(1)
+			if err := w.Write(res.table, res.data); err != nil {
+				shutdown(err)
 			}
 		} else {
-			w.WriteFooter()
+			if err := w.WriteFooter(); err != nil {
+				shutdown(err)
+			}
 		}
 	}
 }
@@ -210,4 +213,9 @@ func resolveTableFilters(table schema.Table, references map[string]interface{}) 
 	}
 
 	return filters, nil
+}
+
+func shutdown(err error) {
+	fmt.Fprintf(os.Stdout, "%s: %s", ErrExtractor.Error(), err.Error())
+	os.Exit(1)
 }

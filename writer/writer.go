@@ -15,8 +15,8 @@ type FileConf struct {
 var ErrUnsupportedFileWriter = errors.New("unsupported file type")
 
 type FileWriter interface {
-	WriteHeader()
-	WriteFooter()
+	WriteHeader() error
+	WriteFooter() error
 	Write(table string, rows []map[string]interface{}) error
 }
 

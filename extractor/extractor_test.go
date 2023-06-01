@@ -112,13 +112,13 @@ func (FetchDataErrorDummyReader) FetchData(_ string, _ []reader.DBColumn, _ []sc
 	return nil, fmt.Errorf("fetch data error")
 }
 
-func (DummyWriter) WriteHeader() {}
+func (DummyWriter) WriteHeader() error { return nil }
 
-func (WriteDataErrorDummyWriter) WriteHeader() {}
+func (WriteDataErrorDummyWriter) WriteHeader() error { return nil }
 
-func (DummyWriter) WriteFooter() {}
+func (DummyWriter) WriteFooter() error { return nil }
 
-func (WriteDataErrorDummyWriter) WriteFooter() {}
+func (WriteDataErrorDummyWriter) WriteFooter() error { return nil }
 
 func (DummyWriter) Write(_ string, _ []map[string]interface{}) error {
 	return nil

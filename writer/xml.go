@@ -2,12 +2,12 @@ package writer
 
 type XMLWriter struct{}
 
-func (XMLWriter) WriteHeader() {
-	_ = 0
+func (XMLWriter) WriteHeader() error {
+	return nil
 }
 
-func (XMLWriter) WriteFooter() {
-	_ = 0
+func (XMLWriter) WriteFooter() error {
+	return nil
 }
 
 func (XMLWriter) Write(table string, rows []map[string]interface{}) error {
