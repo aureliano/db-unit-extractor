@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"bou.ke/monkey"
+	"github.com/agiledragon/gomonkey/v2"
 	"github.com/aureliano/db-unit-extractor/dataconv"
 	"github.com/aureliano/db-unit-extractor/extractor"
 	"github.com/aureliano/db-unit-extractor/reader"
@@ -202,11 +202,10 @@ func TestExtractFetchDataError(t *testing.T) {
 
 func TestExtractWriteDataError(t *testing.T) {
 	var handledError error
-	fakeExit := func(int) {
+	patches := gomonkey.ApplyFunc(os.Exit, func(int) {
 		handledError = fmt.Errorf("write data panic")
-	}
-	patchExit := monkey.Patch(os.Exit, fakeExit)
-	defer patchExit.Unpatch()
+	})
+	defer patches.Reset()
 
 	dataconv.RegisterConverter("conv_date_time", DummyConverter(""))
 	refs := make(map[string]interface{})
