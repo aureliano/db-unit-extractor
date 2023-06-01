@@ -29,3 +29,7 @@ func NewWriter(conf FileConf) (FileWriter, error) {
 		return nil, fmt.Errorf("%w: %s", ErrUnsupportedFileWriter, conf.Type)
 	}
 }
+
+func SupportedTypes() []string {
+	return []string{"console", "xml"}
+}

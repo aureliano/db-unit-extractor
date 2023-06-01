@@ -3,8 +3,10 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/aureliano/db-unit-extractor/extractor"
+	"github.com/aureliano/db-unit-extractor/writer"
 	"github.com/spf13/cobra"
 
 	"regexp"
@@ -16,9 +18,8 @@ const (
 )
 
 var (
-	refRegExp      = regexp.MustCompile(`^(\w+)\s*=\s*(.+)$`)
-	dsnRegExp      = regexp.MustCompile(`^(\w+)://(\w+):(\w+)@([\w.]+):(\d+)/(\w+)\??(\w+=\w+)*$`)
-	supportedTypes = []string{"console"}
+	refRegExp = regexp.MustCompile(`^(\w+)\s*=\s*(.+)$`)
+	dsnRegExp = regexp.MustCompile(`^(\w+)://(\w+):(\w+)@([\w.]+):(\d+)/(\w+)\??(\w+=\w+)*$`)
 )
 
 func NewExtractCommand() *cobra.Command {
@@ -42,7 +43,7 @@ func NewExtractCommand() *cobra.Command {
 		"Data source name (aka connection string: <driver>://<username>:<password>@<host>:<port>/<database>).")
 	cmd.Flags().Int("max-open-conn", defaultMaxOpenConn, "Set the maximum number of concurrently open connections")
 	cmd.Flags().Int("max-idle-conn", defaultMaxIdleConn, "Set the maximum number of concurrently idle connections")
-	cmd.Flags().StringArrayP("output-type", "t", supportedTypes,
+	cmd.Flags().StringArrayP("output-type", "t", writer.SupportedTypes(),
 		"Extracted data output format type. Expected: console")
 	cmd.Flags().BoolP("formatted-output", "f", false, "Whether the output should be formatted.")
 	cmd.Flags().StringP("directory", "d", ".", "Output directory.")
@@ -126,8 +127,8 @@ func validateConf(conf extractor.Conf) error {
 }
 
 func supportedType(tp string) bool {
-	for _, st := range supportedTypes {
-		if tp == st {
+	for _, st := range writer.SupportedTypes() {
+		if strings.EqualFold(tp, st) {
 			return true
 		}
 	}
