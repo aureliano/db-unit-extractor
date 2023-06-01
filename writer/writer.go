@@ -23,9 +23,9 @@ type FileWriter interface {
 func NewWriter(conf FileConf) (FileWriter, error) {
 	switch {
 	case strings.EqualFold(conf.Type, "console"):
-		return ConsoleWriter{}, nil
+		return &ConsoleWriter{}, nil
 	case strings.EqualFold(conf.Type, "xml"):
-		return XMLWriter{}, nil
+		return &XMLWriter{}, nil
 	default:
 		return nil, fmt.Errorf("%w: %s", ErrUnsupportedFileWriter, conf.Type)
 	}

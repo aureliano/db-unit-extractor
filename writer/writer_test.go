@@ -15,13 +15,13 @@ func TestNewWriter(t *testing.T) {
 func TestNewWriterConsole(t *testing.T) {
 	w, err := writer.NewWriter(writer.FileConf{Type: "console"})
 	assert.Nil(t, err)
-	assert.IsType(t, writer.ConsoleWriter{}, w)
+	assert.IsType(t, &writer.ConsoleWriter{}, w)
 }
 
 func TestNewWriterXML(t *testing.T) {
 	w, err := writer.NewWriter(writer.FileConf{Type: "xml"})
 	assert.Nil(t, err)
-	assert.IsType(t, writer.XMLWriter{}, w)
+	assert.IsType(t, &writer.XMLWriter{}, w)
 }
 
 func TestSupportedTypes(t *testing.T) {

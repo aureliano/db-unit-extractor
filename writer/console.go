@@ -7,15 +7,15 @@ import (
 
 type ConsoleWriter struct{}
 
-func (ConsoleWriter) WriteHeader() error {
+func (*ConsoleWriter) WriteHeader() error {
 	return nil
 }
 
-func (ConsoleWriter) WriteFooter() error {
+func (*ConsoleWriter) WriteFooter() error {
 	return nil
 }
 
-func (ConsoleWriter) Write(table string, rows []map[string]interface{}) error {
+func (*ConsoleWriter) Write(table string, rows []map[string]interface{}) error {
 	fmt.Fprintln(os.Stdout, " >", table)
 
 	for _, row := range rows {
