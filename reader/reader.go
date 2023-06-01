@@ -30,7 +30,7 @@ type DBReader interface {
 }
 
 func NewReader(ds *DataSource) (DBReader, error) {
-	if strings.ToLower(ds.DriverName()) == "oracle" {
+	if strings.EqualFold(ds.DriverName(), "oracle") {
 		return OracleReader{db: ds.DB}, nil
 	}
 

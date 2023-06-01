@@ -3,6 +3,7 @@ package writer
 import (
 	"errors"
 	"fmt"
+	"strings"
 )
 
 type FileConf struct {
@@ -21,9 +22,9 @@ type FileWriter interface {
 
 func NewWriter(conf FileConf) (FileWriter, error) {
 	switch {
-	case conf.Type == "console":
+	case strings.EqualFold(conf.Type, "console"):
 		return ConsoleWriter{}, nil
-	case conf.Type == "xml":
+	case strings.EqualFold(conf.Type, "xml"):
 		return XMLWriter{}, nil
 	default:
 		return nil, fmt.Errorf("%w: %s", ErrUnsupportedFileWriter, conf.Type)
