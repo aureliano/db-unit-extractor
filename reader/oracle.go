@@ -21,8 +21,7 @@ func (r OracleReader) FetchColumnsMetadata(table schema.Table) ([]DBColumn, erro
 	}
 	defer rows.Close()
 
-	records := make([]DBColumn, len(table.SelectColumns()))
-	i := 0
+	records := make([]DBColumn, 0, len(table.SelectColumns()))
 
 	for rows.Next() {
 		rec := DBColumn{}
@@ -38,12 +37,13 @@ func (r OracleReader) FetchColumnsMetadata(table schema.Table) ([]DBColumn, erro
 		rec.DecimalSize.Scale = scale.Int64
 
 		rec.Nullable = strToBool(nullable)
-		records[i] = rec
-		i++
+		records = append(records, rec)
 	}
 
 	if rows.Err() != nil {
 		return nil, rows.Err()
+	} else if len(records) == 0 {
+		return nil, fmt.Errorf("no metadata found in table %s (lack of permission?)", table.Name)
 	}
 
 	return records, nil
@@ -85,6 +85,11 @@ func buildOracleSQLQueryColumnsMetadata(table schema.Table) string {
 	builder.WriteString(fmt.Sprintf(" TABLE_NAME = '%s'", strings.ToUpper(table.Name)))
 	builder.WriteString(" AND VIRTUAL_COLUMN = 'NO'")
 	builder.WriteString(" AND COLUMN_NAME NOT LIKE '%$%'")
+
+	if len(table.Columns) == 0 && len(table.Ignore) == 0 {
+		return builder.String()
+	}
+
 	builder.WriteString(" AND COLUMN_NAME")
 
 	if len(table.Ignore) > 0 {

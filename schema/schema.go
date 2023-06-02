@@ -80,17 +80,22 @@ func DigestSchema(fpath string) (Model, error) {
 
 func (t Table) SelectColumns() []string {
 	var columns []string
+	const wildCardFrom = 1
 
-	if len(t.Columns) > 0 {
+	switch {
+	case len(t.Columns) > 0:
 		columns = make([]string, len(t.Columns))
 		for i, c := range t.Columns {
 			columns[i] = string(c)
 		}
-	} else {
+	case len(t.Ignore) > 0:
 		columns = make([]string, len(t.Ignore))
 		for i, c := range t.Ignore {
 			columns[i] = string(c)
 		}
+	default:
+		columns = make([]string, wildCardFrom)
+		columns[0] = "*"
 	}
 
 	return columns
