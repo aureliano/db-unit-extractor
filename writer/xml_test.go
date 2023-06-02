@@ -69,6 +69,40 @@ func TestWriteUnformatted(t *testing.T) {
 	w := writer.XMLWriter{
 		Formatted: false,
 		Directory: dir,
+		Name:      "test-write-unformatted",
+	}
+
+	assert.Nil(t, w.WriteHeader())
+
+	row := make(map[string]interface{})
+	row["id"] = 1
+	row["name"] = "shirt"
+	row["description"] = "black shirt"
+	row["price"] = 14.50
+
+	rows := make([]map[string]interface{}, 2)
+	rows[0] = row
+
+	assert.Nil(t, w.Write("products", rows))
+
+	assert.Nil(t, w.WriteFooter())
+
+	bytes, _ := os.ReadFile(filepath.Join(dir, fmt.Sprintf("%s.xml", w.Name)))
+	xml := string(bytes)
+
+	assert.Contains(t, xml, "<?xml version=\"1.0\" encoding=\"UTF-8\"?><dataset><products ")
+	assert.Contains(t, xml, "id=\"1\"")
+	assert.Contains(t, xml, "name=\"shirt\"")
+	assert.Contains(t, xml, "description=\"black shirt\"")
+	assert.Contains(t, xml, "price=\"14.5\"")
+	assert.Contains(t, xml, "/></dataset>")
+}
+
+func TestWriteFormatted(t *testing.T) {
+	dir := filepath.Join(os.TempDir(), "db-unit-extractor", "writer")
+	w := writer.XMLWriter{
+		Formatted: true,
+		Directory: dir,
 		Name:      "test-write-formatted",
 	}
 
@@ -86,4 +120,14 @@ func TestWriteUnformatted(t *testing.T) {
 	assert.Nil(t, w.Write("products", rows))
 
 	assert.Nil(t, w.WriteFooter())
+
+	bytes, _ := os.ReadFile(filepath.Join(dir, fmt.Sprintf("%s.xml", w.Name)))
+	xml := string(bytes)
+
+	assert.Contains(t, xml, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<dataset>\n  <products\n")
+	assert.Contains(t, xml, "    id=\"1\"")
+	assert.Contains(t, xml, "    name=\"shirt\"")
+	assert.Contains(t, xml, "    description=\"black shirt\"")
+	assert.Contains(t, xml, "    price=\"14.5\"")
+	assert.Contains(t, xml, "/>\n</dataset>")
 }
