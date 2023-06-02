@@ -72,7 +72,7 @@ func Extract(conf Conf, db reader.DBReader, writers []writer.FileWriter) error {
 	}
 
 	for k, v := range conf.References {
-		schema.Refs[k] = v
+		schema.Refs[strings.ToLower(k)] = v
 	}
 
 	return extract(schema, db, writers)
@@ -179,7 +179,7 @@ func writeData(c chan dbResponse, w writer.FileWriter) {
 func updateReferences(model schema.Model, response dbResponse) {
 	for _, record := range response.data {
 		for k, v := range record {
-			key := fmt.Sprintf("%s.%s", response.table, k)
+			key := strings.ToLower(fmt.Sprintf("%s.%s", response.table, k))
 			if _, exist := model.Refs[key]; exist {
 				model.Refs[key] = v
 			}
@@ -202,7 +202,7 @@ func resolveTableFilters(table schema.Table, references map[string]interface{}) 
 
 		matches := filterValueRegExp.FindAllStringSubmatch(filter.Value, -1)
 		if matches != nil {
-			key := matches[0][1]
+			key := strings.ToLower(matches[0][1])
 
 			if v, exists := references[key]; exists {
 				value = v

@@ -112,7 +112,7 @@ func fetchReferences(s Model) map[string]interface{} {
 		for _, filter := range table.Filters {
 			matches := filterReferenceRegExp.FindAllStringSubmatch(filter.Value, -1)
 			if matches != nil {
-				key := fmt.Sprintf("%s.%s", matches[0][1], matches[0][2])
+				key := strings.ToLower(fmt.Sprintf("%s.%s", matches[0][1], matches[0][2]))
 				refs[key] = nil
 			}
 		}
