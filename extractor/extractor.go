@@ -85,8 +85,9 @@ func extract(model schema.Model, db reader.DBReader, writers []writer.FileWriter
 		return err
 	}
 
-	for _, w := range cw {
-		w <- dbResponse{}
+	for i := 0; i < len(cw); i++ {
+		cw[i] <- dbResponse{}
+		writers[i].WriteFooter()
 	}
 
 	return nil
@@ -170,8 +171,6 @@ func writeData(c chan dbResponse, w writer.FileWriter) {
 			if err := w.Write(res.table, res.data); err != nil {
 				shutdown(err)
 			}
-		} else {
-			_ = w.WriteFooter()
 		}
 	}
 }
