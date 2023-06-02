@@ -77,18 +77,12 @@ func formattedXMLRecord(table string, rows []map[string]interface{}) []byte {
 	sb := strings.Builder{}
 
 	for _, row := range rows {
-		sb.WriteString(fmt.Sprintf("  <%s\n", table))
+		sb.WriteString(fmt.Sprintf("  <%s", table))
 
-		li := len(row) - 1
-		i := 0
 		for name, value := range row {
 			if value != nil {
-				sb.WriteString(fmt.Sprintf("    %s=\"%v\"", name, value))
-				if i < li {
-					sb.WriteString("\n")
-				}
+				sb.WriteString(fmt.Sprintf("\n    %s=\"%v\"", name, value))
 			}
-			i++
 		}
 		sb.WriteString("/>\n")
 	}
