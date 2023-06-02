@@ -20,7 +20,9 @@ func (*ConsoleWriter) Write(table string, rows []map[string]interface{}) error {
 
 	for _, row := range rows {
 		for name, value := range row {
-			fmt.Fprintf(os.Stdout, "   %s: %v\n", name, value)
+			if value != nil {
+				fmt.Fprintf(os.Stdout, "   %s: %v\n", name, value)
+			}
 		}
 	}
 

@@ -70,27 +70,43 @@ func fileFooter(formatted bool) []byte {
 }
 
 func fileBody(formatted bool, table string, rows []map[string]interface{}) []byte {
-	sb := strings.Builder{}
-
 	if formatted {
-		sb.WriteString(fmt.Sprintf("  <%s\n", table))
+		return formattedXMLRecord(table, rows)
+	}
 
-		for _, row := range rows {
-			li := len(row) - 1
-			i := 0
-			for name, value := range row {
+	return unformattedXMLRecord(table, rows)
+}
+
+func formattedXMLRecord(table string, rows []map[string]interface{}) []byte {
+	sb := strings.Builder{}
+	sb.WriteString(fmt.Sprintf("  <%s\n", table))
+
+	for _, row := range rows {
+		li := len(row) - 1
+		i := 0
+		for name, value := range row {
+			if value != nil {
 				sb.WriteString(fmt.Sprintf("    %s=\"%v\"", name, value))
 				if i < li {
 					sb.WriteString("\n")
 				}
-				i++
 			}
+			i++
 		}
-	} else {
-		sb.WriteString(fmt.Sprintf("<%s", table))
+	}
 
-		for _, row := range rows {
-			for name, value := range row {
+	sb.WriteString("/>")
+
+	return []byte(sb.String())
+}
+
+func unformattedXMLRecord(table string, rows []map[string]interface{}) []byte {
+	sb := strings.Builder{}
+	sb.WriteString(fmt.Sprintf("<%s", table))
+
+	for _, row := range rows {
+		for name, value := range row {
+			if value != nil {
 				sb.WriteString(fmt.Sprintf(" %s=\"%v\"", name, value))
 			}
 		}
