@@ -29,10 +29,19 @@ type DBReader interface {
 		filters [][]interface{}) ([]map[string]interface{}, error)
 }
 
-func NewReader(ds *DataSource) (DBReader, error) {
+func NewReader(ds DBConnector) (DBReader, error) {
 	if strings.EqualFold(ds.DriverName(), "oracle") {
-		return OracleReader{db: ds.DB}, nil
+		return newOracle(ds)
 	}
 
 	return nil, fmt.Errorf("%w: %s", ErrUnsupportedDBReader, ds.DriverName())
+}
+
+func newOracle(ds DBConnector) (DBReader, error) {
+	db, err := ds.Connect(MaxDBTimeout)
+	if err != nil {
+		return nil, err
+	}
+
+	return OracleReader{db: db}, nil
 }

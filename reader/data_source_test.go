@@ -20,12 +20,12 @@ func TestConnect(t *testing.T) {
 	ds := reader.NewDataSource()
 	ds.DSN = "sqlite3://file:test.db?cache=shared&mode=memory"
 
-	err := ds.Connect(reader.MaxDBTimeout)
+	_, err := ds.Connect(reader.MaxDBTimeout)
 	assert.Nil(t, err)
 
 	assert.True(t, ds.IsConnected())
 
-	err = ds.Connect(reader.MaxDBTimeout)
+	_, err = ds.Connect(reader.MaxDBTimeout)
 	assert.Nil(t, err)
 }
 
@@ -33,7 +33,7 @@ func TestConnectOpenError(t *testing.T) {
 	ds := reader.NewDataSource()
 	ds.DSN = "test://localhost"
 
-	err := ds.Connect(reader.MaxDBTimeout)
+	_, err := ds.Connect(reader.MaxDBTimeout)
 	assert.Contains(t, err.Error(), "sql: unknown driver \"test\" (forgotten import?)")
 
 	assert.False(t, ds.IsConnected())
@@ -43,7 +43,7 @@ func TestConnectPingError(t *testing.T) {
 	ds := reader.NewDataSource()
 	ds.DSN = "sqlite3://file:test.db?cache=shared&mode=memory"
 
-	err := ds.Connect(0)
+	_, err := ds.Connect(0)
 	assert.Contains(t, err.Error(), "context deadline exceeded")
 
 	assert.False(t, ds.IsConnected())
