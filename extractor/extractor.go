@@ -4,7 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"regexp"
+	"strings"
 
 	"github.com/aureliano/db-unit-extractor/reader"
 	"github.com/aureliano/db-unit-extractor/schema"
@@ -55,7 +57,12 @@ func Extract(conf Conf, db reader.DBReader, writers []writer.FileWriter) error {
 		writers = make([]writer.FileWriter, len(conf.OutputTypes))
 
 		for i, outputTp := range conf.OutputTypes {
-			fc := writer.FileConf{Type: outputTp, Formatted: conf.FormattedOutput}
+			fname := filepath.Base(conf.SchemaPath)
+			fname = fname[:strings.LastIndex(fname, ".")]
+
+			fc := writer.FileConf{
+				Type: outputTp, Formatted: conf.FormattedOutput, Directory: conf.OutputDir, Name: fname,
+			}
 			fw, e := writer.NewWriter(fc)
 			if e != nil {
 				return e

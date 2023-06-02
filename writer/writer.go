@@ -10,6 +10,7 @@ type FileConf struct {
 	Type      string
 	Formatted bool
 	Directory string
+	Name      string
 }
 
 var ErrUnsupportedFileWriter = errors.New("unsupported file type")
