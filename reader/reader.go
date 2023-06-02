@@ -39,9 +39,5 @@ func NewReader(ds DBConnector) (DBReader, error) {
 
 func newOracle(ds DBConnector) (DBReader, error) {
 	db, err := ds.Connect(MaxDBTimeout)
-	if err != nil {
-		return nil, err
-	}
-
-	return OracleReader{db: db}, nil
+	return OracleReader{db: db}, err
 }
