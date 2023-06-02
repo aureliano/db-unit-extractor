@@ -11,6 +11,10 @@ test:
 		./...
 	go tool cover -func cover.out
 
+.PHONY: coverage
+coverage:
+	go tool cover -html=cover.out
+
 .PHONY: code-lint
 code-lint:
 	golangci-lint run
