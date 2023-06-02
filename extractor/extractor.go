@@ -87,7 +87,7 @@ func extract(model schema.Model, db reader.DBReader, writers []writer.FileWriter
 
 	for i := 0; i < len(cw); i++ {
 		cw[i] <- dbResponse{}
-		writers[i].WriteFooter()
+		_ = writers[i].WriteFooter()
 	}
 
 	return nil
