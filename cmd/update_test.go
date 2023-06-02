@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"bou.ke/monkey"
+	"github.com/agiledragon/gomonkey/v2"
 	"github.com/aureliano/caravela"
 	"github.com/aureliano/caravela/provider"
 	"github.com/aureliano/db-unit-extractor/cmd"
@@ -16,11 +16,10 @@ import (
 )
 
 func TestNewUpdateCommandError(t *testing.T) {
-	fakeExit := func(int) {
+	patches := gomonkey.ApplyFunc(os.Exit, func(int) {
 		panic("os.Exit called")
-	}
-	patch := monkey.Patch(os.Exit, fakeExit)
-	defer patch.Unpatch()
+	})
+	defer patches.Reset()
 
 	upcmd := func(c caravela.Conf) (*provider.Release, error) {
 		return nil, fmt.Errorf("update error")

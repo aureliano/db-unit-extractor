@@ -4,7 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"regexp"
+	"strings"
 
 	"github.com/aureliano/db-unit-extractor/reader"
 	"github.com/aureliano/db-unit-extractor/schema"
@@ -55,7 +57,12 @@ func Extract(conf Conf, db reader.DBReader, writers []writer.FileWriter) error {
 		writers = make([]writer.FileWriter, len(conf.OutputTypes))
 
 		for i, outputTp := range conf.OutputTypes {
-			fc := writer.FileConf{Type: outputTp, Formatted: conf.FormattedOutput}
+			fname := filepath.Base(conf.SchemaPath)
+			fname = fname[:strings.LastIndex(fname, ".")]
+
+			fc := writer.FileConf{
+				Type: outputTp, Formatted: conf.FormattedOutput, Directory: conf.OutputDir, Name: fname,
+			}
 			fw, e := writer.NewWriter(fc)
 			if e != nil {
 				return e
@@ -154,16 +161,17 @@ func fetchData(c chan dbResponse, table schema.Table,
 }
 
 func writeData(c chan dbResponse, w writer.FileWriter) {
-	w.WriteHeader()
+	if err := w.WriteHeader(); err != nil {
+		shutdown(err)
+	}
+
 	for res := range c {
 		if res.data != nil {
-			err := w.Write(res.table, res.data)
-			if err != nil {
-				fmt.Fprintf(os.Stdout, "%s: %s", ErrExtractor.Error(), err.Error())
-				os.Exit(1)
+			if err := w.Write(res.table, res.data); err != nil {
+				shutdown(err)
 			}
 		} else {
-			w.WriteFooter()
+			_ = w.WriteFooter()
 		}
 	}
 }
@@ -210,4 +218,9 @@ func resolveTableFilters(table schema.Table, references map[string]interface{}) 
 	}
 
 	return filters, nil
+}
+
+func shutdown(err error) {
+	fmt.Fprintf(os.Stdout, "%s: %s\n", ErrExtractor.Error(), err.Error())
+	os.Exit(1)
 }

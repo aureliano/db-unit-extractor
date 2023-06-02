@@ -3,9 +3,10 @@ package extractor_test
 import (
 	"fmt"
 	"os"
+	"sync"
 	"testing"
 
-	"bou.ke/monkey"
+	"github.com/agiledragon/gomonkey/v2"
 	"github.com/aureliano/db-unit-extractor/dataconv"
 	"github.com/aureliano/db-unit-extractor/extractor"
 	"github.com/aureliano/db-unit-extractor/reader"
@@ -28,6 +29,8 @@ type FetchDataErrorDummyReader struct{}
 type DummyWriter struct{}
 
 type WriteDataErrorDummyWriter struct{}
+
+type WriteDataHeaderErrorDummyWriter struct{}
 
 func (DummyReader) FetchColumnsMetadata(table schema.Table) ([]reader.DBColumn, error) {
 	switch {
@@ -61,11 +64,11 @@ func (DummyReader) FetchColumnsMetadata(table schema.Table) ([]reader.DBColumn, 
 	}
 }
 
-func (FetchMetadataErrorDummyReader) FetchColumnsMetadata(_ schema.Table) ([]reader.DBColumn, error) {
+func (FetchMetadataErrorDummyReader) FetchColumnsMetadata(schema.Table) ([]reader.DBColumn, error) {
 	return nil, fmt.Errorf("fetch metadata error")
 }
 
-func (FetchDataErrorDummyReader) FetchColumnsMetadata(_ schema.Table) ([]reader.DBColumn, error) {
+func (FetchDataErrorDummyReader) FetchColumnsMetadata(schema.Table) ([]reader.DBColumn, error) {
 	return []reader.DBColumn{}, nil
 }
 
@@ -102,30 +105,38 @@ func (DummyReader) FetchData(table string, _ []reader.DBColumn, _ []schema.Conve
 	}
 }
 
-func (FetchMetadataErrorDummyReader) FetchData(_ string, _ []reader.DBColumn, _ []schema.Converter,
-	_ [][]interface{}) ([]map[string]interface{}, error) {
+func (FetchMetadataErrorDummyReader) FetchData(string, []reader.DBColumn, []schema.Converter,
+	[][]interface{}) ([]map[string]interface{}, error) {
 	return []map[string]interface{}{}, nil
 }
 
-func (FetchDataErrorDummyReader) FetchData(_ string, _ []reader.DBColumn, _ []schema.Converter,
-	_ [][]interface{}) ([]map[string]interface{}, error) {
+func (FetchDataErrorDummyReader) FetchData(string, []reader.DBColumn, []schema.Converter,
+	[][]interface{}) ([]map[string]interface{}, error) {
 	return nil, fmt.Errorf("fetch data error")
 }
 
-func (DummyWriter) WriteHeader() {}
+func (DummyWriter) WriteHeader() error { return nil }
 
-func (WriteDataErrorDummyWriter) WriteHeader() {}
+func (WriteDataErrorDummyWriter) WriteHeader() error { return nil }
 
-func (DummyWriter) WriteFooter() {}
+func (WriteDataHeaderErrorDummyWriter) WriteHeader() error { return fmt.Errorf("write header error") }
 
-func (WriteDataErrorDummyWriter) WriteFooter() {}
+func (DummyWriter) WriteFooter() error { return nil }
 
-func (DummyWriter) Write(_ string, _ []map[string]interface{}) error {
+func (WriteDataErrorDummyWriter) WriteFooter() error { return nil }
+
+func (WriteDataHeaderErrorDummyWriter) WriteFooter() error { return nil }
+
+func (DummyWriter) Write(string, []map[string]interface{}) error {
 	return nil
 }
 
-func (WriteDataErrorDummyWriter) Write(_ string, _ []map[string]interface{}) error {
+func (WriteDataErrorDummyWriter) Write(string, []map[string]interface{}) error {
 	return fmt.Errorf("write data error")
+}
+
+func (WriteDataHeaderErrorDummyWriter) Write(string, []map[string]interface{}) error {
+	return nil
 }
 
 func TestExtractSchemaFileNotFound(t *testing.T) {
@@ -201,12 +212,14 @@ func TestExtractFetchDataError(t *testing.T) {
 }
 
 func TestExtractWriteDataError(t *testing.T) {
+	mu := sync.Mutex{}
 	var handledError error
-	fakeExit := func(int) {
+	patches := gomonkey.ApplyFunc(os.Exit, func(int) {
+		mu.Lock()
 		handledError = fmt.Errorf("write data panic")
-	}
-	patchExit := monkey.Patch(os.Exit, fakeExit)
-	defer patchExit.Unpatch()
+		mu.Unlock()
+	})
+	defer patches.Reset()
 
 	dataconv.RegisterConverter("conv_date_time", DummyConverter(""))
 	refs := make(map[string]interface{})
@@ -218,6 +231,29 @@ func TestExtractWriteDataError(t *testing.T) {
 	}
 
 	_ = extractor.Extract(conf, DummyReader{}, []writer.FileWriter{WriteDataErrorDummyWriter{}})
+	assert.Contains(t, handledError.Error(), "write data panic")
+}
+
+func TestExtractWriteDataHeaderError(t *testing.T) {
+	mu := sync.Mutex{}
+	var handledError error
+	patches := gomonkey.ApplyFunc(os.Exit, func(int) {
+		mu.Lock()
+		handledError = fmt.Errorf("write data panic")
+		mu.Unlock()
+	})
+	defer patches.Reset()
+
+	dataconv.RegisterConverter("conv_date_time", DummyConverter(""))
+	refs := make(map[string]interface{})
+	refs["customer_id"] = 34
+
+	conf := extractor.Conf{
+		SchemaPath: "../test/unit/extractor_test.yml",
+		References: refs,
+	}
+
+	_ = extractor.Extract(conf, DummyReader{}, []writer.FileWriter{WriteDataHeaderErrorDummyWriter{}})
 	assert.Contains(t, handledError.Error(), "write data panic")
 }
 

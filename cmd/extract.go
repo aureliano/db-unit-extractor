@@ -3,8 +3,10 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/aureliano/db-unit-extractor/extractor"
+	"github.com/aureliano/db-unit-extractor/writer"
 	"github.com/spf13/cobra"
 
 	"regexp"
@@ -16,9 +18,8 @@ const (
 )
 
 var (
-	refRegExp      = regexp.MustCompile(`^(\w+)\s*=\s*(.+)$`)
-	dsnRegExp      = regexp.MustCompile(`^(\w+)://(\w+):(\w+)@([\w.]+):(\d+)/(\w+)\??(\w+=\w+)*$`)
-	supportedTypes = []string{"console"}
+	refRegExp = regexp.MustCompile(`^(\w+)\s*=\s*(.+)$`)
+	dsnRegExp = regexp.MustCompile(`^(\w+)://(\w+):(\w+)@([\w.]+):(\d+)/(\w+)\??(\w+=\w+)*$`)
 )
 
 func NewExtractCommand() *cobra.Command {
@@ -27,11 +28,17 @@ func NewExtractCommand() *cobra.Command {
 		Short: "Extract data-set from database",
 		Long:  "Extract data-set from a database to any supported file.",
 		Example: fmt.Sprintf(`  # Extract data-set from PostgreSQL and write to the console.
-            %s extract -s /path/to/schema.yml -n postgres://usr:pwd@127.0.0.1:5432/test
+  %s extract -s /path/to/schema.yml -n postgres://usr:pwd@127.0.0.1:5432/test
 
-            # Pass parameter expected in schema file.
-            %s extract -s /path/to/schema.yml -n postgres://usr:pwd@127.0.0.1:5432/test -r customer_id=4329`,
-			project.binName, project.binName),
+  # Pass parameter expected in schema file.
+  %s extract -s /path/to/schema.yml -n postgres://usr:pwd@127.0.0.1:5432/test -r customer_id=4329
+
+  # Write to xml file too.
+  %s extract -s /path/to/schema.yml -n postgres://usr:pwd@127.0.0.1:5432/test -r customer_id=4329 -t xml
+
+  # Format xml output.
+  %s extract -s /path/to/schema.yml -n postgres://usr:pwd@127.0.0.1:5432/test -r customer_id=4329 -t xml -f`,
+			project.binName, project.binName, project.binName, project.binName),
 		Run: func(cmd *cobra.Command, args []string) {
 			extract(cmd)
 		},
@@ -42,8 +49,8 @@ func NewExtractCommand() *cobra.Command {
 		"Data source name (aka connection string: <driver>://<username>:<password>@<host>:<port>/<database>).")
 	cmd.Flags().Int("max-open-conn", defaultMaxOpenConn, "Set the maximum number of concurrently open connections")
 	cmd.Flags().Int("max-idle-conn", defaultMaxIdleConn, "Set the maximum number of concurrently idle connections")
-	cmd.Flags().StringArrayP("output-type", "t", supportedTypes,
-		"Extracted data output format type. Expected: console")
+	cmd.Flags().StringArrayP("output-type", "t", []string{"console"},
+		fmt.Sprintf("Extracted data output format type. Expected: %s", writer.SupportedTypes()))
 	cmd.Flags().BoolP("formatted-output", "f", false, "Whether the output should be formatted.")
 	cmd.Flags().StringP("directory", "d", ".", "Output directory.")
 	cmd.Flags().StringArrayP("references", "r", nil, "Expected input parameter in 'schema' file. Expected: name=value")
@@ -126,8 +133,8 @@ func validateConf(conf extractor.Conf) error {
 }
 
 func supportedType(tp string) bool {
-	for _, st := range supportedTypes {
-		if tp == st {
+	for _, st := range writer.SupportedTypes() {
+		if strings.EqualFold(tp, st) {
 			return true
 		}
 	}

@@ -7,14 +7,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestConsoleWriteHeader(_ *testing.T) {
+func TestConsoleWriteHeader(t *testing.T) {
 	w := writer.ConsoleWriter{}
-	w.WriteHeader()
+	assert.Nil(t, w.WriteHeader())
 }
 
-func TestConsoleWriteFooter(_ *testing.T) {
+func TestConsoleWriteFooter(t *testing.T) {
 	w := writer.ConsoleWriter{}
-	w.WriteFooter()
+	assert.Nil(t, w.WriteFooter())
 }
 
 func TestConsoleWrite(t *testing.T) {

@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"bou.ke/monkey"
+	"github.com/agiledragon/gomonkey/v2"
 	"github.com/aureliano/db-unit-extractor/cmd"
 	"github.com/aureliano/db-unit-extractor/extractor"
 	"github.com/aureliano/db-unit-extractor/reader"
@@ -44,11 +44,10 @@ func TestNewExtractCommandDSNIsRequired(t *testing.T) {
 }
 
 func TestNewExtractCommandInvalidDSN(t *testing.T) {
-	fakeExit := func(int) {
+	patches := gomonkey.ApplyFunc(os.Exit, func(int) {
 		panic("os.Exit called")
-	}
-	patch := monkey.Patch(os.Exit, fakeExit)
-	defer patch.Unpatch()
+	})
+	defer patches.Reset()
 
 	c := cmd.NewExtractCommand()
 	output := new(bytes.Buffer)
@@ -64,11 +63,10 @@ func TestNewExtractCommandInvalidDSN(t *testing.T) {
 }
 
 func TestNewExtractCommandSchemaFileDoesNotExist(t *testing.T) {
-	fakeExit := func(int) {
+	patches := gomonkey.ApplyFunc(os.Exit, func(int) {
 		panic("os.Exit called")
-	}
-	patch := monkey.Patch(os.Exit, fakeExit)
-	defer patch.Unpatch()
+	})
+	defer patches.Reset()
 
 	c := cmd.NewExtractCommand()
 	output := new(bytes.Buffer)
@@ -84,11 +82,10 @@ func TestNewExtractCommandSchemaFileDoesNotExist(t *testing.T) {
 }
 
 func TestNewExtractCommandSchemaFileIsDirectory(t *testing.T) {
-	fakeExit := func(int) {
+	patches := gomonkey.ApplyFunc(os.Exit, func(int) {
 		panic("os.Exit called")
-	}
-	patch := monkey.Patch(os.Exit, fakeExit)
-	defer patch.Unpatch()
+	})
+	defer patches.Reset()
 
 	c := cmd.NewExtractCommand()
 	output := new(bytes.Buffer)
@@ -104,11 +101,10 @@ func TestNewExtractCommandSchemaFileIsDirectory(t *testing.T) {
 }
 
 func TestNewExtractCommandInvalidOutputType(t *testing.T) {
-	fakeExit := func(int) {
+	patches := gomonkey.ApplyFunc(os.Exit, func(int) {
 		panic("os.Exit called")
-	}
-	patch := monkey.Patch(os.Exit, fakeExit)
-	defer patch.Unpatch()
+	})
+	defer patches.Reset()
 
 	c := cmd.NewExtractCommand()
 	output := new(bytes.Buffer)
@@ -126,11 +122,10 @@ func TestNewExtractCommandInvalidOutputType(t *testing.T) {
 }
 
 func TestNewExtractCommandOutputDirIsNotADirectory(t *testing.T) {
-	fakeExit := func(int) {
+	patches := gomonkey.ApplyFunc(os.Exit, func(int) {
 		panic("os.Exit called")
-	}
-	patch := monkey.Patch(os.Exit, fakeExit)
-	defer patch.Unpatch()
+	})
+	defer patches.Reset()
 
 	c := cmd.NewExtractCommand()
 	output := new(bytes.Buffer)
@@ -149,11 +144,10 @@ func TestNewExtractCommandOutputDirIsNotADirectory(t *testing.T) {
 }
 
 func TestNewExtractCommandInvalidReference(t *testing.T) {
-	fakeExit := func(int) {
+	patches := gomonkey.ApplyFunc(os.Exit, func(int) {
 		panic("os.Exit called")
-	}
-	patch := monkey.Patch(os.Exit, fakeExit)
-	defer patch.Unpatch()
+	})
+	defer patches.Reset()
 
 	c := cmd.NewExtractCommand()
 	output := new(bytes.Buffer)
@@ -172,18 +166,12 @@ func TestNewExtractCommandInvalidReference(t *testing.T) {
 }
 
 func TestNewExtractCommandExtractError(t *testing.T) {
-	fakeExit := func(int) {
+	patches := gomonkey.ApplyFunc(os.Exit, func(int) {
 		panic("os.Exit called")
-	}
-	patchExit := monkey.Patch(os.Exit, fakeExit)
-
-	fakeExtract := func(extractor.Conf, reader.DBReader, []writer.FileWriter) error {
+	}).ApplyFunc(extractor.Extract, func(extractor.Conf, reader.DBReader, []writer.FileWriter) error {
 		return fmt.Errorf("extract error")
-	}
-	patchExtract := monkey.Patch(extractor.Extract, fakeExtract)
-
-	defer patchExtract.Unpatch()
-	defer patchExit.Unpatch()
+	})
+	defer patches.Reset()
 
 	c := cmd.NewExtractCommand()
 	output := new(bytes.Buffer)
@@ -202,12 +190,10 @@ func TestNewExtractCommandExtractError(t *testing.T) {
 }
 
 func TestNewExtractCommand(t *testing.T) {
-	fakeExtract := func(extractor.Conf, reader.DBReader, []writer.FileWriter) error {
+	patches := gomonkey.ApplyFunc(extractor.Extract, func(extractor.Conf, reader.DBReader, []writer.FileWriter) error {
 		return nil
-	}
-	patchExtract := monkey.Patch(extractor.Extract, fakeExtract)
-
-	defer patchExtract.Unpatch()
+	})
+	defer patches.Reset()
 
 	c := cmd.NewExtractCommand()
 	assert.Equal(t, "extract", c.Use)
