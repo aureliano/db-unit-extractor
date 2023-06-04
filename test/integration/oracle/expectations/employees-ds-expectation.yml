@@ -1,0 +1,52 @@
+---
+tables:
+  - name: employees
+    records:
+      - employee_id: 200
+      - first_name: Jennifer
+      - last_name: Whalen
+      - hire_date: 17/09/13
+      - job_id: AD_ASST
+      - salary: 4400
+      - manager_id: 101
+      - department_id: 10
+  - name: departments
+    records:
+      - department_id: 10
+        department_name: Administration
+        manager_id: 200
+        location_id: 1700
+  - name: locations
+    records:
+      - location_id: 1700
+        street_address: 2004 Charade Rd
+        city: Seattle
+        state_province: Washington
+        country_id: US
+  - name: countries
+    records:
+      - country_id: US
+        country_name: United States of America
+        region_id: 10
+  - name: regions
+    records:
+      - region_id: 10
+        region_name: Europe
+  - name: jobs
+    records:
+      - job_id: AD_ASST
+        job_title: Administration Assistant
+        min_salary: 3000
+        max_salary: 6000
+  - name: job_history
+    records:
+      - employee_id: 200
+        start_date: 17/09/05
+        end_date: 17/06/11
+        job_id: AD_ASST
+        department_id: 90
+      - employee_id: 200
+        start_date: 01/07/12
+        end_date: 31/12/16
+        job_id: AC_ACCOUNT
+        department_id: 90
