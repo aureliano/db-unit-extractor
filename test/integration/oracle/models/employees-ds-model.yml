@@ -1,0 +1,41 @@
+---
+tables:
+  - name: employees
+    filters:
+      - name: employee_id
+        value: ${employee_id}
+    columns:
+      - employee_id
+      - first_name
+      - last_name
+      - hire_date
+      - job_id
+      - salary
+      - manager_id
+      - department_id
+  - name: departments
+    filters:
+      - name: department_id
+        value: ${employees.department_id}
+  - name: locations
+    filters:
+      - name: location_id
+        value: ${departments.location_id}
+    ignore:
+      - postal_code
+  - name: countries
+    filters:
+      - name: country_id
+        value: ${locations.country_id}
+  - name: regions
+    filters:
+      - name: region_id
+        value: ${countries.region_id}
+  - name: jobs
+    filters:
+      - name: job_id
+        value: ${employees.job_id}
+  - name: job_history
+    filters:
+      - name: employee_id
+        value: ${employees.employee_id}
