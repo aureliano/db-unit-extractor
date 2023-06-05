@@ -14,3 +14,6 @@ It's supposed to have one directory to each database reader, in which we can fin
 
 ### Runner
 There is an implementation - at test/integration - that, given an output from db-unit-extractor, executes a test that match the result with an expected data-set. Even not being mandatory building the runner, you may do that and run ti directly. Although, just call `go *.go expected-data-set resulted-data-set`.
+
+## Database readers
+Go to the specific directory of a database reader in order to get access to instructions of how to execute integration tests.
