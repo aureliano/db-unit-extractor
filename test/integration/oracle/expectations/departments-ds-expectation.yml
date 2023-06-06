@@ -13,7 +13,7 @@ tables:
         last_name: King
         email: SKING
         phone_number: 1.515.555.0100
-        hire_date: 17/06/13
+        hire_date: 2013-06-17 00:00:00 +0000 UTC
         job_id: AD_PRES
         salary: 24000
         department_id: 90
@@ -22,7 +22,7 @@ tables:
         last_name: Yang
         email: NYANG
         phone_number: 1.515.555.0101
-        hire_date: 21/09/15
+        hire_date: 2015-09-21 00:00:00 +0000 UTC
         job_id: AD_VP
         salary: 17000
         manager_id: 100
@@ -32,7 +32,7 @@ tables:
         last_name: Garcia
         email: LGARCIA
         phone_number: 1.515.555.0102
-        hire_date: 13/01/11
+        hire_date: 2011-01-13 00:00:00 +0000 UTC
         job_id: AD_VP
         salary: 17000
         manager_id: 100
