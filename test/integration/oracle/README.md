@@ -21,8 +21,8 @@ dist/db-unit-extractor_linux_amd64_v1/db-unit-extractor extract \
 ```
 
 ```sh
-go run *.go \
-    oracle/expectations/employees-ds-expectation.yml \
+go run test/integration/*.go \
+    test/integration/oracle/expectations/employees-ds-expectation.yml \
     /tmp/db-unit-extractor/integration-tests/oracle/employees-ds-model.xml
 ```
 
