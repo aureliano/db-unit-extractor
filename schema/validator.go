@@ -2,6 +2,7 @@ package schema
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/aureliano/db-unit-extractor/dataconv"
 )
@@ -101,14 +102,43 @@ func validateTables(tables []Table) error {
 		}
 	}
 
-	tbls := make([]string, len(tables))
-	for i, t := range tables {
-		tbls[i] = t.Name
+	return validateRepeatedTable(tables)
+}
+
+func validateRepeatedTable(tables []Table) error {
+	for i, t1 := range tables {
+		for j, t2 := range tables {
+			if i == j {
+				continue
+			}
+
+			if err := assertTablesAreDifferent(t1, t2); err != nil {
+				return err
+			}
+		}
 	}
 
-	tb := repeatedValue(tbls)
-	if tb != "" {
-		return fmt.Errorf("%w: repeated table '%s'", ErrSchemaValidation, tb)
+	return nil
+}
+
+func assertTablesAreDifferent(t1, t2 Table) error {
+	if t1.Name != t2.Name || len(t1.Filters) != len(t2.Filters) {
+		return nil
+	}
+
+	filters := strings.Builder{}
+	equals := true
+	for k := 0; k < len(t1.Filters); k++ {
+		f1 := t1.Filters[k]
+		f2 := t2.Filters[k]
+
+		filters.WriteString(fmt.Sprintf("%s=%s", f1.Name, f1.Value))
+		equals = equals && (f1.Name == f2.Name) && (f1.Value == f2.Value)
+	}
+
+	if equals {
+		return fmt.Errorf("%w: repeated table %s with filters [%s]",
+			ErrSchemaValidation, t1.Name, filters.String())
 	}
 
 	return nil

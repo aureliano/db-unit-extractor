@@ -56,7 +56,7 @@ func TestValidateSchemaRepeatedConverter(t *testing.T) {
 	assert.Contains(t, err.Error(), "repeated converter 'dummy'")
 }
 
-func TestValidateSchemaRepeatedTables(t *testing.T) {
+func TestValidateSchemaRepeatedTablesEmptyFilters(t *testing.T) {
 	dataconv.RegisterConverter("dummy", DummyConverter(""))
 
 	s := schema.Model{
@@ -67,7 +67,36 @@ func TestValidateSchemaRepeatedTables(t *testing.T) {
 	}
 	err := s.Validate()
 	assert.ErrorIs(t, err, schema.ErrSchemaValidation)
-	assert.Contains(t, err.Error(), "repeated table 'tbl_2'")
+	assert.Contains(t, err.Error(), "repeated table tbl_2 with filters []")
+}
+
+func TestValidateSchemaRepeatedTablesWithDifferentFilters(t *testing.T) {
+	dataconv.RegisterConverter("dummy", DummyConverter(""))
+
+	s := schema.Model{
+		Converters: []schema.Converter{"dummy"},
+		Tables: []schema.Table{
+			{Name: "tbl_1"}, {Name: "tbl_2", Filters: []schema.Filter{{"f1", "v1"}}},
+			{Name: "tbl_3"}, {Name: "tbl_4"}, {Name: "tbl_2", Filters: []schema.Filter{{"f2", "v2"}}},
+		},
+	}
+	err := s.Validate()
+	assert.Nil(t, err)
+}
+
+func TestValidateSchemaRepeatedTablesWithEqualFilters(t *testing.T) {
+	dataconv.RegisterConverter("dummy", DummyConverter(""))
+
+	s := schema.Model{
+		Converters: []schema.Converter{"dummy"},
+		Tables: []schema.Table{
+			{Name: "tbl_1"}, {Name: "tbl_2", Filters: []schema.Filter{{"f1", "v1"}}},
+			{Name: "tbl_3"}, {Name: "tbl_4"}, {Name: "tbl_2", Filters: []schema.Filter{{"f1", "v1"}}},
+		},
+	}
+	err := s.Validate()
+	assert.ErrorIs(t, err, schema.ErrSchemaValidation)
+	assert.Contains(t, err.Error(), "repeated table tbl_2 with filters [f1=v1]")
 }
 
 func TestValidateSchema(t *testing.T) {
