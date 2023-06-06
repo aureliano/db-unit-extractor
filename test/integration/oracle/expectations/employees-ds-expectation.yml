@@ -5,7 +5,7 @@ tables:
       - employee_id: 200
         first_name: Jennifer
         last_name: Whalen
-        hire_date: 17/09/13
+        hire_date: 2013-09-17 00:00:00 +0000 UTC
         job_id: AD_ASST
         salary: 4400
         manager_id: 101
@@ -41,12 +41,12 @@ tables:
   - name: job_history
     records:
       - employee_id: 200
-        start_date: 17/09/05
-        end_date: 17/06/11
+        start_date: 2005-09-17 00:00:00 +0000 UTC
+        end_date: 2011-06-17 00:00:00 +0000 UTC
         job_id: AD_ASST
         department_id: 90
       - employee_id: 200
-        start_date: 01/07/12
-        end_date: 31/12/16
+        start_date: 2012-07-01 00:00:00 +0000 UTC
+        end_date: 2016-12-31 00:00:00 +0000 UTC
         job_id: AC_ACCOUNT
         department_id: 90
