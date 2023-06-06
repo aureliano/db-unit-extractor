@@ -15,7 +15,7 @@ All execution examples have to be launched from base directory.
 dist/db-unit-extractor_linux_amd64_v1/db-unit-extractor extract \
     -n oracle://sys:admin@localhost:1521/xe \
     -s test/integration/oracle/models/employees-ds-model.yml \
-    -t xml \
+    -t xml -f \
     -r employee_id=200 \
     -d /tmp/db-unit-extractor/integration-tests/oracle
 ```
@@ -31,7 +31,7 @@ go run *.go \
 dist/db-unit-extractor_linux_amd64_v1/db-unit-extractor extract \
     -n oracle://sys:admin@localhost:1521/xe \
     -s test/integration/oracle/models/departments-ds-model.yml \
-    -t xml \
+    -t xml -f \
     -r department_id=90 \
     -d /tmp/db-unit-extractor/integration-tests/oracle
 ```

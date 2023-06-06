@@ -7,15 +7,6 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type YAMLDataSet struct {
-	Tables []YAMLTable `yaml:"tables"`
-}
-
-type YAMLTable struct {
-	Name    string `yaml:"name"`
-	Records []Tag
-}
-
 func parseYAML(path string) (*DataSet, error) {
 	schema := make(map[interface{}]interface{})
 	yml, err := os.ReadFile(path)
@@ -31,31 +22,35 @@ func parseYAML(path string) (*DataSet, error) {
 	tables, _ := schema["tables"].([]interface{})
 
 	dataset := DataSet{
-		Tables: make([]Table, len(tables)),
+		Tables: make([]Table, 0, len(tables)),
 	}
 
-	for i, table := range tables {
+	for _, table := range tables {
 		t, _ := table.(map[interface{}]interface{})
 		name := t["name"]
 		records, _ := t["records"].([]interface{})
-		fields := make([]Field, len(records))
 
-		for j, rec := range records {
+		for _, record := range records {
+			r, _ := record.(map[interface{}]interface{})
+			fields := make([]Field, len(r))
+
 			var fname, fvalue string
-			for k, v := range rec.(map[interface{}]interface{}) {
+			l := 0
+			for k, v := range r {
 				fname, _ = k.(string)
 				fvalue = fmt.Sprintf("%v", v)
+
+				fields[l] = Field{
+					Name:  fname,
+					Value: fvalue,
+				}
+				l++
 			}
 
-			fields[j] = Field{
-				Name:  fname,
-				Value: fvalue,
-			}
-		}
-
-		dataset.Tables[i] = Table{
-			Name:   name.(string),
-			Fields: fields,
+			dataset.Tables = append(dataset.Tables, Table{
+				Name:   name.(string),
+				Fields: fields,
+			})
 		}
 	}
 
