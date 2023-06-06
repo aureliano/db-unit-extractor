@@ -8,7 +8,7 @@ test:
 		-race \
 		-covermode atomic \
 		-coverprofile=cover.out \
-		./...
+		$$(go list ./... | grep -v test)
 	go tool cover -func cover.out
 
 .PHONY: coverage

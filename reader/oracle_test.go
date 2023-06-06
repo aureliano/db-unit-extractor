@@ -103,6 +103,57 @@ func TestFetchColumnsMetadataIgnore(t *testing.T) {
 	assert.EqualValues(t, 2, columns[1].DecimalSize.Scale)
 }
 
+func TestFetchColumnsMetadataAllColumns(t *testing.T) {
+	db, mock, err := sqlmock.New()
+
+	require.Nil(t, err)
+	defer db.Close()
+
+	r, _ := reader.NewReader(&reader.DataSource{DSN: "oracle://usr:pwd@localhost:1521/dbname", DB: db})
+
+	rows := sqlmock.NewRows([]string{
+		"COLUMN_NAME", "DATA_TYPE", "NULLABLE", "DATA_LENGTH", "DATA_PRECISION", "DATA_SCALE",
+	}).
+		AddRow("ID", "NUMBER", "F", 22, 2, 0).
+		AddRow("USER_ID", "NUMBER", "F", 22, 2, 0).
+		AddRow("STATUS", "VARCHAR2", "Y", 15, nil, nil).
+		AddRow("TOTAL", "NUMBER", "F", 22, 17, 2)
+
+	mock.ExpectQuery("^SELECT (.+) FROM  ALL_TAB_COLS").WillReturnRows(rows)
+
+	columns, err := r.FetchColumnsMetadata(schema.Table{Name: "orders"})
+
+	require.Nil(t, err)
+
+	assert.Equal(t, "ID", columns[0].Name)
+	assert.Equal(t, "NUMBER", columns[0].Type)
+	assert.Equal(t, false, columns[0].Nullable)
+	assert.EqualValues(t, 22, columns[0].Length)
+	assert.EqualValues(t, 2, columns[0].DecimalSize.Precision)
+	assert.EqualValues(t, 0, columns[0].DecimalSize.Scale)
+
+	assert.Equal(t, "USER_ID", columns[1].Name)
+	assert.Equal(t, "NUMBER", columns[1].Type)
+	assert.Equal(t, false, columns[1].Nullable)
+	assert.EqualValues(t, 22, columns[1].Length)
+	assert.EqualValues(t, 2, columns[1].DecimalSize.Precision)
+	assert.EqualValues(t, 0, columns[1].DecimalSize.Scale)
+
+	assert.Equal(t, "STATUS", columns[2].Name)
+	assert.Equal(t, "VARCHAR2", columns[2].Type)
+	assert.Equal(t, true, columns[2].Nullable)
+	assert.EqualValues(t, 15, columns[2].Length)
+	assert.EqualValues(t, 0, columns[2].DecimalSize.Precision)
+	assert.EqualValues(t, 0, columns[2].DecimalSize.Scale)
+
+	assert.Equal(t, "TOTAL", columns[3].Name)
+	assert.Equal(t, "NUMBER", columns[3].Type)
+	assert.Equal(t, false, columns[3].Nullable)
+	assert.EqualValues(t, 22, columns[3].Length)
+	assert.EqualValues(t, 17, columns[3].DecimalSize.Precision)
+	assert.EqualValues(t, 2, columns[3].DecimalSize.Scale)
+}
+
 func TestFetchColumnsMetadataQueryError(t *testing.T) {
 	db, mock, err := sqlmock.New()
 
@@ -153,6 +204,24 @@ func TestFetchColumnsMetadataRowsError(t *testing.T) {
 
 	_, err = r.FetchColumnsMetadata(schema.Table{Name: "customers", Ignore: []schema.Ignore{"id"}})
 	assert.ErrorIs(t, err, sqlErr)
+}
+
+func TestFetchColumnsMetadataEmptyResultError(t *testing.T) {
+	db, mock, err := sqlmock.New()
+
+	require.Nil(t, err)
+	defer db.Close()
+
+	r, _ := reader.NewReader(&reader.DataSource{DSN: "oracle://usr:pwd@localhost:1521/dbname", DB: db})
+
+	rows := sqlmock.NewRows([]string{
+		"COLUMN_NAME", "DATA_TYPE", "NULLABLE", "DATA_LENGTH", "DATA_PRECISION", "DATA_SCALE",
+	})
+
+	mock.ExpectQuery("^SELECT (.+) FROM  ALL_TAB_COLS").WillReturnRows(rows)
+
+	_, err = r.FetchColumnsMetadata(schema.Table{Name: "customers", Ignore: []schema.Ignore{"id"}})
+	assert.Equal(t, "no metadata found in table customers (lack of permission?)", err.Error())
 }
 
 func TestFetchData(t *testing.T) {

@@ -35,7 +35,7 @@ func (w *XMLWriter) WriteHeader() error {
 }
 
 func (w *XMLWriter) WriteFooter() error {
-	_, err := w.file.Write(fileFooter(w.Formatted))
+	_, err := w.file.Write(fileFooter())
 	if err != nil {
 		_ = w.file.Close()
 		return err
@@ -61,42 +61,47 @@ func fileHeader(formatted bool) []byte {
 	return []byte("<?xml version=\"1.0\" encoding=\"UTF-8\"?><dataset>")
 }
 
-func fileFooter(formatted bool) []byte {
-	if formatted {
-		return []byte("\n</dataset>\n")
-	}
-
+func fileFooter() []byte {
 	return []byte("</dataset>")
 }
 
 func fileBody(formatted bool, table string, rows []map[string]interface{}) []byte {
+	if formatted {
+		return formattedXMLRecord(table, rows)
+	}
+
+	return unformattedXMLRecord(table, rows)
+}
+
+func formattedXMLRecord(table string, rows []map[string]interface{}) []byte {
 	sb := strings.Builder{}
 
-	if formatted {
-		sb.WriteString(fmt.Sprintf("  <%s\n", table))
+	for _, row := range rows {
+		sb.WriteString(fmt.Sprintf("  <%s", table))
 
-		for _, row := range rows {
-			li := len(row) - 1
-			i := 0
-			for name, value := range row {
-				sb.WriteString(fmt.Sprintf("    %s=\"%v\"", name, value))
-				if i < li {
-					sb.WriteString("\n")
-				}
-				i++
+		for name, value := range row {
+			if value != nil {
+				sb.WriteString(fmt.Sprintf("\n    %s=\"%v\"", name, value))
 			}
 		}
-	} else {
-		sb.WriteString(fmt.Sprintf("<%s", table))
+		sb.WriteString("/>\n")
+	}
 
-		for _, row := range rows {
-			for name, value := range row {
+	return []byte(sb.String())
+}
+
+func unformattedXMLRecord(table string, rows []map[string]interface{}) []byte {
+	sb := strings.Builder{}
+
+	for _, row := range rows {
+		sb.WriteString(fmt.Sprintf("<%s", table))
+		for name, value := range row {
+			if value != nil {
 				sb.WriteString(fmt.Sprintf(" %s=\"%v\"", name, value))
 			}
 		}
+		sb.WriteString("/>")
 	}
-
-	sb.WriteString("/>")
 
 	return []byte(sb.String())
 }

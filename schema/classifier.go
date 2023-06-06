@@ -114,8 +114,7 @@ func classifyGroupsButOne(s Model, group int) ([]int, error) {
 
 func findTableByName(s Model, tname string) int {
 	for i, table := range s.Tables {
-		name := strings.ToLower(table.Name)
-		if tname == name {
+		if strings.EqualFold(tname, table.Name) {
 			return i
 		}
 	}

@@ -155,6 +155,12 @@ func TestSelectColumns(t *testing.T) {
 	assert.Len(t, columns, 2)
 	assert.EqualValues(t, "tax", columns[0])
 	assert.EqualValues(t, "total", columns[1])
+
+	table = schema.Table{}
+
+	columns = table.SelectColumns()
+	assert.Len(t, columns, 1)
+	assert.EqualValues(t, "*", columns[0])
 }
 
 func TestFormattedSelectColumns(t *testing.T) {

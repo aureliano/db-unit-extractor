@@ -15,7 +15,7 @@ type DataSource struct {
 }
 
 type DBConnector interface {
-	Connect() error
+	Connect(timeout time.Duration) (*sql.DB, error)
 	IsConnected() bool
 	DriverName() string
 	ConnectionURL() string
@@ -30,14 +30,14 @@ func NewDataSource() *DataSource {
 	}
 }
 
-func (ds *DataSource) Connect(timeout time.Duration) error {
+func (ds *DataSource) Connect(timeout time.Duration) (*sql.DB, error) {
 	if ds.DB != nil {
-		return nil
+		return ds.DB, nil
 	}
 
 	db, err := sql.Open(ds.DriverName(), ds.ConnectionURL())
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	db.SetMaxOpenConns(ds.MaxOpenConn)
@@ -48,12 +48,12 @@ func (ds *DataSource) Connect(timeout time.Duration) error {
 
 	err = db.PingContext(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	ds.DB = db
 
-	return nil
+	return ds.DB, nil
 }
 
 func (ds *DataSource) IsConnected() bool {
