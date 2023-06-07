@@ -13,6 +13,14 @@ tables:
       - salary
       - manager_id
       - department_id
+  - name: employees
+    filters:
+      - name: employee_id
+        value: ${employees.manager_id}
+    columns:
+      - employee_id
+      - first_name
+      - last_name
   - name: departments
     filters:
       - name: department_id
