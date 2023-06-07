@@ -1,0 +1,26 @@
+---
+tables:
+  - name: employees
+    filters:
+      - name: department_id
+        value: ${departments.id}
+  - name: departments
+    filters:
+      - name: department_id
+        value: ${department_id}
+  - name: locations
+    filters:
+      - name: location_id
+        value: ${departments.location_id}
+  - name: countries
+    filters:
+      - name: country_id
+        value: ${locations.country_id}
+  - name: regions
+    filters:
+      - name: region_id
+        value: ${countries.region_id}
+  - name: jobs
+    filters:
+      - name: job_id
+        value: ${employees.job_id[@]}

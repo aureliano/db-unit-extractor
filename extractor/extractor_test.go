@@ -22,6 +22,8 @@ func (DummyConverter) Convert(_ interface{}, _ *interface{}) {
 
 type DummyReader struct{}
 
+type HumanResourcesReader struct{}
+
 type FetchMetadataErrorDummyReader struct{}
 
 type FetchDataErrorDummyReader struct{}
@@ -64,6 +66,50 @@ func (DummyReader) FetchColumnsMetadata(table schema.Table) ([]reader.DBColumn, 
 	}
 }
 
+func (HumanResourcesReader) FetchColumnsMetadata(table schema.Table) ([]reader.DBColumn, error) {
+	switch {
+	case table.Name == "employees":
+		return []reader.DBColumn{
+			{Name: "id", Type: "int"},
+			{Name: "department_id", Type: "int"},
+			{Name: "first_name", Type: "varchar"},
+			{Name: "last_name", Type: "varchar"},
+		}, nil
+	case table.Name == "departments":
+		return []reader.DBColumn{
+			{Name: "id", Type: "int"},
+			{Name: "localtion_id", Type: "int"},
+			{Name: "name", Type: "varchar"},
+		}, nil
+	case table.Name == "locations":
+		return []reader.DBColumn{
+			{Name: "id", Type: "int"},
+			{Name: "country_id", Type: "int"},
+			{Name: "city", Type: "varchar"},
+			{Name: "province", Type: "varchar"},
+		}, nil
+	case table.Name == "countries":
+		return []reader.DBColumn{
+			{Name: "id", Type: "int"},
+			{Name: "region_id", Type: "int"},
+			{Name: "name", Type: "varchar"},
+		}, nil
+	case table.Name == "regions":
+		return []reader.DBColumn{
+			{Name: "id", Type: "int"},
+			{Name: "name", Type: "varchar"},
+		}, nil
+	case table.Name == "jobs":
+		return []reader.DBColumn{
+			{Name: "id", Type: "int"},
+			{Name: "employee_id", Type: "int"},
+			{Name: "title", Type: "varchar"},
+		}, nil
+	default:
+		return []reader.DBColumn{}, nil
+	}
+}
+
 func (FetchMetadataErrorDummyReader) FetchColumnsMetadata(schema.Table) ([]reader.DBColumn, error) {
 	return nil, fmt.Errorf("fetch metadata error")
 }
@@ -99,6 +145,52 @@ func (DummyReader) FetchData(table string, _ []reader.DBColumn, _ []schema.Conve
 		m["name"] = "Holy Bible"
 		m["description"] = "Latin Vulgata from Saint Jerome"
 		m["price"] = 150.8
+		return []map[string]interface{}{m}, nil
+	default:
+		return []map[string]interface{}{}, nil
+	}
+}
+
+func (HumanResourcesReader) FetchData(table string, _ []reader.DBColumn, _ []schema.Converter,
+	_ [][]interface{}) ([]map[string]interface{}, error) {
+	switch {
+	case table == "employees":
+		m1 := make(map[string]interface{})
+		m1["id"] = 100
+		m1["department_id"] = 90
+		m1["first_name"] = "Antonio"
+		m1["last_name"] = "Vivaldi"
+
+		m2 := make(map[string]interface{})
+		m2["id"] = 101
+		m2["department_id"] = 90
+		m2["first_name"] = "Johann"
+		m2["last_name"] = "Bach"
+
+		return []map[string]interface{}{m1, m2}, nil
+	case table == "departments":
+		m := make(map[string]interface{})
+		m["id"] = 90
+		m["location_id"] = 1700
+		m["name"] = "Sales"
+		return []map[string]interface{}{m}, nil
+	case table == "locations":
+		m := make(map[string]interface{})
+		m["id"] = 1700
+		m["country_id"] = 55
+		m["city"] = "Governador Valadares"
+		m["province"] = "Minas Gerais"
+		return []map[string]interface{}{m}, nil
+	case table == "countries":
+		m := make(map[string]interface{})
+		m["id"] = 55
+		m["region_id"] = 3
+		m["name"] = "Brasil"
+		return []map[string]interface{}{m}, nil
+	case table == "regions":
+		m := make(map[string]interface{})
+		m["id"] = 3
+		m["name"] = "América do Sul"
 		return []map[string]interface{}{m}, nil
 	default:
 		return []map[string]interface{}{}, nil
@@ -268,6 +360,22 @@ func TestExtract(t *testing.T) {
 			References:  refs,
 			OutputTypes: []string{"console"},
 		}, DummyReader{}, nil,
+	)
+
+	assert.Nil(t, err)
+}
+
+func TestExtractMultivalued(t *testing.T) {
+	dataconv.RegisterConverter("conv_date_time", DummyConverter(""))
+	refs := make(map[string]interface{})
+	refs["department_id"] = 12
+
+	err := extractor.Extract(
+		extractor.Conf{
+			SchemaPath:  "../test/unit/extractor_multivalued_test.yml",
+			References:  refs,
+			OutputTypes: []string{"console"},
+		}, HumanResourcesReader{}, nil,
 	)
 
 	assert.Nil(t, err)
