@@ -181,6 +181,15 @@ func updateReferences(model schema.Model, response dbResponse) {
 			key := strings.ToLower(fmt.Sprintf("%s.%s", response.table, k))
 			if _, exist := model.Refs[key]; exist {
 				model.Refs[key] = v
+			} else {
+				key = strings.ToLower(fmt.Sprintf("%s.%s[@]", response.table, k))
+				if _, exist = model.Refs[key]; exist {
+					if model.Refs[key] == nil {
+						model.Refs[key] = make([]interface{}, 0)
+					}
+
+					model.Refs[key] = append(model.Refs[key].([]interface{}), v)
+				}
 			}
 		}
 	}
