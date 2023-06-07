@@ -72,6 +72,7 @@ func (HumanResourcesReader) FetchColumnsMetadata(table schema.Table) ([]reader.D
 		return []reader.DBColumn{
 			{Name: "id", Type: "int"},
 			{Name: "department_id", Type: "int"},
+			{Name: "job_id_id", Type: "int"},
 			{Name: "first_name", Type: "varchar"},
 			{Name: "last_name", Type: "varchar"},
 		}, nil
@@ -162,12 +163,14 @@ func (HumanResourcesReader) FetchData(table string, _ []reader.DBColumn, _ []sch
 		m1 := make(map[string]interface{})
 		m1["id"] = 100
 		m1["department_id"] = 90
+		m1["job_id"] = 5
 		m1["first_name"] = "Antonio"
 		m1["last_name"] = "Vivaldi"
 
 		m2 := make(map[string]interface{})
 		m2["id"] = 101
 		m2["department_id"] = 90
+		m2["job_id"] = 3
 		m2["first_name"] = "Johann"
 		m2["last_name"] = "Bach"
 

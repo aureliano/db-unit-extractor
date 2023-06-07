@@ -23,4 +23,8 @@ tables:
   - name: jobs
     filters:
       - name: job_id
-        value: ${employees.job_id[@]}
+        value: ${job_history.job_id[@]}
+  - name: job_history
+    filters:
+      - name: employee_id
+        value: ${employees.id[@]}
