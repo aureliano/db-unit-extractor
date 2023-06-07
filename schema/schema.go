@@ -17,7 +17,7 @@ var (
 	ErrSchemaValidation    = errors.New("validation")
 	ErrTableClassification = errors.New("classification")
 	nameRegExp             = regexp.MustCompile(`^[a-zA-Z_]\w+$`)
-	filterReferenceRegExp  = regexp.MustCompile(`^\$\{(\w+)\.(\w+)\}$`)
+	filterReferenceRegExp  = regexp.MustCompile(`^\$\{(\w+)\.(\w+(\[@\])?)\}$`)
 )
 
 type Converter string

@@ -54,4 +54,4 @@ tables:
       - name: any
         value: 5
       - name: a11_fk
-        value: ${a11.id}
+        value: ${a11.id[@]}

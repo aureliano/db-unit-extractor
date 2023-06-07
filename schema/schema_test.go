@@ -126,7 +126,7 @@ func TestDigestSchemaReferences(t *testing.T) {
 		keys = append(keys, k)
 	}
 
-	assert.Len(t, keys, 7)
+	assert.Len(t, keys, 8)
 	assert.Contains(t, schema.Refs, "b1.id")
 	assert.Contains(t, schema.Refs, "a11.id")
 	assert.Contains(t, schema.Refs, "b1312.id")
@@ -134,6 +134,7 @@ func TestDigestSchemaReferences(t *testing.T) {
 	assert.Contains(t, schema.Refs, "b13.id")
 	assert.Contains(t, schema.Refs, "b131.id")
 	assert.Contains(t, schema.Refs, "c1.id")
+	assert.Contains(t, schema.Refs, "a11.id[@]")
 }
 
 func TestSelectColumns(t *testing.T) {
