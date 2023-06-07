@@ -102,8 +102,12 @@ func (HumanResourcesReader) FetchColumnsMetadata(table schema.Table) ([]reader.D
 	case table.Name == "jobs":
 		return []reader.DBColumn{
 			{Name: "id", Type: "int"},
-			{Name: "employee_id", Type: "int"},
 			{Name: "title", Type: "varchar"},
+		}, nil
+	case table.Name == "job_history":
+		return []reader.DBColumn{
+			{Name: "department_id", Type: "int"},
+			{Name: "employee_id", Type: "int"},
 		}, nil
 	default:
 		return []reader.DBColumn{}, nil
@@ -192,6 +196,50 @@ func (HumanResourcesReader) FetchData(table string, _ []reader.DBColumn, _ []sch
 		m["id"] = 3
 		m["name"] = "América do Sul"
 		return []map[string]interface{}{m}, nil
+	case table == "jobs":
+		m1 := make(map[string]interface{})
+		m1["id"] = 1
+		m1["title"] = "junior developer"
+
+		m2 := make(map[string]interface{})
+		m2["id"] = 2
+		m2["title"] = "full developer"
+
+		m3 := make(map[string]interface{})
+		m3["id"] = 3
+		m3["title"] = "senior developer"
+
+		m4 := make(map[string]interface{})
+		m4["id"] = 4
+		m4["title"] = "seller"
+
+		m5 := make(map[string]interface{})
+		m5["id"] = 5
+		m5["title"] = "sell manager"
+
+		return []map[string]interface{}{m1, m2, m3, m4, m5}, nil
+	case table == "job_history":
+		m1 := make(map[string]interface{})
+		m1["employee_id"] = 100
+		m1["job_id"] = 4
+
+		m2 := make(map[string]interface{})
+		m2["employee_id"] = 100
+		m2["job_id"] = 5
+
+		m3 := make(map[string]interface{})
+		m3["employee_id"] = 101
+		m3["job_id"] = 1
+
+		m4 := make(map[string]interface{})
+		m4["employee_id"] = 101
+		m4["job_id"] = 2
+
+		m5 := make(map[string]interface{})
+		m5["employee_id"] = 101
+		m5["job_id"] = 3
+
+		return []map[string]interface{}{m1, m2, m3, m4, m5}, nil
 	default:
 		return []map[string]interface{}{}, nil
 	}
