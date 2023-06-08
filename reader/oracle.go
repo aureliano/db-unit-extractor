@@ -49,23 +49,73 @@ func (r OracleReader) FetchColumnsMetadata(table schema.Table) ([]DBColumn, erro
 	return records, nil
 }
 
-func (r OracleReader) FetchData(table string, fields []DBColumn, _ []schema.Converter,
+func (r OracleReader) FetchData(table string, fields []DBColumn, converters []schema.Converter,
 	filters [][]interface{}) ([]map[string]interface{}, error) {
 	query := buildOracleSQLQueryColumns(table, fields, filters)
 
-	stmt, err := r.db.Prepare(query)
+	size := len(filters)
+	ind := make([]int, 0)
+	values := make([]interface{}, size)
+
+	for i := 0; i < size; i++ {
+		_, multivalued := filters[i][1].([]interface{})
+		if multivalued {
+			ind = append(ind, i)
+		} else {
+			values[i] = filters[i][1]
+		}
+	}
+
+	arrValues := make([][]interface{}, 0)
+	if len(values) > 0 && values[0] != nil {
+		arrValues = append(arrValues, values)
+	}
+
+	for _, i := range ind {
+		for _, v := range filters[i][1].([]interface{}) {
+			cpValues := make([]interface{}, len(values))
+			copy(cpValues, values)
+			cpValues[i] = v
+
+			arrValues = append(arrValues, cpValues)
+		}
+	}
+
+	return fetchData(r.db, converters, arrValues, query)
+}
+
+func fetchData(db *sql.DB, converters []schema.Converter, arrValues [][]interface{},
+	query string) ([]map[string]interface{}, error) {
+	rows := make([]map[string]interface{}, 0, len(arrValues))
+
+	if len(arrValues) > 0 {
+		for _, filterValues := range arrValues {
+			data, err := executeQuery(db, converters, filterValues, query)
+			if err != nil {
+				return nil, err
+			}
+			rows = append(rows, data...)
+		}
+	} else {
+		data, err := executeQuery(db, converters, []interface{}{}, query)
+		if err != nil {
+			return nil, err
+		}
+		rows = append(rows, data...)
+	}
+
+	return rows, nil
+}
+
+func executeQuery(db *sql.DB, _ []schema.Converter, filters []interface{},
+	query string) ([]map[string]interface{}, error) {
+	stmt, err := db.Prepare(query)
 	if err != nil {
 		return nil, err
 	}
 	defer stmt.Close()
 
-	size := len(filters)
-	values := make([]interface{}, size)
-	for i := 0; i < size; i++ {
-		values[i] = (filters)[i][1]
-	}
-
-	rows, err := stmt.Query(values...)
+	rows, err := stmt.Query(filters...)
 	if err != nil {
 		return nil, err
 	}

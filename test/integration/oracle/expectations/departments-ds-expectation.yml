@@ -54,3 +54,34 @@ tables:
     records:
       - region_id: 10
         region_name: Europe
+  - name: jobs
+    records:
+      - job_id: AC_ACCOUNT
+        job_title: Public Accountant
+        min_salary: 4200
+        max_salary: 9000
+      - job_id: AC_MGR
+        job_title: Accounting Manager
+        min_salary: 8200
+        max_salary: 16000
+      - job_id: IT_PROG
+        job_title: Programmer
+        min_salary: 4000
+        max_salary: 10000
+  - name: job_history
+    records:
+      - employee_id: 101
+        start_date: 2007-09-21 00:00:00 +0000 UTC
+        end_date: 2011-10-27 00:00:00 +0000 UTC
+        job_id: AC_ACCOUNT
+        department_id: 110
+      - employee_id: 101
+        start_date: 2011-10-28 00:00:00 +0000 UTC
+        end_date: 2015-03-15 00:00:00 +0000 UTC
+        job_id: AC_MGR
+        department_id: 110
+      - employee_id: 102
+        start_date: 2011-01-13 00:00:00 +0000 UTC
+        end_date: 2016-07-24 00:00:00 +0000 UTC
+        job_id: IT_PROG
+        department_id: 60

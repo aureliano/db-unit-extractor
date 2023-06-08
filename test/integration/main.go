@@ -57,18 +57,18 @@ func compare(expected, actual *DataSet) error {
 			return fmt.Errorf("table %s not found", t.Name)
 		}
 
-		allMatch, msg := fieldsMatch(t, actual, ind)
+		allMatch, index := fieldsMatch(t, actual, ind)
 		if !allMatch {
-			return fmt.Errorf("table %s doesn't match: %v != %v\n%s", t.Name, t, actual.Tables[ind[0]], msg)
+			return fmt.Errorf("table %s doesn't match: %v != %v", t.Name, t, actual.Tables[index])
 		}
 	}
 
 	return nil
 }
 
-func fieldsMatch(t Table, actual *DataSet, ind []int) (bool, string) {
-	msg := strings.Builder{}
+func fieldsMatch(t Table, actual *DataSet, ind []int) (bool, int) {
 	var allMatch bool
+	index := -1
 
 	for _, i := range ind {
 		allMatch = true
@@ -78,19 +78,16 @@ func fieldsMatch(t Table, actual *DataSet, ind []int) (bool, string) {
 
 		for _, f := range t.Fields {
 			match := fieldMatch(f, actual.Tables[i].Fields)
-			if !match {
-				msg.WriteString(fmt.Sprintf("'%s' => '%s'\n", f.Name, f.Value))
-			}
-
 			allMatch = allMatch && match
 		}
 
 		if allMatch {
 			break
 		}
+		index = i
 	}
 
-	return allMatch, msg.String()
+	return allMatch, index
 }
 
 func indexOfTable(t Table, ds *DataSet) []int {
