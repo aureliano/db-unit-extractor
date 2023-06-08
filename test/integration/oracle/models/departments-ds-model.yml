@@ -20,3 +20,11 @@ tables:
     filters:
       - name: region_id
         value: ${countries.region_id}
+  - name: jobs
+    filters:
+      - name: job_id
+        value: ${job_history.job_id[@]}
+  - name: job_history
+    filters:
+      - name: employee_id
+        value: ${employees.employee_id[@]}
