@@ -13,11 +13,12 @@ import (
 const NameMaxLength = 80
 
 var (
-	ErrSchemaFile          = errors.New("schema-file")
-	ErrSchemaValidation    = errors.New("validation")
-	ErrTableClassification = errors.New("classification")
-	nameRegExp             = regexp.MustCompile(`^[a-zA-Z_]\w+$`)
-	filterReferenceRegExp  = regexp.MustCompile(`^\$\{(\w+)\.(\w+(\[@\])?)\}$`)
+	ErrSchemaFile            = errors.New("schema-file")
+	ErrSchemaValidation      = errors.New("validation")
+	ErrTableClassification   = errors.New("classification")
+	nameRegExp               = regexp.MustCompile(`^[a-zA-Z_]\w+$`)
+	filterReferenceRegExp    = regexp.MustCompile(`^\$\{(\w+)\.(\w+(\[@\])?)\}$`)
+	multivaluedFilterRegeExp = regexp.MustCompile(`^\$\{(\w+)\.(\w+\[@\])\}$`)
 )
 
 type Converter string

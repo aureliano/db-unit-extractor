@@ -99,6 +99,22 @@ func TestValidateSchemaRepeatedTablesWithEqualFilters(t *testing.T) {
 	assert.Contains(t, err.Error(), "repeated table tbl_2 with filters [f1=v1]")
 }
 
+func TestValidateSchemaManyMultivaluedParameter(t *testing.T) {
+	dataconv.RegisterConverter("dummy", DummyConverter(""))
+
+	s := schema.Model{
+		Converters: []schema.Converter{"dummy"},
+		Tables: []schema.Table{
+			{Name: "tbl_1"}, {Name: "tbl_2", Filters: []schema.Filter{{"f1", "v1"}}},
+			{Name: "tbl_3", Filters: []schema.Filter{{"f1", "${t1.pk[@]}"}, {"f2", "v2"}, {"f3", "${t3.pk[@]}"}}},
+			{Name: "tbl_4"}, {Name: "tbl_2", Filters: []schema.Filter{{"f2", "v2"}}},
+		},
+	}
+	err := s.Validate()
+	assert.ErrorIs(t, err, schema.ErrSchemaValidation)
+	assert.Contains(t, err.Error(), "found more than one multivalued filter in table tbl_3")
+}
+
 func TestValidateSchema(t *testing.T) {
 	dataconv.RegisterConverter("dummy", DummyConverter(""))
 

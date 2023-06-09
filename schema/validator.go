@@ -102,7 +102,11 @@ func validateTables(tables []Table) error {
 		}
 	}
 
-	return validateRepeatedTable(tables)
+	if err := validateRepeatedTable(tables); err != nil {
+		return err
+	}
+
+	return validateMoreThanOneMultivaluedFiltersByTable(tables)
 }
 
 func validateRepeatedTable(tables []Table) error {
@@ -115,6 +119,24 @@ func validateRepeatedTable(tables []Table) error {
 			if err := assertTablesAreDifferent(t1, t2); err != nil {
 				return err
 			}
+		}
+	}
+
+	return nil
+}
+
+func validateMoreThanOneMultivaluedFiltersByTable(tables []Table) error {
+	for _, table := range tables {
+		counter := 0
+		for _, filter := range table.Filters {
+			if multivaluedFilterRegeExp.Match([]byte(filter.Value)) {
+				counter++
+			}
+		}
+
+		if counter > 1 {
+			return fmt.Errorf("%w: found more than one multivalued filter in table %s",
+				ErrSchemaValidation, table.Name)
 		}
 	}
 
