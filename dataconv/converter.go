@@ -3,7 +3,7 @@ package dataconv
 var converterIds = make(map[string]Converter)
 
 type Converter interface {
-	Convert(source interface{}, target *interface{})
+	Convert(source interface{}) (target interface{})
 }
 
 func ConverterExists(id string) bool {

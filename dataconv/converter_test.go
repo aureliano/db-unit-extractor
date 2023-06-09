@@ -9,7 +9,8 @@ import (
 
 type DummyConverter string
 
-func (DummyConverter) Convert(_ interface{}, _ *interface{}) {
+func (DummyConverter) Convert(interface{}) interface{} {
+	return nil
 }
 
 func TestConverterExists(t *testing.T) {
