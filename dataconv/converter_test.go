@@ -13,6 +13,10 @@ func (DummyConverter) Convert(interface{}) (interface{}, error) {
 	return 0, nil
 }
 
+func (DummyConverter) Handle(interface{}) bool {
+	return true
+}
+
 func TestConverterExists(t *testing.T) {
 	assert.False(t, dataconv.ConverterExists(""))
 }

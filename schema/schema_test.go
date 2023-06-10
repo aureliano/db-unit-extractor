@@ -16,6 +16,8 @@ func (DummyConverter) Convert(interface{}) (interface{}, error) {
 	return 0, nil
 }
 
+func (DummyConverter) Handle(interface{}) bool { return true }
+
 func TestDigestSchemaFileNotFound(t *testing.T) {
 	_, err := schema.DigestSchema("/path/to/unknown/file.yml")
 	assert.ErrorIs(t, err, schema.ErrSchemaFile)

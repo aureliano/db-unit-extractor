@@ -21,6 +21,8 @@ func (DummyConverter) Convert(interface{}) (interface{}, error) {
 	return 0, nil
 }
 
+func (DummyConverter) Handle(interface{}) bool { return true }
+
 type DummyReader struct{}
 
 type HumanResourcesReader struct{}

@@ -17,3 +17,8 @@ func (DateTimeISO8601Converter) Convert(source interface{}) (interface{}, error)
 
 	return tm.Format(dateTimeISO8601Layout), nil
 }
+
+func (DateTimeISO8601Converter) Handle(vl interface{}) bool {
+	_, handled := vl.(time.Time)
+	return handled
+}

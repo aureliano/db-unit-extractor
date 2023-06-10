@@ -4,6 +4,7 @@ var converterIds = make(map[string]Converter)
 
 type Converter interface {
 	Convert(interface{}) (interface{}, error)
+	Handle(interface{}) bool
 }
 
 func ConverterExists(id string) bool {
