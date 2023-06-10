@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/aureliano/db-unit-extractor/dataconv"
 	"github.com/aureliano/db-unit-extractor/schema"
 )
 
@@ -49,7 +50,7 @@ func (r OracleReader) FetchColumnsMetadata(table schema.Table) ([]DBColumn, erro
 	return records, nil
 }
 
-func (r OracleReader) FetchData(table string, fields []DBColumn, converters []schema.Converter,
+func (r OracleReader) FetchData(table string, fields []DBColumn, converters []dataconv.Converter,
 	filters [][]interface{}) ([]map[string]interface{}, error) {
 	query := buildOracleSQLQueryColumns(table, fields, filters)
 
@@ -84,7 +85,7 @@ func (r OracleReader) FetchData(table string, fields []DBColumn, converters []sc
 	return fetchData(r.db, converters, arrValues, query)
 }
 
-func fetchData(db *sql.DB, converters []schema.Converter, arrValues [][]interface{},
+func fetchData(db *sql.DB, converters []dataconv.Converter, arrValues [][]interface{},
 	query string) ([]map[string]interface{}, error) {
 	rows := make([]map[string]interface{}, 0, len(arrValues))
 
@@ -107,7 +108,7 @@ func fetchData(db *sql.DB, converters []schema.Converter, arrValues [][]interfac
 	return rows, nil
 }
 
-func executeQuery(db *sql.DB, _ []schema.Converter, filters []interface{},
+func executeQuery(db *sql.DB, _ []dataconv.Converter, filters []interface{},
 	query string) ([]map[string]interface{}, error) {
 	stmt, err := db.Prepare(query)
 	if err != nil {

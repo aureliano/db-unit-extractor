@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/aureliano/db-unit-extractor/dataconv"
 	"github.com/aureliano/db-unit-extractor/reader"
 	"github.com/aureliano/db-unit-extractor/schema"
 	"github.com/stretchr/testify/assert"
@@ -241,7 +242,7 @@ func TestFetchData(t *testing.T) {
 		{Name: "TOTAL", Type: "NUMBER", Nullable: false, Length: 22,
 			DecimalSize: reader.DecimalColumn{Precision: 17, Scale: 2}},
 	}
-	converters := []schema.Converter{}
+	converters := []dataconv.Converter{}
 	filters := [][]interface{}{}
 
 	rows := sqlmock.
@@ -278,7 +279,7 @@ func TestFetchDataFiltered(t *testing.T) {
 		{Name: "TOTAL", Type: "NUMBER", Nullable: false, Length: 22,
 			DecimalSize: reader.DecimalColumn{Precision: 17, Scale: 2}},
 	}
-	converters := []schema.Converter{}
+	converters := []dataconv.Converter{}
 	filters := [][]interface{}{{"ID", 4}, {"STATUS", "SOLD"}}
 
 	rows := sqlmock.
@@ -315,7 +316,7 @@ func TestFetchDataPrepareError(t *testing.T) {
 		{Name: "TOTAL", Type: "NUMBER", Nullable: false, Length: 22,
 			DecimalSize: reader.DecimalColumn{Precision: 19, Scale: 2}},
 	}
-	converters := []schema.Converter{}
+	converters := []dataconv.Converter{}
 	filters := [][]interface{}{}
 
 	errTest := errors.New("prepare error")
@@ -343,7 +344,7 @@ func TestFetchDataPrepareErrorMultivalued(t *testing.T) {
 		{Name: "TOTAL", Type: "NUMBER", Nullable: false, Length: 22,
 			DecimalSize: reader.DecimalColumn{Precision: 19, Scale: 2}},
 	}
-	converters := []schema.Converter{}
+	converters := []dataconv.Converter{}
 	filters := [][]interface{}{{"f1", []interface{}{"v1", "v2"}}}
 
 	errTest := errors.New("prepare error")
@@ -371,7 +372,7 @@ func TestFetchDataPrepareQueryError(t *testing.T) {
 		{Name: "TOTAL", Type: "NUMBER", Nullable: false, Length: 22,
 			DecimalSize: reader.DecimalColumn{Precision: 18, Scale: 2}},
 	}
-	converters := []schema.Converter{}
+	converters := []dataconv.Converter{}
 	filters := [][]interface{}{}
 
 	errTest := errors.New("prepare query error")

@@ -19,3 +19,7 @@ func RegisterConverters() {
 	RegisterConverter("date-time-iso8601", DateTimeISO8601Converter{})
 	RegisterConverter("blob", BlobConverter{})
 }
+
+func GetConverter(id string) Converter {
+	return converterIds[id]
+}

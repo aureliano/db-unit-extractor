@@ -107,6 +107,11 @@ func launchWriters(writers []writer.FileWriter) []chan dbResponse {
 }
 
 func launchReaders(model schema.Model, db reader.DBReader, writers []chan dbResponse) error {
+	converters := make([]dataconv.Converter, 0)
+	for _, id := range model.Converters {
+		converters = append(converters, dataconv.GetConverter(string(id)))
+	}
+
 	for _, tables := range model.GroupedTables() {
 		respChan := make(chan dbResponse)
 		tbSize := len(tables)
@@ -117,7 +122,7 @@ func launchReaders(model schema.Model, db reader.DBReader, writers []chan dbResp
 				return fmt.Errorf("%w: %w", ErrExtractor, err)
 			}
 
-			go fetchData(respChan, table, db, model.Converters, filters)
+			go fetchData(respChan, table, db, converters, filters)
 		}
 
 		counter := 0
@@ -143,7 +148,7 @@ func launchReaders(model schema.Model, db reader.DBReader, writers []chan dbResp
 }
 
 func fetchData(c chan dbResponse, table schema.Table,
-	db reader.DBReader, converters []schema.Converter, filters [][]interface{}) {
+	db reader.DBReader, converters []dataconv.Converter, filters [][]interface{}) {
 	columns, err := db.FetchColumnsMetadata(table)
 	if err != nil {
 		c <- dbResponse{err: err}

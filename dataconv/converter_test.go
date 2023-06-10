@@ -31,3 +31,13 @@ func TestRegisterConverters(t *testing.T) {
 	assert.True(t, dataconv.ConverterExists("date-time-iso8601"))
 	assert.True(t, dataconv.ConverterExists("blob"))
 }
+
+func TestGetConverter(t *testing.T) {
+	dataconv.RegisterConverters()
+
+	c := dataconv.GetConverter("date-time-iso8601")
+	assert.NotNil(t, c)
+
+	c = dataconv.GetConverter("blob")
+	assert.NotNil(t, c)
+}
