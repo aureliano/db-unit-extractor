@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestConvertSourceIsNotTime(t *testing.T) {
+func TestConvertTimeSourceIsNotTime(t *testing.T) {
 	c := dataconv.DateTimeISO8601Converter{}
 	source := "2023-06-09T14:31:16.478 -0300"
 	actual, err := c.Convert(source)
@@ -17,7 +17,7 @@ func TestConvertSourceIsNotTime(t *testing.T) {
 	assert.Nil(t, actual)
 }
 
-func TestConvert(t *testing.T) {
+func TestConvertTime(t *testing.T) {
 	c := dataconv.DateTimeISO8601Converter{}
 	location, _ := time.LoadLocation("America/Sao_Paulo")
 	source := time.Date(2023, time.June, 9, 14, 31, 16, 478587456, location)
