@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/aureliano/db-unit-extractor/dataconv"
 	"github.com/aureliano/db-unit-extractor/reader"
 	"github.com/aureliano/db-unit-extractor/schema"
 	"github.com/aureliano/db-unit-extractor/writer"
@@ -36,6 +37,7 @@ var (
 )
 
 func Extract(conf Conf, db reader.DBReader, writers []writer.FileWriter) error {
+	dataconv.RegisterConverters()
 	schema, err := schema.DigestSchema(conf.SchemaPath)
 	if err != nil {
 		return err

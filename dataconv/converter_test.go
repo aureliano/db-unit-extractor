@@ -21,3 +21,9 @@ func TestRegisterConverter(t *testing.T) {
 	dataconv.RegisterConverter("xpto", DummyConverter(""))
 	assert.True(t, dataconv.ConverterExists("xpto"))
 }
+
+func TestRegisterConverters(t *testing.T) {
+	dataconv.RegisterConverters()
+	assert.True(t, dataconv.ConverterExists("date-time-iso8601"))
+	assert.True(t, dataconv.ConverterExists("blob"))
+}

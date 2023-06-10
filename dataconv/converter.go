@@ -13,3 +13,8 @@ func ConverterExists(id string) bool {
 func RegisterConverter(id string, converter Converter) {
 	converterIds[id] = converter
 }
+
+func RegisterConverters() {
+	RegisterConverter("date-time-iso8601", DateTimeISO8601Converter{})
+	RegisterConverter("blob", BlobConverter{})
+}
