@@ -12,7 +12,8 @@ import (
 
 type DummyConverter string
 
-func (DummyConverter) Convert(_ interface{}, _ *interface{}) {
+func (DummyConverter) Convert(interface{}) (interface{}, error) {
+	return 0, nil
 }
 
 func TestDigestSchemaFileNotFound(t *testing.T) {
