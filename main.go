@@ -11,28 +11,40 @@ import (
 
 func main() {
 	cpuProfile := os.Getenv("CPU_PROFILE")
+	var file *os.File
+	var err error
 	if cpuProfile != "" {
-		f, err := os.Create(cpuProfile)
+		file, err = os.Create(cpuProfile)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		pprof.StartCPUProfile(f)
-		defer pprof.StopCPUProfile()
+		if err = pprof.StartCPUProfile(file); err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	memProfile := os.Getenv("MEM_PROFILE")
 	if memProfile != "" {
-		f, err := os.Create(memProfile)
+		file, err = os.Create(memProfile)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		pprof.WriteHeapProfile(f)
-		defer f.Close()
+		if err = pprof.WriteHeapProfile(file); err != nil {
+			log.Fatal(err)
+		}
 	}
 
-	err := cmd.NewRootCommand().Execute()
+	err = cmd.NewRootCommand().Execute()
+	if cpuProfile != "" {
+		pprof.StopCPUProfile()
+	}
+
+	if file != nil {
+		_ = file.Close()
+	}
+
 	if err != nil {
 		os.Exit(1)
 	}
