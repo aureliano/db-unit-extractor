@@ -299,6 +299,8 @@ func TestExtractUnsupportedReader(t *testing.T) {
 
 func TestExtractUnsupportedWriter(t *testing.T) {
 	dataconv.RegisterConverter("conv_date_time", DummyConverter(""))
+	dataconv.RegisterConverters()
+
 	refs := make(map[string]interface{})
 	refs["customer_id"] = 34
 

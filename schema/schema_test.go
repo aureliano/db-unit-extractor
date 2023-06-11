@@ -48,9 +48,11 @@ func TestDigestSchema(t *testing.T) {
 	require.Nil(t, err)
 
 	converters := schema.Converters
-	assert.Len(t, converters, 2)
+	assert.Len(t, converters, 4)
 	assert.EqualValues(t, "conv_date_time", converters[0])
 	assert.EqualValues(t, "conv_timestamp", converters[1])
+	assert.EqualValues(t, dataconv.DateTimeISO8601ID, converters[2])
+	assert.EqualValues(t, dataconv.BlobConverterID, converters[3])
 
 	tables := schema.Tables
 	assert.Len(t, tables, 4)
@@ -138,6 +140,10 @@ func TestDigestSchemaReferences(t *testing.T) {
 	assert.Contains(t, schema.Refs, "b131.id")
 	assert.Contains(t, schema.Refs, "c1.id")
 	assert.Contains(t, schema.Refs, "a11.id[@]")
+
+	assert.Len(t, schema.Converters, 2)
+	assert.EqualValues(t, dataconv.DateTimeISO8601ID, schema.Converters[0])
+	assert.EqualValues(t, dataconv.BlobConverterID, schema.Converters[1])
 }
 
 func TestSelectColumns(t *testing.T) {

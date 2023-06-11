@@ -28,16 +28,16 @@ func TestRegisterConverter(t *testing.T) {
 
 func TestRegisterConverters(t *testing.T) {
 	dataconv.RegisterConverters()
-	assert.True(t, dataconv.ConverterExists("date-time-iso8601"))
-	assert.True(t, dataconv.ConverterExists("blob"))
+	assert.True(t, dataconv.ConverterExists(dataconv.DateTimeISO8601ID))
+	assert.True(t, dataconv.ConverterExists(dataconv.BlobConverterID))
 }
 
 func TestGetConverter(t *testing.T) {
 	dataconv.RegisterConverters()
 
-	c := dataconv.GetConverter("date-time-iso8601")
+	c := dataconv.GetConverter(dataconv.DateTimeISO8601ID)
 	assert.NotNil(t, c)
 
-	c = dataconv.GetConverter("blob")
+	c = dataconv.GetConverter(dataconv.BlobConverterID)
 	assert.NotNil(t, c)
 }

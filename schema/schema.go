@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/aureliano/db-unit-extractor/dataconv"
 	"gopkg.in/yaml.v2"
 )
 
@@ -75,6 +76,7 @@ func DigestSchema(fpath string) (Model, error) {
 	}
 
 	schema.Refs = fetchReferences(schema)
+	setDefaultConverters(&schema)
 
 	return schema, schema.Classify()
 }
@@ -120,4 +122,24 @@ func fetchReferences(s Model) map[string]interface{} {
 	}
 
 	return refs
+}
+
+func setDefaultConverters(model *Model) {
+	if !converterDefined(dataconv.DateTimeISO8601ID, model) {
+		model.Converters = append(model.Converters, dataconv.DateTimeISO8601ID)
+	}
+
+	if !converterDefined(dataconv.BlobConverterID, model) {
+		model.Converters = append(model.Converters, dataconv.BlobConverterID)
+	}
+}
+
+func converterDefined(cvid string, model *Model) bool {
+	for _, id := range model.Converters {
+		if string(id) == cvid {
+			return true
+		}
+	}
+
+	return false
 }

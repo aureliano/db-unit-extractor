@@ -1,6 +1,8 @@
 ---
 converters:
   - conv_date_time
+  - date-time-iso8601
+  - blob
 tables:
   - name: customers
     filters:
