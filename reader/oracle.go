@@ -108,7 +108,7 @@ func fetchData(db *sql.DB, converters []dataconv.Converter, arrValues [][]interf
 	return rows, nil
 }
 
-func executeQuery(db *sql.DB, _ []dataconv.Converter, filters []interface{},
+func executeQuery(db *sql.DB, converters []dataconv.Converter, filters []interface{},
 	query string) ([]map[string]interface{}, error) {
 	stmt, err := db.Prepare(query)
 	if err != nil {
@@ -122,7 +122,7 @@ func executeQuery(db *sql.DB, _ []dataconv.Converter, filters []interface{},
 	}
 	defer rows.Close()
 
-	return readDataSet(rows)
+	return readDataSet(rows, converters)
 }
 
 func strToBool(str string) bool {
@@ -189,7 +189,7 @@ func buildOracleSQLQueryColumns(table string, fields []DBColumn, filters [][]int
 	return query
 }
 
-func readDataSet(rows *sql.Rows) ([]map[string]interface{}, error) {
+func readDataSet(rows *sql.Rows, converters []dataconv.Converter) ([]map[string]interface{}, error) {
 	columns, _ := rows.Columns()
 	count := len(columns)
 	values := make([]interface{}, count)
@@ -206,11 +206,35 @@ func readDataSet(rows *sql.Rows) ([]map[string]interface{}, error) {
 
 		row := make(map[string]interface{})
 		for i := range columns {
-			row[columns[i]] = values[i]
+			value, err := fetchValue(values[i], converters)
+			if err != nil {
+				return nil, err
+			}
+
+			row[columns[i]] = value
 		}
 
 		data = append(data, row)
 	}
 
 	return data, rows.Err()
+}
+
+func fetchValue(value interface{}, converters []dataconv.Converter) (interface{}, error) {
+	converter := findConverter(value, converters)
+	if converter != nil {
+		return converter.Convert(value)
+	}
+
+	return value, nil
+}
+
+func findConverter(value interface{}, converters []dataconv.Converter) dataconv.Converter {
+	for _, converter := range converters {
+		if converter.Handle(value) {
+			return converter
+		}
+	}
+
+	return nil
 }
