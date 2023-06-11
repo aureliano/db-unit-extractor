@@ -21,6 +21,17 @@ func main() {
 		defer pprof.StopCPUProfile()
 	}
 
+	memProfile := os.Getenv("MEM_PROFILE")
+	if memProfile != "" {
+		f, err := os.Create(memProfile)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		pprof.WriteHeapProfile(f)
+		defer f.Close()
+	}
+
 	err := cmd.NewRootCommand().Execute()
 	if err != nil {
 		os.Exit(1)
