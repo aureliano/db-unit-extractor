@@ -29,3 +29,9 @@ func TestConvertBytes(t *testing.T) {
 	bts, _ := base64.StdEncoding.DecodeString(actual.(string))
 	assert.Equal(t, source, bts)
 }
+
+func TestHandleBlob(t *testing.T) {
+	c := dataconv.BlobConverter{}
+	assert.False(t, c.Handle(456))
+	assert.True(t, c.Handle([]byte{1, 3, 65}))
+}

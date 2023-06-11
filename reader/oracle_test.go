@@ -2,14 +2,27 @@ package reader_test
 
 import (
 	"errors"
+	"fmt"
 	"testing"
+	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/aureliano/db-unit-extractor/dataconv"
 	"github.com/aureliano/db-unit-extractor/reader"
 	"github.com/aureliano/db-unit-extractor/schema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+type DummyConverter struct{}
+
+func (DummyConverter) Convert(interface{}) (interface{}, error) {
+	return nil, fmt.Errorf("converter error")
+}
+
+func (DummyConverter) Handle(interface{}) bool {
+	return true
+}
 
 func TestFetchColumnsMetadata(t *testing.T) {
 	db, mock, err := sqlmock.New()
@@ -240,13 +253,17 @@ func TestFetchData(t *testing.T) {
 		{Name: "STATUS", Type: "VARCHAR2", Nullable: true, Length: 15},
 		{Name: "TOTAL", Type: "NUMBER", Nullable: false, Length: 22,
 			DecimalSize: reader.DecimalColumn{Precision: 17, Scale: 2}},
+		{Name: "DATE_REC", Type: "DATE", Nullable: false},
+		{Name: "ATTACHMENT", Type: "BLOB", Nullable: true, Length: 1024},
 	}
-	converters := []schema.Converter{}
+	converters := []dataconv.Converter{dataconv.DateTimeISO8601Converter{}, dataconv.BlobConverter{}}
 	filters := [][]interface{}{}
+	dateRec := time.Now()
+	attachment := []byte("hello world")
 
 	rows := sqlmock.
-		NewRows([]string{"ID", "USER_ID", "STATUS", "TOTAL"}).
-		AddRow(4, 375, "SOLD", 2243.72)
+		NewRows([]string{"ID", "USER_ID", "STATUS", "TOTAL", "DATE_REC", "ATTACHMENT"}).
+		AddRow(4, 375, "SOLD", 2243.72, dateRec, attachment)
 
 	sql := "^SELECT (.+) FROM ORDERS$"
 	mock.ExpectPrepare(sql).ExpectQuery().WillReturnRows(rows)
@@ -259,6 +276,8 @@ func TestFetchData(t *testing.T) {
 	assert.EqualValues(t, 375, data[0]["USER_ID"])
 	assert.Equal(t, "SOLD", data[0]["STATUS"])
 	assert.EqualValues(t, 2243.72, data[0]["TOTAL"])
+	assert.Equal(t, dateRec.Format("2006-01-02T15:04:05.999 -0700"), data[0]["DATE_REC"])
+	assert.Equal(t, "aGVsbG8gd29ybGQ=", data[0]["ATTACHMENT"])
 }
 
 func TestFetchDataFiltered(t *testing.T) {
@@ -278,7 +297,7 @@ func TestFetchDataFiltered(t *testing.T) {
 		{Name: "TOTAL", Type: "NUMBER", Nullable: false, Length: 22,
 			DecimalSize: reader.DecimalColumn{Precision: 17, Scale: 2}},
 	}
-	converters := []schema.Converter{}
+	converters := []dataconv.Converter{}
 	filters := [][]interface{}{{"ID", 4}, {"STATUS", "SOLD"}}
 
 	rows := sqlmock.
@@ -315,7 +334,7 @@ func TestFetchDataPrepareError(t *testing.T) {
 		{Name: "TOTAL", Type: "NUMBER", Nullable: false, Length: 22,
 			DecimalSize: reader.DecimalColumn{Precision: 19, Scale: 2}},
 	}
-	converters := []schema.Converter{}
+	converters := []dataconv.Converter{}
 	filters := [][]interface{}{}
 
 	errTest := errors.New("prepare error")
@@ -343,7 +362,7 @@ func TestFetchDataPrepareErrorMultivalued(t *testing.T) {
 		{Name: "TOTAL", Type: "NUMBER", Nullable: false, Length: 22,
 			DecimalSize: reader.DecimalColumn{Precision: 19, Scale: 2}},
 	}
-	converters := []schema.Converter{}
+	converters := []dataconv.Converter{}
 	filters := [][]interface{}{{"f1", []interface{}{"v1", "v2"}}}
 
 	errTest := errors.New("prepare error")
@@ -371,7 +390,7 @@ func TestFetchDataPrepareQueryError(t *testing.T) {
 		{Name: "TOTAL", Type: "NUMBER", Nullable: false, Length: 22,
 			DecimalSize: reader.DecimalColumn{Precision: 18, Scale: 2}},
 	}
-	converters := []schema.Converter{}
+	converters := []dataconv.Converter{}
 	filters := [][]interface{}{}
 
 	errTest := errors.New("prepare query error")
@@ -380,4 +399,35 @@ func TestFetchDataPrepareQueryError(t *testing.T) {
 
 	_, err = r.FetchData("ORDERS", fields, converters, filters)
 	assert.ErrorIs(t, err, errTest)
+}
+
+func TestFetchDataConverterError(t *testing.T) {
+	db, mock, err := sqlmock.New()
+
+	require.Nil(t, err)
+	defer db.Close()
+
+	r, _ := reader.NewReader(&reader.DataSource{DSN: "oracle://usr:pwd@localhost:1521/dbname", DB: db})
+
+	fields := []reader.DBColumn{
+		{Name: "ID", Type: "NUMBER", Nullable: false, Length: 22,
+			DecimalSize: reader.DecimalColumn{Precision: 2, Scale: 0}},
+		{Name: "USER_ID", Type: "NUMBER", Nullable: false, Length: 22,
+			DecimalSize: reader.DecimalColumn{Precision: 2, Scale: 0}},
+		{Name: "STATUS", Type: "VARCHAR2", Nullable: true, Length: 15},
+		{Name: "TOTAL", Type: "NUMBER", Nullable: false, Length: 22,
+			DecimalSize: reader.DecimalColumn{Precision: 17, Scale: 2}},
+	}
+	converters := []dataconv.Converter{DummyConverter{}}
+	filters := [][]interface{}{}
+
+	rows := sqlmock.
+		NewRows([]string{"ID", "USER_ID", "STATUS", "TOTAL"}).
+		AddRow(4, 375, "SOLD", 2243.72)
+
+	sql := "^SELECT (.+) FROM ORDERS$"
+	mock.ExpectPrepare(sql).ExpectQuery().WillReturnRows(rows)
+
+	_, err = r.FetchData("ORDERS", fields, converters, filters)
+	assert.Equal(t, "converter error", err.Error())
 }

@@ -21,6 +21,8 @@ func (DummyConverter) Convert(interface{}) (interface{}, error) {
 	return 0, nil
 }
 
+func (DummyConverter) Handle(interface{}) bool { return true }
+
 type DummyReader struct{}
 
 type HumanResourcesReader struct{}
@@ -124,7 +126,7 @@ func (FetchDataErrorDummyReader) FetchColumnsMetadata(schema.Table) ([]reader.DB
 	return []reader.DBColumn{}, nil
 }
 
-func (DummyReader) FetchData(table string, _ []reader.DBColumn, _ []schema.Converter,
+func (DummyReader) FetchData(table string, _ []reader.DBColumn, _ []dataconv.Converter,
 	_ [][]interface{}) ([]map[string]interface{}, error) {
 	switch {
 	case table == "customers":
@@ -157,7 +159,7 @@ func (DummyReader) FetchData(table string, _ []reader.DBColumn, _ []schema.Conve
 	}
 }
 
-func (HumanResourcesReader) FetchData(table string, _ []reader.DBColumn, _ []schema.Converter,
+func (HumanResourcesReader) FetchData(table string, _ []reader.DBColumn, _ []dataconv.Converter,
 	_ [][]interface{}) ([]map[string]interface{}, error) {
 	switch {
 	case table == "employees":
@@ -249,12 +251,12 @@ func (HumanResourcesReader) FetchData(table string, _ []reader.DBColumn, _ []sch
 	}
 }
 
-func (FetchMetadataErrorDummyReader) FetchData(string, []reader.DBColumn, []schema.Converter,
+func (FetchMetadataErrorDummyReader) FetchData(string, []reader.DBColumn, []dataconv.Converter,
 	[][]interface{}) ([]map[string]interface{}, error) {
 	return []map[string]interface{}{}, nil
 }
 
-func (FetchDataErrorDummyReader) FetchData(string, []reader.DBColumn, []schema.Converter,
+func (FetchDataErrorDummyReader) FetchData(string, []reader.DBColumn, []dataconv.Converter,
 	[][]interface{}) ([]map[string]interface{}, error) {
 	return nil, fmt.Errorf("fetch data error")
 }
@@ -297,6 +299,8 @@ func TestExtractUnsupportedReader(t *testing.T) {
 
 func TestExtractUnsupportedWriter(t *testing.T) {
 	dataconv.RegisterConverter("conv_date_time", DummyConverter(""))
+	dataconv.RegisterConverters()
+
 	refs := make(map[string]interface{})
 	refs["customer_id"] = 34
 

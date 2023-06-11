@@ -15,3 +15,8 @@ func (BlobConverter) Convert(source interface{}) (interface{}, error) {
 
 	return base64.StdEncoding.EncodeToString(bts), nil
 }
+
+func (BlobConverter) Handle(vl interface{}) bool {
+	_, handled := vl.([]byte)
+	return handled
+}

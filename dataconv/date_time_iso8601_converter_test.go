@@ -27,3 +27,9 @@ func TestConvertTime(t *testing.T) {
 	assert.Nil(t, err)
 	assert.EqualValues(t, expected, actual)
 }
+
+func TestHandleTime(t *testing.T) {
+	c := dataconv.DateTimeISO8601Converter{}
+	assert.False(t, c.Handle("2023-06-09T14:31:16.478 -0300"))
+	assert.True(t, c.Handle(time.Now()))
+}

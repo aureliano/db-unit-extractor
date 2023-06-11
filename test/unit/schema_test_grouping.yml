@@ -1,4 +1,7 @@
 ---
+converters:
+  - date-time-iso8601
+  - blob
 tables:
   - name: b11
     filters:

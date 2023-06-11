@@ -3,6 +3,7 @@ package schema_test
 import (
 	"testing"
 
+	"github.com/aureliano/db-unit-extractor/dataconv"
 	"github.com/aureliano/db-unit-extractor/schema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -34,6 +35,7 @@ func TestClassifyReferenceNotFound(t *testing.T) {
 }
 
 func TestClassify(t *testing.T) {
+	dataconv.RegisterConverters()
 	schema, err := schema.DigestSchema("../test/unit/schema_test_grouping.yml")
 	require.Nil(t, err)
 
