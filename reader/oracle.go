@@ -44,7 +44,7 @@ func (r OracleReader) FetchColumnsMetadata(table schema.Table) ([]DBColumn, erro
 	if rows.Err() != nil {
 		return nil, rows.Err()
 	} else if len(records) == 0 {
-		return nil, fmt.Errorf("no metadata found in table %s (lack of permission?)", table.Name)
+		return nil, fmt.Errorf("no metadata found for table %s (make sure it exists and user has proper grants)", table.Name)
 	}
 
 	return records, nil

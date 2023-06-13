@@ -234,7 +234,7 @@ func TestFetchColumnsMetadataEmptyResultError(t *testing.T) {
 	mock.ExpectQuery("^SELECT (.+) FROM  ALL_TAB_COLS").WillReturnRows(rows)
 
 	_, err = r.FetchColumnsMetadata(schema.Table{Name: "customers", Ignore: []schema.Ignore{"id"}})
-	assert.Equal(t, "no metadata found in table customers (lack of permission?)", err.Error())
+	assert.Equal(t, "no metadata found for table customers (make sure it exists and user has proper grants)", err.Error())
 }
 
 func TestFetchData(t *testing.T) {
