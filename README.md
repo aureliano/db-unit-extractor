@@ -1,4 +1,5 @@
 # db-unit-extractor
+
 **db-unit-extractor** is a database extractor for unit testing. Rather than a massive data extractor, its goal is to extract a data-set for unit testing. 
 
 Sometimes, it is necessary to write some integration tests in order to assure that components may work together. A database is a middleware that is often mocked in unit test and tests are neglited in favor of black box tests. Some frameworks like [dbunit](https://www.dbunit.org/) and [h2](https://www.h2database.com) helps creating those integration tests accessing a database. Although, they lack a consistent tool for generating a data-set to each test scenario. This tool was made to support testers on creating data-sets by extracting data of a specific set of records.
@@ -6,9 +7,11 @@ Sometimes, it is necessary to write some integration tests in order to assure th
 Supported [operating systems](https://en.wikipedia.org/wiki/Operating_system) are [Linux](https://en.wikipedia.org/wiki/Linux), [Darwin](https://en.wikipedia.org/wiki/Darwin_(operating_system)) and [Windows](https://en.wikipedia.org/wiki/Microsoft_Windows).
 
 ## Data-set schema
+
 A data-set schema is a yaml file with instructions of how a data-set will be created, as which tables and which columns will be part of the query, columns that will filter the query and data converters.
 
 ### Converters
+
 A converter takes a column and formats its output in order to be suitable for consumers like dbunit. There two converters that are loaded by default and it's not necessary to declare them in the schema file.
 
 Converters are defined by the key `converters` and handles an array of converter ids.
@@ -21,6 +24,7 @@ converters:
 ```
 
 #### Date/Time ISO 8601
+
 Converts a date/time/timestamp data in a formatted [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) text.
 
 ```yaml
@@ -30,6 +34,7 @@ converters:
 ```
 
 #### BLOB
+
 Converts a blob data in a [base64](https://en.wikipedia.org/wiki/Base64) encoded text.
 
 ```yaml
@@ -39,6 +44,7 @@ converters:
 ```
 
 ### Tables
+
 The tables key is the entry point to data-set definition. Indeed, it's where you tell which tables will be queried in order to build the data-set.
 
 Tables are defined by the key `tables` and handles an array of table keys.
@@ -51,6 +57,7 @@ tables:
 In the sample above, an sql like `select * from table_name` will be sent to database and all records and all columns of table_name will be fetched.
 
 #### Filtering
+
 Most of times you'll probably want filter a query. In the case you want just a specific record, you pass a filter with name and value. so, to fetch only the record with id 12345 you do like bellow.
 
 ```yaml
@@ -64,6 +71,7 @@ tables:
 It'll query `select * from table_name where id = '12345'`.
 
 #### Fetch columns
+
 If you don't want to fetch all columns and just select a few of them, you may set which ones.
 
 ```yaml
@@ -82,6 +90,7 @@ tables:
 It'll query `select id, column_2, column_5, column_9 from table_name where id = '12345'`.
 
 #### Ignore columns
+
 Sometimes, instead of setting which columns you want to get in a query, you may want to set which ones you don't. Following the samples above, imagine `table_name` has this set of columns: id, column_1, column_2, column_3, column_4, column_5, column_6, column_7, column_8, column_9. And you want to get all but columns column_3 and column_4.
 
 ```yaml
@@ -98,6 +107,7 @@ tables:
 **Important to note that columns and ignore are excludent!** You cannot set both in a table.
 
 #### Dynamic filter - command line parameter
+
 So far, we've seen static references on filtering. A better approach would be using dynamic filters. Imagine you have a lot of scenarios to the same data-set. Instead of creating many schema files you just need to parameterize the filter.
 
 ```yaml
@@ -111,6 +121,7 @@ tables:
 Now, since filter named `id` has a dynamic value, you must set `table_name_pk` parameter to command line.
 
 #### Dynamic filter - referenced table
+
 Unlike the previous section, you may have situations where you don't know which value a parameter may have because you depend of a resulted query. In the previous samples, we had just one table. So, imagine we have two tables: customers and orders. And we get the customer id from command line and the orders of the employee from que queried customer.
 
 ```yaml
@@ -130,6 +141,7 @@ Above, we see that, a query to customers will be made and the result will be use
 **Importnat!** The order of tables doesn't matter. They are ordered at runtime. Setting orders before customers will make no difference.
 
 #### Dynamic filter - multivalued referenced table
+
 Multivalued filters are useful when you need to reference a table that returns more than one record. Following the last sample, now we need to fetch all products ordered by the customer. As we known that a customer may have ordered more than once, it is necessary to filter products by an array of order ids.
 
 ```yaml
@@ -155,18 +167,23 @@ tables:
 Above you might have noticed the use of `[@]` suffix, that means: this reference is multivalued. At the end, our data-set will have a customer with many orders with many products.
 
 ## Database reader
+
 Database reader is a component that handles data recovering. In the next subsections you'll see what database systems are supported by this project.
 
 ### Oracle
+
 This reader handles data and metadata recovering from [Oracle](https://www.oracle.com) databases. Integrations tests were made in Oracle 21c. Although it is supposed to work on older versions.
 
 ## File writer
+
 File writer is a component that handles data writing. It takes records from data reader and outputs to an arbitrary file type. In the next subsections you'll see what file writers are supported by this project.
 
 ### XML
+
 This writer send records to an XML file.
 
 ## Command line application
+
 Data-set extractions are made through a command line application named `db-unit-extractor`.
 
 ```
@@ -223,14 +240,17 @@ Flags:
 ```
 
 ## Update program
+
 If you wanna stay up to date, you may call `db-unit-extractor update` and a new verion - if it is not the edge - will be installed.
 
 ## Development
 
 ### Integration tests
+
 Go to the integration tests [documentation](./test/integration/README.md) to get detailed information and how to execute them.
 
 ### Profiling
+
 Identify performance problems with code profilers. You may enable CPU profiling and memory profiling by exporting CPU_PROFILE and MEM_PROFILE environment variables. They must point to a file (non existing directories won't be created). In the sample bellow, both profilers are enabled.
 
 ```shell
@@ -257,6 +277,7 @@ go tool pprof dist/db-unit-extractor_linux_amd64_v1/db-unit-extractor /tmp/db-un
 ```
 
 ### Release
+
 Programs are released under semantic versioning - [semver](https://semver.org).
 
  > Given a version number MAJOR.MINOR.PATCH, increment the:
@@ -281,7 +302,9 @@ git push origin v1.0.0
 After a tag is published a [pipeline](./.github/workflows/release.yml) is triggered and create a release based on the created tag. Releases are listed [here](https://github.com/aureliano/db-unit-extractor/releases).
 
 ## Contributing
+
 Please feel free to submit issues, fork the repository and send pull requests! But first, read [this guide](./CONTRIBUTING.md) in order to get orientations on how to contribute the best way.
 
 ## License
+
 This project is licensed under the terms of the MIT license found in the [LICENSE](./LICENSE) file.
