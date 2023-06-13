@@ -254,6 +254,30 @@ go tool pprof dist/db-unit-extractor_linux_amd64_v1/db-unit-extractor /tmp/db-un
 go tool pprof dist/db-unit-extractor_linux_amd64_v1/db-unit-extractor /tmp/db-unit-extractor/mem.prof
 ```
 
+### Release
+Programs are released under semantic versioning - [semver](https://semver.org).
+
+ > Given a version number MAJOR.MINOR.PATCH, increment the:
+ > 1. MAJOR version when you make incompatible API changes
+ > 2. MINOR version when you add functionality in a backward compatible manner
+ > 3. PATCH version when you make backward compatible bug fixes
+
+Before you make sure that continuous integration pipeline isn't broken. The pipeline execute unit tests and code linters to check code compliance.
+
+Beyond, execute [integration tests](./test/integration/README.md) and make sure none of them is broken.
+
+When all branches and pull requests of bug fixes and new features are merged, just create a tag following semantic versioning. Bellow is a sample of the first version tag creation.
+
+```shell
+# Create an annotated tag.
+git tag -a v1.0.0 -m "Database extractor for unit testing. Supports Oracle database reader and console and xml file writers."
+
+# Publish tag.
+git push origin v1.0.0
+```
+
+After a tag is published a [pipeline](./.github/workflows/release.yml) is triggered and create a release based on the created tag. Releases are listed [here](https://github.com/aureliano/db-unit-extractor/releases).
+
 ## Contributing
 Please feel free to submit issues, fork the repository and send pull requests! But first, read [this guide](./CONTRIBUTING.md) in order to get orientations on how to contribute the best way.
 
