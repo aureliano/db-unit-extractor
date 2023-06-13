@@ -6,6 +6,33 @@ Sometimes, it is necessary to write some integration tests in order to assure th
 
 Supported [operating systems](https://en.wikipedia.org/wiki/Operating_system) are [Linux](https://en.wikipedia.org/wiki/Linux), [Darwin](https://en.wikipedia.org/wiki/Darwin_(operating_system)) and [Windows](https://en.wikipedia.org/wiki/Microsoft_Windows).
 
+## Index
+
+ 1. [Data-set schema](#data-set-schema)
+    1. [Converters](#converters)
+        1. [Date/Time ISO 8601](#datetime-iso-8601)
+        2. [BLOB](#blob)
+    2. [Tables](#tables)
+        1. [Filtering](#filtering)
+        2. [Fetch columns](#fetch-columns)
+        3. [Ignore columns](#ignore-columns)
+        4. [Dynamic filter - command line parameter](#dynamic-filter---command-line-parameter)
+        5. [Dynamic filter - referenced table](#dynamic-filter---referenced-table)
+        6. [Dynamic filter - multivalued referenced table](#dynamic-filter---multivalued-referenced-table)
+ 2. [Database reader](#database-reader)
+    1. [Oracle](#oracle)
+ 3. [File writer](#file-writer)
+    1. [Console](#console)
+    2. [XML](#xml)
+ 4. [Command line application](#command-line-application)
+ 5. [Update program](#update-program)
+ 6. [Development](#development)
+    1. [Integration tests](#integration-tests)
+    2. [Profiling](#profiling)
+    3. [Release](#release)
+ 7. [Contributing](#contributing)
+ 8. [License](#license)
+
 ## Data-set schema
 
 A data-set schema is a yaml file with instructions of how a data-set will be created, as which tables and which columns will be part of the query, columns that will filter the query and data converters.
@@ -178,9 +205,13 @@ This reader handles data and metadata recovering from [Oracle](https://www.oracl
 
 File writer is a component that handles data writing. It takes records from data reader and outputs to an arbitrary file type. In the next subsections you'll see what file writers are supported by this project.
 
+### Console
+
+This writer sends records to the standard output.
+
 ### XML
 
-This writer send records to an XML file.
+This writer sends records to an XML file.
 
 ## Command line application
 
