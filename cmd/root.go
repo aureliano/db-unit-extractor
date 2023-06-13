@@ -33,7 +33,8 @@ func NewRootCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   project.binName,
 		Short: "Database extractor for unit testing.",
-		Long:  "Database extractor for unit testing.",
+		Long: "Database extractor for unit testing.\nGo to https://github.com/aureliano/db-unit-extractor/issues " +
+			"in order to report a bug or make any suggestion.",
 		Run: func(cmd *cobra.Command, args []string) {
 			version, _ := cmd.Flags().GetBool("version")
 			if version {

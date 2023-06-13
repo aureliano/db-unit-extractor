@@ -2,6 +2,7 @@ package cmd_test
 
 import (
 	"bytes"
+	"fmt"
 	"testing"
 
 	"github.com/aureliano/db-unit-extractor/cmd"
@@ -10,9 +11,13 @@ import (
 
 func TestNewRootCommandHelp(t *testing.T) {
 	c := cmd.NewRootCommand()
+	shortDoc := "Database extractor for unit testing."
+	longDoc := fmt.Sprintf("%s\nGo to https://github.com/aureliano/db-unit-extractor/issues "+
+		"in order to report a bug or make any suggestion.", shortDoc)
+
 	assert.Equal(t, "db-unit-extractor", c.Use)
-	assert.Equal(t, "Database extractor for unit testing.", c.Short)
-	assert.Equal(t, "Database extractor for unit testing.", c.Long)
+	assert.Equal(t, shortDoc, c.Short)
+	assert.Equal(t, longDoc, c.Long)
 
 	output := new(bytes.Buffer)
 	c.SetOut(output)
@@ -29,9 +34,13 @@ func TestNewRootCommandHelp(t *testing.T) {
 
 func TestNewRootCommandVersion(t *testing.T) {
 	c := cmd.NewRootCommand()
+	shortDoc := "Database extractor for unit testing."
+	longDoc := fmt.Sprintf("%s\nGo to https://github.com/aureliano/db-unit-extractor/issues "+
+		"in order to report a bug or make any suggestion.", shortDoc)
+
 	assert.Equal(t, "db-unit-extractor", c.Use)
-	assert.Equal(t, "Database extractor for unit testing.", c.Short)
-	assert.Equal(t, "Database extractor for unit testing.", c.Long)
+	assert.Equal(t, shortDoc, c.Short)
+	assert.Equal(t, longDoc, c.Long)
 
 	output := new(bytes.Buffer)
 	c.SetArgs([]string{"-v"})
