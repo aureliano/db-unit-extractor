@@ -152,13 +152,15 @@ tables:
 
 Above you might have noticed the use of `[@]` suffix, that means: this reference is multivalued. At the end, our data-set will have a customer with many orders with many products.
 
-## Command line application
-
-## Dataset schema
-
 ## Database reader
+Database reader is a component that handles data recovering. In next subsections you'll see what database systems are supported by this project.
+
+### Oracle
+This reader handles data and metadata recovering from [Oracle](https://www.oracle.com) databases. Integrations tests were made in Oracle 21c. Although it is supposed to work on older versions.
 
 ## File writer
+
+## Command line application
 
 ## Contributing
 Please feel free to submit issues, fork the repository and send pull requests! But first, read [this guide](./CONTRIBUTING.md) in order to get orientations on how to contribute the best way.
