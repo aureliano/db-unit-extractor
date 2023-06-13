@@ -153,12 +153,16 @@ tables:
 Above you might have noticed the use of `[@]` suffix, that means: this reference is multivalued. At the end, our data-set will have a customer with many orders with many products.
 
 ## Database reader
-Database reader is a component that handles data recovering. In next subsections you'll see what database systems are supported by this project.
+Database reader is a component that handles data recovering. In the next subsections you'll see what database systems are supported by this project.
 
 ### Oracle
 This reader handles data and metadata recovering from [Oracle](https://www.oracle.com) databases. Integrations tests were made in Oracle 21c. Although it is supposed to work on older versions.
 
 ## File writer
+File writer is a component that handles data writing. It takes records from data reader and outputs to an arbitrary file type. In the next subsections you'll see what file writers are supported by this project.
+
+### XML
+This writer send records to an XML file.
 
 ## Command line application
 
