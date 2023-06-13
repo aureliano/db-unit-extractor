@@ -165,6 +165,60 @@ File writer is a component that handles data writing. It takes records from data
 This writer send records to an XML file.
 
 ## Command line application
+Data-set extractions are made through a command line application named `db-unit-extractor`.
+
+```
+Database extractor for unit testing.
+Go to https://github.com/aureliano/db-unit-extractor/issues in order to report a bug or make any suggestion.
+
+Usage:
+  db-unit-extractor [flags]
+  db-unit-extractor [command]
+
+Available Commands:
+  extract     Extract data-set from database
+  help        Help about any command
+  update      Update this program
+
+Flags:
+  -h, --help      help for db-unit-extractor
+  -v, --version   Print db-unit-extractor version
+
+Use "db-unit-extractor [command] --help" for more information about a command.
+```
+
+In order to see some samples on how to extract data execute this command `db-unit-extractor extract --help`
+
+```
+Extract data-set from a database to any supported file.
+
+Usage:
+  db-unit-extractor extract [flags]
+
+Examples:
+  # Extract data-set from Oracle and write to the console.
+  db-unit-extractor extract -s /path/to/schema.yml -n oracle://usr:pwd@127.0.0.1:1521/test
+
+  # Pass parameter expected in schema file.
+  db-unit-extractor extract -s /path/to/schema.yml -n oracle://usr:pwd@127.0.0.1:1521/test -r customer_id=4329
+
+  # Write to xml file too.
+  db-unit-extractor extract -s /path/to/schema.yml -n oracle://usr:pwd@127.0.0.1:1521/test -r customer_id=4329 -t xml
+
+  # Format xml output.
+  db-unit-extractor extract -s /path/to/schema.yml -n oracle://usr:pwd@127.0.0.1:1521/test -r customer_id=4329 -t xml -f
+
+Flags:
+  -n, --data-source-name string   Data source name (aka connection string: <driver>://<username>:<password>@<host>:<port>/<database>).
+  -d, --directory string          Output directory. (default ".")
+  -f, --formatted-output          Whether the output should be formatted.
+  -h, --help                      help for extract
+      --max-idle-conn int         Set the maximum number of concurrently idle connections (default 2)
+      --max-open-conn int         Set the maximum number of concurrently open connections (default 3)
+  -t, --output-type stringArray   Extracted data output format type. Expected: [console xml] (default [console])
+  -r, --references stringArray    Expected input parameter in 'schema' file. Expected: name=value
+  -s, --schema string             Path to the file with the data schema to be extracted.
+```
 
 ## Contributing
 Please feel free to submit issues, fork the repository and send pull requests! But first, read [this guide](./CONTRIBUTING.md) in order to get orientations on how to contribute the best way.
