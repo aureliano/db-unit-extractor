@@ -223,6 +223,11 @@ Flags:
 ## Update program
 If you wanna stay up to date, you may call `db-unit-extractor update` and a new verion - if it is not the edge - will be installed.
 
+## Development
+
+### Integration tests
+Go to the integration tests [documentation](./test/integration/README.md) to get detailed information and how to execute them.
+
 ## Contributing
 Please feel free to submit issues, fork the repository and send pull requests! But first, read [this guide](./CONTRIBUTING.md) in order to get orientations on how to contribute the best way.
 
