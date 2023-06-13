@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/aureliano/db-unit-extractor/extractor"
 	"github.com/aureliano/db-unit-extractor/writer"
@@ -62,6 +63,8 @@ func NewExtractCommand() *cobra.Command {
 }
 
 func extract(cmd *cobra.Command) {
+	seedTime := time.Now()
+
 	conf := extractor.Conf{}
 	conf.SchemaPath, _ = cmd.Flags().GetString("schema")
 	conf.DSN, _ = cmd.Flags().GetString("data-source-name")
@@ -87,6 +90,7 @@ func extract(cmd *cobra.Command) {
 	}
 
 	_, _ = cmd.OutOrStdout().Write([]byte(extractionSuccessMessage(conf)))
+	_, _ = cmd.OutOrStdout().Write([]byte(fmt.Sprintf("Elapsed time: %s\n", elapsedTime(seedTime))))
 }
 
 func mapReferences(refs []string) (map[string]interface{}, error) {
@@ -144,4 +148,18 @@ func supportedType(tp string) bool {
 
 func extractionSuccessMessage(conf extractor.Conf) string {
 	return fmt.Sprintf("Extraction is done!\nAssets generated in the directory %s\n", conf.OutputDir)
+}
+
+func elapsedTime(seed time.Time) string {
+	diff := time.Since(seed)
+	out := time.Time{}.Add(diff)
+
+	switch {
+	case time.Second > diff:
+		return "less than a second"
+	case time.Hour*24 <= diff:
+		return "more than a day"
+	default:
+		return fmt.Sprint(out.Format("15:04:05"))
+	}
 }

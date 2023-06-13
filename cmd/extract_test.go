@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/agiledragon/gomonkey/v2"
 	"github.com/aureliano/db-unit-extractor/cmd"
@@ -220,5 +221,59 @@ func TestNewExtractCommand(t *testing.T) {
 	assert.Nil(t, err)
 
 	txt := output.String()
-	assert.Equal(t, txt, fmt.Sprintf("Extraction is done!\nAssets generated in the directory %s\n", os.TempDir()))
+	assert.Equal(t, txt,
+		fmt.Sprintf("Extraction is done!\nAssets generated in the directory %s\nElapsed time: less than a second\n",
+			os.TempDir()))
+}
+
+func TestNewExtractCommandElapsedTimeMoreThanASecond(t *testing.T) {
+	patches := gomonkey.ApplyFunc(extractor.Extract, func(extractor.Conf, reader.DBReader, []writer.FileWriter) error {
+		return nil
+	}).ApplyFunc(time.Since, func(time.Time) time.Duration {
+		return time.Second * 25
+	})
+	defer patches.Reset()
+
+	c := cmd.NewExtractCommand()
+
+	output := new(bytes.Buffer)
+	c.SetArgs([]string{
+		"extract", "-s", "../test/unit/schema_test.yml", "-n", "postgres://usr:pwd@127.0.0.1:5432/test",
+		"-t", "console", "-d", os.TempDir(), "-r", "test=123",
+	})
+	c.SetOut(output)
+
+	err := c.Execute()
+	assert.Nil(t, err)
+
+	txt := output.String()
+	assert.Equal(t, txt,
+		fmt.Sprintf("Extraction is done!\nAssets generated in the directory %s\nElapsed time: 00:00:25\n",
+			os.TempDir()))
+}
+
+func TestNewExtractCommandElapsedTimeMoreThanADay(t *testing.T) {
+	patches := gomonkey.ApplyFunc(extractor.Extract, func(extractor.Conf, reader.DBReader, []writer.FileWriter) error {
+		return nil
+	}).ApplyFunc(time.Since, func(time.Time) time.Duration {
+		return time.Hour * 24
+	})
+	defer patches.Reset()
+
+	c := cmd.NewExtractCommand()
+
+	output := new(bytes.Buffer)
+	c.SetArgs([]string{
+		"extract", "-s", "../test/unit/schema_test.yml", "-n", "postgres://usr:pwd@127.0.0.1:5432/test",
+		"-t", "console", "-d", os.TempDir(), "-r", "test=123",
+	})
+	c.SetOut(output)
+
+	err := c.Execute()
+	assert.Nil(t, err)
+
+	txt := output.String()
+	assert.Equal(t, txt,
+		fmt.Sprintf("Extraction is done!\nAssets generated in the directory %s\nElapsed time: more than a day\n",
+			os.TempDir()))
 }
