@@ -220,6 +220,9 @@ Flags:
   -s, --schema string             Path to the file with the data schema to be extracted.
 ```
 
+## Update program
+If you wanna stay up to date, you may call `db-unit-extractor update` and a new verion - if it is not the edge - will be installed.
+
 ## Contributing
 Please feel free to submit issues, fork the repository and send pull requests! But first, read [this guide](./CONTRIBUTING.md) in order to get orientations on how to contribute the best way.
 
