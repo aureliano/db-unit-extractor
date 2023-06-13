@@ -1,6 +1,8 @@
 # db-unit-extractor
 
-**db-unit-extractor** is a database extractor for unit testing. Rather than a massive data extractor, its goal is to extract a dataset for unit testing. Where, given a record seed and some schema information, a data file is generated to be loaded into tests integrated with a database using frameworks such as [dbunit](https://www.dbunit.org/) and [h2](https://www.h2database.com) for example.
+**db-unit-extractor** is a database extractor for unit testing. Rather than a massive data extractor, its goal is to extract a data-set for unit testing. 
+
+Sometimes, it is necessary to write some integration tests in order to assure that components may work together. A database is a middleware that is often mocked in unit test and tests are neglited in favor of black box tests. Some frameworks like [dbunit](https://www.dbunit.org/) and [h2](https://www.h2database.com) helps creating those integration tests accessing a database. Although, they lack a consistent tool for generating a data-set to each test scenario. This tool was made to support testers on creating data-sets by extracting data of a specific set of records.
 
 ## Command line application
 
