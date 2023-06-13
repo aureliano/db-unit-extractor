@@ -228,6 +228,32 @@ If you wanna stay up to date, you may call `db-unit-extractor update` and a new 
 ### Integration tests
 Go to the integration tests [documentation](./test/integration/README.md) to get detailed information and how to execute them.
 
+### Profiling
+Identify performance problems with code profilers. You may enable CPU profiling and memory profiling by exporting CPU_PROFILE and MEM_PROFILE environment variables. They must point to a file (non existing directories won't be created). In the sample bellow, both profilers are enabled.
+
+```shell
+export CPU_PROFILE=/tmp/db-unit-extractor/cpu.prof
+export MEM_PROFILE=/tmp/db-unit-extractor/mem.prof
+
+# Builb program.
+make clean snapshot
+
+# Launch program with profilers enabled.
+dist/db-unit-extractor_linux_amd64_v1/db-unit-extractor \
+    extract \
+      -s /path/to/schema.yml \
+      -n oracle://usr:pwd@127.0.0.1:1521/test \
+      -r customer_id=4329 \
+      -t xml \
+      -f
+
+# CPU profiling.
+go tool pprof dist/db-unit-extractor_linux_amd64_v1/db-unit-extractor /tmp/db-unit-extractor/cpu.prof
+
+# Memory profiling.
+go tool pprof dist/db-unit-extractor_linux_amd64_v1/db-unit-extractor /tmp/db-unit-extractor/mem.prof
+```
+
 ## Contributing
 Please feel free to submit issues, fork the repository and send pull requests! But first, read [this guide](./CONTRIBUTING.md) in order to get orientations on how to contribute the best way.
 
