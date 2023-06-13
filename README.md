@@ -3,6 +3,8 @@
 
 Sometimes, it is necessary to write some integration tests in order to assure that components may work together. A database is a middleware that is often mocked in unit test and tests are neglited in favor of black box tests. Some frameworks like [dbunit](https://www.dbunit.org/) and [h2](https://www.h2database.com) helps creating those integration tests accessing a database. Although, they lack a consistent tool for generating a data-set to each test scenario. This tool was made to support testers on creating data-sets by extracting data of a specific set of records.
 
+Supported [operating systems](https://en.wikipedia.org/wiki/Operating_system) are [Linux](https://en.wikipedia.org/wiki/Linux), [Darwin](https://en.wikipedia.org/wiki/Darwin_(operating_system)) and [Windows](https://en.wikipedia.org/wiki/Microsoft_Windows).
+
 ## Data-set schema
 A data-set schema is a yaml file with instructions of how a data-set will be created, as which tables and which columns will be part of the query, columns that will filter the query and data converters.
 
