@@ -4,14 +4,17 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"os"
 	"strings"
+	"time"
 
 	"github.com/aureliano/db-unit-extractor/dataconv"
 	"github.com/aureliano/db-unit-extractor/schema"
 )
 
 type OracleReader struct {
-	db *sql.DB
+	db        *sql.DB
+	profiling *os.File
 }
 
 func (r OracleReader) FetchColumnsMetadata(table schema.Table) ([]DBColumn, error) {
@@ -98,10 +101,22 @@ func (r OracleReader) FetchData(table string, fields []DBColumn, converters []da
 }
 
 func (r OracleReader) ProfilerMode() bool {
-	return false
+	return r.profiling != nil
 }
 
-func (r OracleReader) StartDBProfiler(context.Context) {
+func (r OracleReader) StartDBProfiler(ctx context.Context) {
+	go func(c context.Context) {
+		for {
+			select {
+			case <-c.Done():
+				_ = r.profiling.Close()
+				return
+			default:
+				r.profileSnapshot()
+				time.Sleep(DBSnapshotDealy)
+			}
+		}
+	}(ctx)
 }
 
 func fetchData(db *sql.DB, converters []dataconv.Converter, arrValues [][]interface{},
@@ -270,4 +285,17 @@ func emptyFilter(filter []interface{}) bool {
 	}
 
 	return false
+}
+
+func (r OracleReader) profileSnapshot() {
+	if r.profiling == nil {
+		return
+	}
+
+	stats := r.db.Stats()
+	record := fmt.Sprintf("%d %d %d %d %d %d %d %d %d\n", stats.MaxOpenConnections, stats.OpenConnections,
+		stats.InUse, stats.Idle, stats.WaitCount, stats.WaitDuration, stats.MaxIdleClosed, stats.MaxIdleTimeClosed,
+		stats.MaxLifetimeClosed)
+
+	_, _ = r.profiling.WriteString(record)
 }

@@ -1,6 +1,7 @@
 package extractor
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -82,6 +83,12 @@ func Extract(conf Conf, db reader.DBReader, writers []writer.FileWriter) error {
 
 func extract(model schema.Model, db reader.DBReader, writers []writer.FileWriter) error {
 	cw := launchWriters(writers)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	if db.ProfilerMode() {
+		db.StartDBProfiler(ctx)
+	}
 
 	if err := launchReaders(model, db, cw); err != nil {
 		return err
