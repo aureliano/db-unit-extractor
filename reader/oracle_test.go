@@ -1,8 +1,11 @@
 package reader_test
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -466,4 +469,66 @@ func TestFetchDataConverterError(t *testing.T) {
 
 	_, err = r.FetchData("ORDERS", fields, converters, filters)
 	assert.Equal(t, "converter error", err.Error())
+}
+
+func TestProfilerModeDisabled(t *testing.T) {
+	r := reader.OracleReader{}
+	assert.False(t, r.ProfilerMode())
+	t.Setenv("DB_PROFILE", "")
+	assert.Empty(t, os.Getenv("DB_PROFILE"))
+}
+
+func TestProfilerModeEnabled(t *testing.T) {
+	prof := filepath.Join(os.TempDir(), "db.prof")
+	defer os.Remove(prof)
+	t.Setenv("DB_PROFILE", prof)
+	defer t.Setenv("DB_PROFILE", "")
+
+	db, _, err := sqlmock.New()
+
+	require.Nil(t, err)
+	defer db.Close()
+
+	r, _ := reader.NewReader(&reader.DataSource{DSN: "oracle://usr:pwd@localhost:1521/dbname", DB: db})
+	assert.True(t, r.ProfilerMode())
+}
+
+func TestStartDBProfiler(t *testing.T) {
+	prof := filepath.Join(os.TempDir(), "db.prof")
+	defer os.Remove(prof)
+	t.Setenv("DB_PROFILE", prof)
+	defer t.Setenv("DB_PROFILE", "")
+
+	db, _, err := sqlmock.New()
+
+	require.Nil(t, err)
+	defer db.Close()
+
+	r, _ := reader.NewReader(&reader.DataSource{DSN: "oracle://usr:pwd@localhost:1521/dbname", DB: db})
+
+	ctx, cancel := context.WithCancel(context.Background())
+	r.StartDBProfiler(ctx)
+	time.Sleep(time.Millisecond * 500)
+
+	cancel()
+	time.Sleep(time.Millisecond * 500)
+}
+
+func TestStartDBProfilerUnitialized(t *testing.T) {
+	t.Setenv("DB_PROFILE", "")
+
+	db, _, err := sqlmock.New()
+
+	require.Nil(t, err)
+	defer db.Close()
+
+	r, _ := reader.NewReader(&reader.DataSource{DSN: "oracle://usr:pwd@localhost:1521/dbname", DB: db})
+	assert.False(t, r.ProfilerMode())
+
+	ctx, cancel := context.WithCancel(context.Background())
+	r.StartDBProfiler(ctx)
+	time.Sleep(time.Millisecond * 500)
+
+	cancel()
+	time.Sleep(time.Millisecond * 500)
 }

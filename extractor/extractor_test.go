@@ -1,6 +1,7 @@
 package extractor_test
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"sync"
@@ -259,6 +260,34 @@ func (FetchMetadataErrorDummyReader) FetchData(string, []reader.DBColumn, []data
 func (FetchDataErrorDummyReader) FetchData(string, []reader.DBColumn, []dataconv.Converter,
 	[][]interface{}) ([]map[string]interface{}, error) {
 	return nil, fmt.Errorf("fetch data error")
+}
+
+func (DummyReader) ProfilerMode() bool {
+	return true
+}
+
+func (FetchMetadataErrorDummyReader) ProfilerMode() bool {
+	return false
+}
+
+func (FetchDataErrorDummyReader) ProfilerMode() bool {
+	return false
+}
+
+func (HumanResourcesReader) ProfilerMode() bool {
+	return false
+}
+
+func (DummyReader) StartDBProfiler(context.Context) {
+}
+
+func (FetchMetadataErrorDummyReader) StartDBProfiler(context.Context) {
+}
+
+func (FetchDataErrorDummyReader) StartDBProfiler(context.Context) {
+}
+
+func (HumanResourcesReader) StartDBProfiler(context.Context) {
 }
 
 func (DummyWriter) WriteHeader() error { return nil }
