@@ -51,13 +51,14 @@ func TestNewOracleReader(t *testing.T) {
 	ds.On("ConnectionURL").Return("oracle://usr:pwd@localhost:1521/dbname")
 
 	prof := filepath.Join(os.TempDir(), "db.prof")
+	defer os.Remove(prof)
 	t.Setenv("DB_PROFILE", prof)
 
 	r, err := reader.NewReader(ds)
 	assert.Nil(t, err)
 	assert.IsType(t, reader.OracleReader{}, r)
 
-	_ = os.Remove(prof)
+	t.Setenv("DB_PROFILE", "")
 }
 
 func TestNewOracleReaderProfileError(t *testing.T) {
@@ -70,4 +71,5 @@ func TestNewOracleReaderProfileError(t *testing.T) {
 
 	_, err := reader.NewReader(ds)
 	assert.ErrorIs(t, err, os.ErrNotExist)
+	t.Setenv("DB_PROFILE", "")
 }

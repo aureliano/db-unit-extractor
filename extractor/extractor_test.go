@@ -263,7 +263,7 @@ func (FetchDataErrorDummyReader) FetchData(string, []reader.DBColumn, []dataconv
 }
 
 func (DummyReader) ProfilerMode() bool {
-	return false
+	return true
 }
 
 func (FetchMetadataErrorDummyReader) ProfilerMode() bool {

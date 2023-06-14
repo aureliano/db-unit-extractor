@@ -288,7 +288,7 @@ func emptyFilter(filter []interface{}) bool {
 }
 
 func (r OracleReader) profileSnapshot() {
-	if r.profiling == nil {
+	if !r.ProfilerMode() {
 		return
 	}
 
