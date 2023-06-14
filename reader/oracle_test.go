@@ -280,6 +280,42 @@ func TestFetchData(t *testing.T) {
 	assert.Equal(t, "aGVsbG8gd29ybGQ=", data[0]["ATTACHMENT"])
 }
 
+func TestFetchDataNotAllFieldsWereBound(t *testing.T) {
+	db, mock, err := sqlmock.New()
+
+	require.Nil(t, err)
+	defer db.Close()
+
+	r, _ := reader.NewReader(&reader.DataSource{DSN: "oracle://usr:pwd@localhost:1521/dbname", DB: db})
+
+	fields := []reader.DBColumn{
+		{Name: "ID", Type: "NUMBER", Nullable: false, Length: 22,
+			DecimalSize: reader.DecimalColumn{Precision: 2, Scale: 0}},
+		{Name: "USER_ID", Type: "NUMBER", Nullable: false, Length: 22,
+			DecimalSize: reader.DecimalColumn{Precision: 2, Scale: 0}},
+		{Name: "STATUS", Type: "VARCHAR2", Nullable: true, Length: 15},
+		{Name: "TOTAL", Type: "NUMBER", Nullable: false, Length: 22,
+			DecimalSize: reader.DecimalColumn{Precision: 17, Scale: 2}},
+		{Name: "DATE_REC", Type: "DATE", Nullable: false},
+		{Name: "ATTACHMENT", Type: "BLOB", Nullable: true, Length: 1024},
+	}
+	converters := []dataconv.Converter{dataconv.DateTimeISO8601Converter{}, dataconv.BlobConverter{}}
+	filters := [][]interface{}{{"ID", nil}}
+	dateRec := time.Now()
+	attachment := []byte("hello world")
+
+	rows := sqlmock.
+		NewRows([]string{"ID", "USER_ID", "STATUS", "TOTAL", "DATE_REC", "ATTACHMENT"}).
+		AddRow(4, 375, "SOLD", 2243.72, dateRec, attachment)
+
+	sql := "^SELECT (.+) FROM ORDERS WHERE ID = :1$"
+	mock.ExpectPrepare(sql).ExpectQuery().WillReturnRows(rows)
+
+	_, err = r.FetchData("ORDERS", fields, converters, filters)
+	assert.NotNil(t, err)
+	assert.Equal(t, "not all filters were bound for table ORDERS `[[ID <nil>]]'", err.Error())
+}
+
 func TestFetchDataFiltered(t *testing.T) {
 	db, mock, err := sqlmock.New()
 
