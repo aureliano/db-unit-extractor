@@ -1,6 +1,7 @@
 package reader
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strings"
@@ -25,9 +26,10 @@ type DBColumn struct {
 var ErrUnsupportedDBReader = errors.New("unsupported database")
 
 type DBReader interface {
-	FetchColumnsMetadata(table schema.Table) ([]DBColumn, error)
-	FetchData(table string, fields []DBColumn, converters []dataconv.Converter,
-		filters [][]interface{}) ([]map[string]interface{}, error)
+	FetchColumnsMetadata(schema.Table) ([]DBColumn, error)
+	FetchData(string, []DBColumn, []dataconv.Converter, [][]interface{}) ([]map[string]interface{}, error)
+	ProfilerMode() bool
+	StartDBProfiler(context.Context)
 }
 
 func NewReader(ds DBConnector) (DBReader, error) {

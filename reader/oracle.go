@@ -1,6 +1,7 @@
 package reader
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"strings"
@@ -94,6 +95,13 @@ func (r OracleReader) FetchData(table string, fields []DBColumn, converters []da
 	}
 
 	return fetchData(r.db, converters, arrValues, query)
+}
+
+func (r OracleReader) ProfilerMode() bool {
+	return false
+}
+
+func (r OracleReader) StartDBProfiler(context.Context) {
 }
 
 func fetchData(db *sql.DB, converters []dataconv.Converter, arrValues [][]interface{},
