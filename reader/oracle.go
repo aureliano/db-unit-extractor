@@ -57,19 +57,22 @@ func (r OracleReader) FetchData(table string, fields []DBColumn, converters []da
 	size := len(filters)
 	ind := make([]int, 0)
 	values := make([]interface{}, size)
+	expectedArrValuesSize := 0
 
 	for i := 0; i < size; i++ {
-		_, multivalued := filters[i][1].([]interface{})
+		value, multivalued := filters[i][1].([]interface{})
 		if multivalued {
 			ind = append(ind, i)
+			expectedArrValuesSize += len(value)
 		} else {
 			values[i] = filters[i][1]
 		}
 	}
 
 	arrValues := make([][]interface{}, 0)
-	if len(values) > 0 && values[0] != nil {
+	if len(ind) == 0 && !emptyFilter(values) {
 		arrValues = append(arrValues, values)
+		expectedArrValuesSize++
 	}
 
 	for _, i := range ind {
@@ -78,8 +81,16 @@ func (r OracleReader) FetchData(table string, fields []DBColumn, converters []da
 			copy(cpValues, values)
 			cpValues[i] = v
 
-			arrValues = append(arrValues, cpValues)
+			if !emptyFilter(cpValues) {
+				arrValues = append(arrValues, cpValues)
+			}
 		}
+	}
+
+	wrongValuesSize := len(arrValues) != expectedArrValuesSize
+	filterWithoutValues := len(arrValues) == 0 && len(filters) > 0
+	if wrongValuesSize || filterWithoutValues {
+		return nil, fmt.Errorf("not all filters were bound for table %s `%v'", table, filters)
 	}
 
 	return fetchData(r.db, converters, arrValues, query)
@@ -237,4 +248,18 @@ func findConverter(value interface{}, converters []dataconv.Converter) dataconv.
 	}
 
 	return nil
+}
+
+func emptyFilter(filter []interface{}) bool {
+	if len(filter) == 0 {
+		return true
+	}
+
+	for _, f := range filter {
+		if f == nil {
+			return true
+		}
+	}
+
+	return false
 }
