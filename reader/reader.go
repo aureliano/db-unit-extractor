@@ -4,7 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"strings"
+	"time"
 
 	"github.com/aureliano/db-unit-extractor/dataconv"
 	"github.com/aureliano/db-unit-extractor/schema"
@@ -25,6 +27,8 @@ type DBColumn struct {
 
 var ErrUnsupportedDBReader = errors.New("unsupported database")
 
+const DBSnapshotDealy = time.Millisecond * 200
+
 type DBReader interface {
 	FetchColumnsMetadata(schema.Table) ([]DBColumn, error)
 	FetchData(string, []DBColumn, []dataconv.Converter, [][]interface{}) ([]map[string]interface{}, error)
@@ -42,5 +46,15 @@ func NewReader(ds DBConnector) (DBReader, error) {
 
 func newOracle(ds DBConnector) (DBReader, error) {
 	db, err := ds.Connect(MaxDBTimeout)
-	return OracleReader{db: db}, err
+
+	dbProfile := os.Getenv("DB_PROFILE")
+	var pfile *os.File
+	if dbProfile != "" {
+		pfile, err = os.Create(dbProfile)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return OracleReader{db: db, profiling: pfile}, err
 }
