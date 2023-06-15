@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"github.com/agiledragon/gomonkey/v2"
+	"github.com/aureliano/caravela"
+	"github.com/aureliano/caravela/provider"
 	"github.com/aureliano/db-unit-extractor/cmd"
 	"github.com/aureliano/db-unit-extractor/extractor"
 	"github.com/aureliano/db-unit-extractor/reader"
@@ -17,7 +19,11 @@ import (
 )
 
 func TestNewExtractCommandSchemaIsRequired(t *testing.T) {
-	c := cmd.NewExtractCommand()
+	cuf := func(c caravela.Conf) (*provider.Release, error) {
+		return &provider.Release{}, nil
+	}
+
+	c := cmd.NewExtractCommand(cuf)
 
 	output := new(bytes.Buffer)
 	c.SetArgs([]string{"extract", "-n", "postgres://usr:pwd@127.0.0.1:5432/test"})
@@ -31,7 +37,11 @@ func TestNewExtractCommandSchemaIsRequired(t *testing.T) {
 }
 
 func TestNewExtractCommandDSNIsRequired(t *testing.T) {
-	c := cmd.NewExtractCommand()
+	cuf := func(c caravela.Conf) (*provider.Release, error) {
+		return &provider.Release{}, nil
+	}
+
+	c := cmd.NewExtractCommand(cuf)
 
 	output := new(bytes.Buffer)
 	c.SetArgs([]string{"extract", "-s", "schema.yml"})
@@ -50,7 +60,11 @@ func TestNewExtractCommandInvalidDSN(t *testing.T) {
 	})
 	defer patches.Reset()
 
-	c := cmd.NewExtractCommand()
+	cuf := func(c caravela.Conf) (*provider.Release, error) {
+		return &provider.Release{}, nil
+	}
+
+	c := cmd.NewExtractCommand(cuf)
 	output := new(bytes.Buffer)
 	c.SetArgs([]string{"extract", "-s", "schema.yml", "-n", "driver://invalid-dsn"})
 	c.SetOut(output)
@@ -69,7 +83,11 @@ func TestNewExtractCommandSchemaFileDoesNotExist(t *testing.T) {
 	})
 	defer patches.Reset()
 
-	c := cmd.NewExtractCommand()
+	cuf := func(c caravela.Conf) (*provider.Release, error) {
+		return &provider.Release{}, nil
+	}
+
+	c := cmd.NewExtractCommand(cuf)
 	output := new(bytes.Buffer)
 	c.SetArgs([]string{"extract", "-s", "schema.yml", "-n", "postgres://usr:pwd@127.0.0.1:5432/test"})
 	c.SetOut(output)
@@ -88,7 +106,11 @@ func TestNewExtractCommandSchemaFileIsDirectory(t *testing.T) {
 	})
 	defer patches.Reset()
 
-	c := cmd.NewExtractCommand()
+	cuf := func(c caravela.Conf) (*provider.Release, error) {
+		return &provider.Release{}, nil
+	}
+
+	c := cmd.NewExtractCommand(cuf)
 	output := new(bytes.Buffer)
 	c.SetArgs([]string{"extract", "-s", os.TempDir(), "-n", "postgres://usr:pwd@127.0.0.1:5432/test"})
 	c.SetOut(output)
@@ -107,7 +129,11 @@ func TestNewExtractCommandInvalidOutputType(t *testing.T) {
 	})
 	defer patches.Reset()
 
-	c := cmd.NewExtractCommand()
+	cuf := func(c caravela.Conf) (*provider.Release, error) {
+		return &provider.Release{}, nil
+	}
+
+	c := cmd.NewExtractCommand(cuf)
 	output := new(bytes.Buffer)
 	c.SetArgs([]string{
 		"extract", "-s", "../test/unit/schema_test.yml", "-n", "postgres://usr:pwd@127.0.0.1:5432/test", "-t", "xls"},
@@ -128,7 +154,11 @@ func TestNewExtractCommandOutputDirIsNotADirectory(t *testing.T) {
 	})
 	defer patches.Reset()
 
-	c := cmd.NewExtractCommand()
+	cuf := func(c caravela.Conf) (*provider.Release, error) {
+		return &provider.Release{}, nil
+	}
+
+	c := cmd.NewExtractCommand(cuf)
 	output := new(bytes.Buffer)
 	c.SetArgs([]string{
 		"extract", "-s", "../test/unit/schema_test.yml", "-n", "postgres://usr:pwd@127.0.0.1:5432/test",
@@ -150,7 +180,11 @@ func TestNewExtractCommandInvalidReference(t *testing.T) {
 	})
 	defer patches.Reset()
 
-	c := cmd.NewExtractCommand()
+	cuf := func(c caravela.Conf) (*provider.Release, error) {
+		return &provider.Release{}, nil
+	}
+
+	c := cmd.NewExtractCommand(cuf)
 	output := new(bytes.Buffer)
 	c.SetArgs([]string{
 		"extract", "-s", "../test/unit/schema_test.yml", "-n", "postgres://usr:pwd@127.0.0.1:5432/test",
@@ -174,7 +208,11 @@ func TestNewExtractCommandExtractError(t *testing.T) {
 	})
 	defer patches.Reset()
 
-	c := cmd.NewExtractCommand()
+	cuf := func(c caravela.Conf) (*provider.Release, error) {
+		return &provider.Release{}, nil
+	}
+
+	c := cmd.NewExtractCommand(cuf)
 	output := new(bytes.Buffer)
 	c.SetArgs([]string{
 		"extract", "-s", "../test/unit/schema_test.yml", "-n", "postgres://usr:pwd@127.0.0.1:5432/test",
@@ -196,7 +234,11 @@ func TestNewExtractCommand(t *testing.T) {
 	})
 	defer patches.Reset()
 
-	c := cmd.NewExtractCommand()
+	cuf := func(c caravela.Conf) (*provider.Release, error) {
+		return &provider.Release{}, nil
+	}
+
+	c := cmd.NewExtractCommand(cuf)
 	assert.Equal(t, "extract", c.Use)
 	assert.Equal(t, "Extract data-set from database", c.Short)
 	assert.Equal(t, "Extract data-set from a database to any supported file.", c.Long)
@@ -234,7 +276,11 @@ func TestNewExtractCommandElapsedTimeMoreThanASecond(t *testing.T) {
 	})
 	defer patches.Reset()
 
-	c := cmd.NewExtractCommand()
+	cuf := func(c caravela.Conf) (*provider.Release, error) {
+		return &provider.Release{}, nil
+	}
+
+	c := cmd.NewExtractCommand(cuf)
 
 	output := new(bytes.Buffer)
 	c.SetArgs([]string{
@@ -260,7 +306,11 @@ func TestNewExtractCommandElapsedTimeMoreThanADay(t *testing.T) {
 	})
 	defer patches.Reset()
 
-	c := cmd.NewExtractCommand()
+	cuf := func(c caravela.Conf) (*provider.Release, error) {
+		return &provider.Release{}, nil
+	}
+
+	c := cmd.NewExtractCommand(cuf)
 
 	output := new(bytes.Buffer)
 	c.SetArgs([]string{
@@ -276,4 +326,63 @@ func TestNewExtractCommandElapsedTimeMoreThanADay(t *testing.T) {
 	assert.Equal(t, txt,
 		fmt.Sprintf("Extraction is done!\nAssets generated in the directory %s\nElapsed time: more than a day\n",
 			os.TempDir()))
+}
+
+func TestNewExtractCheckUpdatesError(t *testing.T) {
+	t.Setenv("DEV_MODE", "true")
+	defer t.Setenv("DEV_MODE", "")
+
+	patches := gomonkey.ApplyFunc(extractor.Extract, func(extractor.Conf, reader.DBReader, []writer.FileWriter) error {
+		return nil
+	})
+	defer patches.Reset()
+
+	cuf := func(c caravela.Conf) (*provider.Release, error) {
+		return nil, fmt.Errorf("check updates error")
+	}
+
+	c := cmd.NewExtractCommand(cuf)
+
+	output := new(bytes.Buffer)
+	c.SetArgs([]string{
+		"extract", "-s", "../test/unit/schema_test.yml", "-n", "postgres://usr:pwd@127.0.0.1:5432/test",
+		"-t", "console", "-d", os.TempDir(), "-r", "test=123",
+	})
+	c.SetOut(output)
+
+	err := c.Execute()
+	assert.Nil(t, err)
+
+	txt := output.String()
+	assert.Contains(t, txt, "Checking for new versions failed! check updates error")
+}
+
+func TestNewExtractCheckUpdates(t *testing.T) {
+	t.Setenv("DEV_MODE", "true")
+	defer t.Setenv("DEV_MODE", "")
+
+	patches := gomonkey.ApplyFunc(extractor.Extract, func(extractor.Conf, reader.DBReader, []writer.FileWriter) error {
+		return nil
+	}).ApplyFunc(time.Sleep, func(time.Duration) {})
+	defer patches.Reset()
+
+	cuf := func(c caravela.Conf) (*provider.Release, error) {
+		return &provider.Release{Name: "v1.0.1"}, nil
+	}
+
+	c := cmd.NewExtractCommand(cuf)
+
+	output := new(bytes.Buffer)
+	c.SetArgs([]string{
+		"extract", "-s", "../test/unit/schema_test.yml", "-n", "postgres://usr:pwd@127.0.0.1:5432/test",
+		"-t", "console", "-d", os.TempDir(), "-r", "test=123",
+	})
+	c.SetOut(output)
+
+	err := c.Execute()
+	assert.Nil(t, err)
+
+	txt := output.String()
+	assert.Contains(t, txt, "[WARNING] There is a new version of db-unit-extractor available.")
+	assert.Contains(t, txt, "\nExecute `db-unit-extractor update` if you want to install version 'v1.0.1'.\n")
 }
