@@ -76,17 +76,17 @@ func extract(cmd *cobra.Command) {
 	refs, _ := cmd.Flags().GetStringArray("references")
 
 	if err := validateConf(conf); err != nil {
-		shutdown(cmd, "Extract error: %s\n", err.Error())
+		shutdown(cmd, "Parameters validation failed: %s\n", err.Error())
 	}
 
 	var err error
 	conf.References, err = mapReferences(refs)
 	if err != nil {
-		shutdown(cmd, "Extract error: %s\n", err.Error())
+		shutdown(cmd, "Mapping references failed: %s\n", err.Error())
 	}
 
 	if err = extractor.Extract(conf, nil, nil); err != nil {
-		shutdown(cmd, "Extract error: %s\n", err.Error())
+		shutdown(cmd, "Extract error (%s)\n", err.Error())
 	}
 
 	_, _ = cmd.OutOrStdout().Write([]byte(extractionSuccessMessage(conf)))

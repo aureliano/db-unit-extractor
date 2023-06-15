@@ -60,7 +60,7 @@ func TestNewExtractCommandInvalidDSN(t *testing.T) {
 		assert.Nil(t, err)
 	}, "os.Exit was not called")
 	txt := output.String()
-	assert.Equal(t, txt, "Extract error: invalid DSN 'driver://invalid-dsn'\n")
+	assert.Equal(t, txt, "Parameters validation failed: invalid DSN 'driver://invalid-dsn'\n")
 }
 
 func TestNewExtractCommandSchemaFileDoesNotExist(t *testing.T) {
@@ -79,7 +79,7 @@ func TestNewExtractCommandSchemaFileDoesNotExist(t *testing.T) {
 		assert.Nil(t, err)
 	}, "os.Exit was not called")
 	txt := output.String()
-	assert.Equal(t, txt, "Extract error: file not found 'schema.yml'\n")
+	assert.Equal(t, txt, "Parameters validation failed: file not found 'schema.yml'\n")
 }
 
 func TestNewExtractCommandSchemaFileIsDirectory(t *testing.T) {
@@ -98,7 +98,7 @@ func TestNewExtractCommandSchemaFileIsDirectory(t *testing.T) {
 		assert.Nil(t, err)
 	}, "os.Exit was not called")
 	txt := output.String()
-	assert.Equal(t, txt, fmt.Sprintf("Extract error: %s is a directory\n", os.TempDir()))
+	assert.Equal(t, txt, fmt.Sprintf("Parameters validation failed: %s is a directory\n", os.TempDir()))
 }
 
 func TestNewExtractCommandInvalidOutputType(t *testing.T) {
@@ -119,7 +119,7 @@ func TestNewExtractCommandInvalidOutputType(t *testing.T) {
 		assert.Nil(t, err)
 	}, "os.Exit was not called")
 	txt := output.String()
-	assert.Equal(t, txt, "Extract error: unsupported output type 'xls'\n")
+	assert.Equal(t, txt, "Parameters validation failed: unsupported output type 'xls'\n")
 }
 
 func TestNewExtractCommandOutputDirIsNotADirectory(t *testing.T) {
@@ -141,7 +141,7 @@ func TestNewExtractCommandOutputDirIsNotADirectory(t *testing.T) {
 		assert.Nil(t, err)
 	}, "os.Exit was not called")
 	txt := output.String()
-	assert.Equal(t, txt, "Extract error: ../test/unit/schema_test.yml is not a directory\n")
+	assert.Equal(t, txt, "Parameters validation failed: ../test/unit/schema_test.yml is not a directory\n")
 }
 
 func TestNewExtractCommandInvalidReference(t *testing.T) {
@@ -163,7 +163,7 @@ func TestNewExtractCommandInvalidReference(t *testing.T) {
 		assert.Nil(t, err)
 	}, "os.Exit was not called")
 	txt := output.String()
-	assert.Equal(t, txt, "Extract error: invalid reference 'test='\n")
+	assert.Equal(t, txt, "Mapping references failed: invalid reference 'test='\n")
 }
 
 func TestNewExtractCommandExtractError(t *testing.T) {
@@ -187,7 +187,7 @@ func TestNewExtractCommandExtractError(t *testing.T) {
 		assert.Nil(t, err)
 	}, "os.Exit was not called")
 	txt := output.String()
-	assert.Equal(t, txt, "Extract error: extract error\n")
+	assert.Equal(t, txt, "Extract error (extract error)\n")
 }
 
 func TestNewExtractCommand(t *testing.T) {
