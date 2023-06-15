@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"runtime"
 
@@ -47,7 +48,7 @@ func NewRootCommand() *cobra.Command {
 
 	cmd.CompletionOptions.DisableDefaultCmd = true
 	cmd.AddCommand(NewUpdateCommand(caravela.Update))
-	cmd.AddCommand(NewExtractCommand())
+	cmd.AddCommand(NewExtractCommand(caravela.CheckUpdates))
 
 	cmd.Flags().BoolP("version", "v", false, fmt.Sprintf("Print %s version", project.name))
 
@@ -60,14 +61,17 @@ func printVersion(cmd *cobra.Command) {
 	osArch := runtime.GOARCH
 
 	w := cmd.OutOrStdout()
-	_, _ = w.Write([]byte(fmt.Sprintf("Version:       %s\n", version)))
-	_, _ = w.Write([]byte(fmt.Sprintf("Go version:    %s\n", goVersion)))
-	_, _ = w.Write([]byte(fmt.Sprintf("OS/Arch:       %s/%s\n", osName, osArch)))
+	write(w, "Version:       %s\n", version)
+	write(w, "Go version:       %s\n", goVersion)
+	write(w, "OS/Arch:       %s/%s\n", osName, osArch)
 }
 
 func shutdown(cmd *cobra.Command, msg string, params ...any) {
-	msgBytes := []byte(fmt.Sprintf(msg, params...))
-	_, _ = cmd.OutOrStdout().Write(msgBytes)
-
+	write(cmd.OutOrStdout(), msg, params...)
 	os.Exit(1)
+}
+
+func write(w io.Writer, msg string, args ...interface{}) {
+	message := fmt.Sprintf(msg, args...)
+	_, _ = w.Write([]byte(message))
 }

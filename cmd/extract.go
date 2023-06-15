@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/aureliano/caravela"
+	"github.com/aureliano/caravela/provider"
 	"github.com/aureliano/db-unit-extractor/extractor"
 	"github.com/aureliano/db-unit-extractor/writer"
 	"github.com/spf13/cobra"
@@ -23,7 +25,7 @@ var (
 	dsnRegExp = regexp.MustCompile(`^(\w+)://(\w+):(\w+)@([\w.]+):(\d+)/(\w+)\??(\w+=\w+)*$`)
 )
 
-func NewExtractCommand() *cobra.Command {
+func NewExtractCommand(cuf func(c caravela.Conf) (*provider.Release, error)) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "extract",
 		Short: "Extract data-set from database",
@@ -41,7 +43,7 @@ func NewExtractCommand() *cobra.Command {
   %s extract -s /path/to/schema.yml -n postgres://usr:pwd@127.0.0.1:5432/test -r customer_id=4329 -t xml -f`,
 			project.binName, project.binName, project.binName, project.binName),
 		Run: func(cmd *cobra.Command, args []string) {
-			extract(cmd)
+			extract(cmd, cuf)
 		},
 	}
 
@@ -62,7 +64,8 @@ func NewExtractCommand() *cobra.Command {
 	return cmd
 }
 
-func extract(cmd *cobra.Command) {
+func extract(cmd *cobra.Command, cuf func(c caravela.Conf) (*provider.Release, error)) {
+	checkUpdates(cmd, cuf)
 	seedTime := time.Now()
 
 	conf := extractor.Conf{}
@@ -89,8 +92,9 @@ func extract(cmd *cobra.Command) {
 		shutdown(cmd, "Extract error (%s)\n", err.Error())
 	}
 
-	_, _ = cmd.OutOrStdout().Write([]byte(extractionSuccessMessage(conf)))
-	_, _ = cmd.OutOrStdout().Write([]byte(fmt.Sprintf("Elapsed time: %s\n", elapsedTime(seedTime))))
+	w := cmd.OutOrStdout()
+	write(w, extractionSuccessMessage(conf))
+	write(w, "Elapsed time: %s\n", elapsedTime(seedTime))
 }
 
 func mapReferences(refs []string) (map[string]interface{}, error) {
@@ -161,5 +165,37 @@ func elapsedTime(seed time.Time) string {
 		return "more than a day"
 	default:
 		return fmt.Sprint(out.Format("15:04:05"))
+	}
+}
+
+func checkUpdates(cmd *cobra.Command, checkUpdatesDelegation func(c caravela.Conf) (*provider.Release, error)) {
+	shouldCheckUpdates := os.Getenv("PROFILE") == "test" || !strings.HasSuffix(project.version, "-dev")
+	const numStars = 80
+	const bannerWaitFor = time.Second * 3
+
+	if shouldCheckUpdates {
+		release, err := checkUpdatesDelegation(caravela.Conf{
+			Version: project.version,
+			Provider: provider.GithubProvider{
+				Host:        project.scmHost,
+				Ssl:         project.scmSsl,
+				ProjectPath: project.scmProjectPath,
+			},
+		})
+
+		w := cmd.OutOrStderr()
+
+		if err != nil {
+			write(w, "Checking for new versions failed! %s\n", err)
+		} else if release.Name != "" {
+			write(w, fmt.Sprintln(strings.Repeat("*", numStars)))
+			write(w, "[WARNING] There is a new version of %s available."+
+				"\nExecute `%s update` if you want to install version '%s'.\n",
+				project.name, project.binName, release.Name)
+			write(w, fmt.Sprintln(strings.Repeat("*", numStars)))
+			write(w, "\n")
+
+			time.Sleep(bannerWaitFor)
+		}
 	}
 }
