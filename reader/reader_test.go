@@ -2,6 +2,7 @@ package reader_test
 
 import (
 	"database/sql"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -59,6 +60,16 @@ func TestNewOracleReader(t *testing.T) {
 	assert.IsType(t, reader.OracleReader{}, r)
 
 	t.Setenv("DB_PROFILE", "")
+}
+
+func TestNewOracleReaderError(t *testing.T) {
+	ds := new(mockDataSource)
+	ds.On("Connect", reader.MaxDBTimeout).Return(fmt.Errorf("connection error"))
+	ds.On("DriverName").Return("oracle")
+	ds.On("ConnectionURL").Return("oracle://usr:pwd@localhost:1521/dbname")
+
+	_, err := reader.NewReader(ds)
+	assert.Equal(t, "connection error", err.Error())
 }
 
 func TestNewOracleReaderProfileError(t *testing.T) {
