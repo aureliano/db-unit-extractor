@@ -169,11 +169,11 @@ func elapsedTime(seed time.Time) string {
 }
 
 func checkUpdates(cmd *cobra.Command, checkUpdatesDelegation func(c caravela.Conf) (*provider.Release, error)) {
-	devMode := os.Getenv("DEV_MODE") != "" || strings.HasSuffix(project.version, "-dev")
+	shouldCheckUpdates := os.Getenv("PROFILE") == "test" || !strings.HasSuffix(project.version, "-dev")
 	const numStars = 80
 	const bannerWaitFor = time.Second * 3
 
-	if devMode {
+	if shouldCheckUpdates {
 		release, err := checkUpdatesDelegation(caravela.Conf{
 			Version: project.version,
 			Provider: provider.GithubProvider{

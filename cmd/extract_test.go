@@ -329,8 +329,8 @@ func TestNewExtractCommandElapsedTimeMoreThanADay(t *testing.T) {
 }
 
 func TestNewExtractCheckUpdatesError(t *testing.T) {
-	t.Setenv("DEV_MODE", "true")
-	defer t.Setenv("DEV_MODE", "")
+	t.Setenv("PROFILE", "test")
+	defer t.Setenv("PROFILE", "test")
 
 	patches := gomonkey.ApplyFunc(extractor.Extract, func(extractor.Conf, reader.DBReader, []writer.FileWriter) error {
 		return nil
@@ -358,8 +358,8 @@ func TestNewExtractCheckUpdatesError(t *testing.T) {
 }
 
 func TestNewExtractCheckUpdates(t *testing.T) {
-	t.Setenv("DEV_MODE", "true")
-	defer t.Setenv("DEV_MODE", "")
+	t.Setenv("PROFILE", "test")
+	defer t.Setenv("PROFILE", "test")
 
 	patches := gomonkey.ApplyFunc(extractor.Extract, func(extractor.Conf, reader.DBReader, []writer.FileWriter) error {
 		return nil
