@@ -2,6 +2,7 @@ package writer
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -17,17 +18,21 @@ type XMLWriter struct {
 func (w *XMLWriter) WriteHeader() error {
 	err := os.MkdirAll(w.Directory, os.ModePerm)
 	if err != nil {
+		log.Printf("XML.WriteHeader\nMake directory %s failed with `%s'\n", w.Directory, err.Error())
 		return err
 	}
 
 	path := filepath.Join(w.Directory, fmt.Sprintf("%s.xml", w.Name))
 	w.file, err = os.Create(path)
 	if err != nil {
+		log.Printf("XML.WriteHeader\nFile %s not created: `%s'\n", path, err.Error())
 		return err
 	}
 
-	_, err = w.file.Write(fileHeader(w.Formatted))
+	content := fileHeader(w.Formatted)
+	_, err = w.file.Write(content)
 	if err != nil {
+		log.Printf("XML.WriteHeader\nWriting to file failed: `%s'\nContent: %s\n", err.Error(), content)
 		_ = w.file.Close()
 	}
 
@@ -35,8 +40,10 @@ func (w *XMLWriter) WriteHeader() error {
 }
 
 func (w *XMLWriter) WriteFooter() error {
-	_, err := w.file.Write(fileFooter())
+	content := fileFooter()
+	_, err := w.file.Write(content)
 	if err != nil {
+		log.Printf("XML.WriteFooter\nWriting to file failed: `%s'\nContent: %s\n", err.Error(), content)
 		_ = w.file.Close()
 		return err
 	}
@@ -45,8 +52,10 @@ func (w *XMLWriter) WriteFooter() error {
 }
 
 func (w *XMLWriter) Write(table string, rows []map[string]interface{}) error {
-	_, err := w.file.Write(fileBody(w.Formatted, table, rows))
+	content := fileBody(w.Formatted, table, rows)
+	_, err := w.file.Write(content)
 	if err != nil {
+		log.Printf("XML.Write\nWriting to file failed: `%s'\nContent: %s\n", err.Error(), content)
 		_ = w.file.Close()
 	}
 
