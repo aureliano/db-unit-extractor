@@ -152,12 +152,14 @@ func executeQuery(db *sql.DB, converters []dataconv.Converter, filters []interfa
 	query string) ([]map[string]interface{}, error) {
 	stmt, err := db.Prepare(query)
 	if err != nil {
+		log.Printf("Oracle.executeQuery\nQuery: %s\nPrepare statement error: %s\n", query, err.Error())
 		return nil, err
 	}
 	defer stmt.Close()
 
 	rows, err := stmt.Query(filters...)
 	if err != nil {
+		log.Printf("Oracle.executeQuery\nQuery: %s\nQuery error: %s\n", query, err.Error())
 		return nil, err
 	}
 	defer rows.Close()
@@ -248,6 +250,7 @@ func readDataSet(rows *sql.Rows, converters []dataconv.Converter) ([]map[string]
 		for i := range columns {
 			value, err := fetchValue(values[i], converters)
 			if err != nil {
+				log.Printf("Oracle.readDataSet\nFetch value error: %s\n", err.Error())
 				return nil, err
 			}
 
