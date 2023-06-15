@@ -89,8 +89,9 @@ func extract(cmd *cobra.Command) {
 		shutdown(cmd, "Extract error (%s)\n", err.Error())
 	}
 
-	_, _ = cmd.OutOrStdout().Write([]byte(extractionSuccessMessage(conf)))
-	_, _ = cmd.OutOrStdout().Write([]byte(fmt.Sprintf("Elapsed time: %s\n", elapsedTime(seedTime))))
+	w := cmd.OutOrStdout()
+	write(w, extractionSuccessMessage(conf))
+	write(w, "Elapsed time: %s\n", elapsedTime(seedTime))
 }
 
 func mapReferences(refs []string) (map[string]interface{}, error) {
