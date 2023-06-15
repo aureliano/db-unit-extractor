@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 	"time"
@@ -22,6 +23,7 @@ func (r OracleReader) FetchColumnsMetadata(table schema.Table) ([]DBColumn, erro
 
 	rows, err := r.db.Query(query)
 	if err != nil {
+		log.Printf("Oracle.FetchColumnsMetadata\nTable: %s\nQuery: %s\nError: %s\n", table.Name, query, err.Error())
 		return nil, err
 	}
 	defer rows.Close()
@@ -35,6 +37,7 @@ func (r OracleReader) FetchColumnsMetadata(table schema.Table) ([]DBColumn, erro
 
 		err = rows.Scan(&rec.Name, &rec.Type, &nullable, &rec.Length, &precision, &scale)
 		if err != nil {
+			log.Printf("Oracle.FetchColumnsMetadata\nTable: %s\nScan error: %s\n", table.Name, err.Error())
 			return nil, err
 		}
 
@@ -45,10 +48,13 @@ func (r OracleReader) FetchColumnsMetadata(table schema.Table) ([]DBColumn, erro
 		records = append(records, rec)
 	}
 
-	if rows.Err() != nil {
-		return nil, rows.Err()
+	err = rows.Err()
+	if err != nil {
+		log.Printf("Oracle.FetchColumnsMetadata\nTable: %s\nFetch rows error: %s\n", table.Name, err.Error())
+		return nil, err
 	} else if len(records) == 0 {
-		return nil, fmt.Errorf("no metadata found for table %s (make sure it exists and user has proper grants)", table.Name)
+		return nil, fmt.Errorf(
+			"no metadata found for table %s (make sure it exists and user has proper grants)", table.Name)
 	}
 
 	return records, nil
