@@ -46,6 +46,9 @@ func NewReader(ds DBConnector) (DBReader, error) {
 
 func newOracle(ds DBConnector) (DBReader, error) {
 	db, err := ds.Connect(MaxDBTimeout)
+	if err != nil {
+		return nil, err
+	}
 
 	dbProfile := os.Getenv("DB_PROFILE")
 	var pfile *os.File
