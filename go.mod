@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/agiledragon/gomonkey/v2 v2.10.1
-	github.com/aureliano/caravela v1.0.0
+	github.com/aureliano/caravela v1.0.1
 	github.com/mattn/go-sqlite3 v1.14.16
 	github.com/sijms/go-ora/v2 v2.7.6
 	github.com/spf13/cobra v1.7.0
