@@ -1,0 +1,16 @@
+---
+tables:
+  - name: customers
+    filters:
+      - name: id
+        value: ${customer_id}
+  <%=template path = "domain-A-tables.yml" customerId = "${customer_id}"%>
+  - name: address
+    filters:
+      - name: customer_id
+        value: ${customer_id}
+  <%= template 
+      path = "/home/user/templates/domain-B-tables.yml" 
+      param1="123"
+      param2 = "${table.pk}"   param3= "abcd"
+  %>
