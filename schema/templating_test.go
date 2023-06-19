@@ -12,11 +12,23 @@ import (
 func TestApplyTemplatesNoTemplateToRender(t *testing.T) {
 	text := `---
 tables:
-  -name: test`
+  - name: test`
 
 	schema, err := schema.ApplyTemplates("", text)
 	assert.Nil(t, err)
 	assert.Equal(t, text, schema)
+}
+
+func TestApplyTemplatesErrorInvalidTemplateDefinition(t *testing.T) {
+	schemaPath := "../test/unit/templating_test.yml"
+	text := `---
+tables:
+  - name: test
+  <%= template path="_domain-customer.yml" param 123 %>`
+
+	_, err := schema.ApplyTemplates(schemaPath, text)
+	assert.Equal(t,
+		"invalid template definition `<%= template path=\"_domain-customer.yml\" param 123 %>'", err.Error())
 }
 
 func TestApplyTemplates(t *testing.T) {
