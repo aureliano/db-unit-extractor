@@ -55,6 +55,18 @@ tables:
 		"repeated parameter 'param'", err.Error())
 }
 
+func TestApplyTemplatesErrorPathIsRequired(t *testing.T) {
+	schemaPath := "../test/unit/templating_test.yml"
+	text := `---
+tables:
+  - name: test
+  <%= template param="123" %>`
+
+	_, err := schema.ApplyTemplates(schemaPath, text)
+	assert.Equal(t,
+		"path parameter is required `<%= template param=\"123\" %>'", err.Error())
+}
+
 func TestApplyTemplates(t *testing.T) {
 	schemaPath := "../test/unit/templating_test.yml"
 	bytes, err := os.ReadFile(schemaPath)
