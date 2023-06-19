@@ -116,7 +116,7 @@ func validateParams(paramGroups [][]string) error {
 
 		for j, params2 := range paramGroups {
 			if i != j && pname == params2[1] {
-				return fmt.Errorf("repeated parameter `%s'", pname)
+				return fmt.Errorf("repeated parameter '%s'", pname)
 			}
 		}
 	}

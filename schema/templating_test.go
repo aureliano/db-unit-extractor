@@ -43,6 +43,18 @@ tables:
 		"template parameter 'param' is empty", err.Error())
 }
 
+func TestApplyTemplatesErrorRepeatedParameter(t *testing.T) {
+	schemaPath := "../test/unit/templating_test.yml"
+	text := `---
+tables:
+  - name: test
+  <%= template path="_domain-customer.yml" param="123" param="321" %>`
+
+	_, err := schema.ApplyTemplates(schemaPath, text)
+	assert.Equal(t,
+		"repeated parameter 'param'", err.Error())
+}
+
 func TestApplyTemplates(t *testing.T) {
 	schemaPath := "../test/unit/templating_test.yml"
 	bytes, err := os.ReadFile(schemaPath)
