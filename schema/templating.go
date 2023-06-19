@@ -111,7 +111,7 @@ func validateParams(paramGroups [][]string) error {
 	for i, params := range paramGroups {
 		pname := params[1]
 		if params[2] == "" {
-			return fmt.Errorf("template parameter %s is empty", pname)
+			return fmt.Errorf("template parameter '%s' is empty", pname)
 		}
 
 		for j, params2 := range paramGroups {

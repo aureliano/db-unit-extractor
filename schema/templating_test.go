@@ -31,6 +31,18 @@ tables:
 		"invalid template definition `<%= template path=\"_domain-customer.yml\" param 123 %>'", err.Error())
 }
 
+func TestApplyTemplatesErrorEmptyParameter(t *testing.T) {
+	schemaPath := "../test/unit/templating_test.yml"
+	text := `---
+tables:
+  - name: test
+  <%= template path="_domain-customer.yml" param="" %>`
+
+	_, err := schema.ApplyTemplates(schemaPath, text)
+	assert.Equal(t,
+		"template parameter 'param' is empty", err.Error())
+}
+
 func TestApplyTemplates(t *testing.T) {
 	schemaPath := "../test/unit/templating_test.yml"
 	bytes, err := os.ReadFile(schemaPath)
