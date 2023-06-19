@@ -26,9 +26,25 @@ func ApplyTemplates(refPath, content string) (string, error) {
 		return "", err
 	}
 
-	fmt.Println(templates)
+	sb := strings.Builder{}
+	sb.WriteString(strings.Trim(content[:tmplInd[0][0]], " "))
 
-	return "", nil
+	size := len(tmplInd)
+	for i := 0; i < size; i++ {
+		sb.WriteString(templates[i])
+		pair := tmplInd[i]
+
+		if i+1 < size {
+			begin := pair[0] + pair[1]
+			end := tmplInd[i+1][0]
+			sb.WriteString(strings.Trim(content[begin:end], " "))
+		}
+	}
+
+	index := tmplInd[size-1][0] + tmplInd[size-1][1]
+	sb.WriteString(strings.Trim(content[index:], " "))
+
+	return sb.String(), nil
 }
 
 func renderTemplates(refPath, content string, indexes [][]int) ([]string, error) {

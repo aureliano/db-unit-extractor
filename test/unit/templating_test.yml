@@ -5,7 +5,7 @@ tables:
       - name: id
         value: ${customer_id}
   <%=template path = "_domain-customer.yml" customerId = "${customer_id}"%>
-  - name: address
+  - name: orders
     filters:
       - name: customer_id
         value: ${customer_id}
@@ -14,3 +14,7 @@ tables:
       productId="123"
       param2 = "${table.pk}"   param3= "abcd"
   %>
+  - name: product
+    filters:
+      - name: id
+        value: 123

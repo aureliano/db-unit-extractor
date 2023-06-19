@@ -17,5 +17,5 @@ func TestApplyTemplates(t *testing.T) {
 	text := string(bytes)
 	schema, err := schema.ApplyTemplates(schemaPath, text)
 	assert.Nil(t, err)
-	assert.Empty(t, schema)
+	assert.NotEmpty(t, schema)
 }
