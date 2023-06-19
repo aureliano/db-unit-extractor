@@ -9,6 +9,16 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestApplyTemplatesNoTemplateToRender(t *testing.T) {
+	text := `---
+tables:
+  -name: test`
+
+	schema, err := schema.ApplyTemplates("", text)
+	assert.Nil(t, err)
+	assert.Equal(t, text, schema)
+}
+
 func TestApplyTemplates(t *testing.T) {
 	schemaPath := "../test/unit/templating_test.yml"
 	bytes, err := os.ReadFile(schemaPath)
