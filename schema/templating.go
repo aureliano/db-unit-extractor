@@ -3,6 +3,7 @@ package schema
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 )
@@ -13,13 +14,13 @@ var (
 	templateParamRegExp  = regexp.MustCompile(`(\w+)\s*=\s*"([^"]*)"`)
 )
 
-func ApplyTemplates(content string) (string, error) {
+func ApplyTemplates(refPath, content string) (string, error) {
 	tmplInd := findTemplateDeclarations(content)
 	if len(tmplInd) == 0 {
 		return content, nil
 	}
 
-	templates, err := renderTemplates(content, tmplInd)
+	templates, err := renderTemplates(refPath, content, tmplInd)
 	if err != nil {
 		return "", err
 	}
@@ -29,32 +30,50 @@ func ApplyTemplates(content string) (string, error) {
 	return "", nil
 }
 
-func renderTemplates(content string, indexes [][]int) (string, error) {
-	for _, pair := range indexes {
+func renderTemplates(refPath, content string, indexes [][]int) ([]string, error) {
+	templates := make([]string, len(indexes))
+	for i, pair := range indexes {
 		begin := pair[0]
 		end := pair[0] + pair[1]
-		template := content[begin:end]
+		tmplDefinition := content[begin:end]
 
-		if !templateRegExp.MatchString(template) {
-			return "", fmt.Errorf("invalid template definition `%s'", template)
+		excerpt, err := renderTemplate(refPath, tmplDefinition)
+		if err != nil {
+			return nil, err
 		}
 
-		params := templateParamRegExp.FindAllStringSubmatch(template, -1)
-		if err := validateParams(params); err != nil {
-			return "", err
-		}
-
-		pathIndex := findPathParam(params)
-		if pathIndex < 0 {
-			return "", fmt.Errorf("path parameters is required `%s'", template)
-		}
-
-		path := params[pathIndex][2]
-		if err := validatePath(path); err != nil {
-			return "", err
-		}
+		templates[i] = excerpt
 	}
 
+	return templates, nil
+}
+
+func renderTemplate(refPath, tmplDefinition string) (string, error) {
+	if !templateRegExp.MatchString(tmplDefinition) {
+		return "", fmt.Errorf("invalid template definition `%s'", tmplDefinition)
+	}
+
+	params := templateParamRegExp.FindAllStringSubmatch(tmplDefinition, -1)
+	if err := validateParams(params); err != nil {
+		return "", err
+	}
+
+	pathIndex := findPathParam(params)
+	if pathIndex < 0 {
+		return "", fmt.Errorf("path parameter is required `%s'", tmplDefinition)
+	}
+
+	path := resolvePath(refPath, params[pathIndex][2])
+	if err := validatePath(path); err != nil {
+		return "", err
+	}
+
+	template, err := os.ReadFile(path)
+	if err != nil {
+		return "", err
+	}
+
+	fmt.Println(string(template))
 	return "", nil
 }
 
@@ -86,10 +105,6 @@ func findPathParam(paramGroups [][]string) int {
 }
 
 func validatePath(path string) error {
-	if path == "" {
-		return fmt.Errorf("path is required")
-	}
-
 	info, err := os.Stat(path)
 	if os.IsNotExist(err) {
 		return fmt.Errorf("%s not found", path)
@@ -98,6 +113,14 @@ func validatePath(path string) error {
 	}
 
 	return nil
+}
+
+func resolvePath(refPath, path string) string {
+	if filepath.IsAbs(path) {
+		return path
+	}
+
+	return filepath.Join(filepath.Dir(refPath), path)
 }
 
 func findTemplateDeclarations(content string) [][]int {

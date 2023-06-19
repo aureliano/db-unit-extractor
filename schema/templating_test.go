@@ -10,11 +10,12 @@ import (
 )
 
 func TestApplyTemplates(t *testing.T) {
-	bytes, err := os.ReadFile("../test/unit/templating_test.yml")
+	schemaPath := "../test/unit/templating_test.yml"
+	bytes, err := os.ReadFile(schemaPath)
 	require.Nil(t, err)
 
 	text := string(bytes)
-	schema, err := schema.ApplyTemplates(text)
-	//assert.Nil(t, err)
+	schema, err := schema.ApplyTemplates(schemaPath, text)
+	assert.Nil(t, err)
 	assert.Empty(t, schema)
 }
