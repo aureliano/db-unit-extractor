@@ -12,6 +12,7 @@ var (
 	templatePrefixRegExp = regexp.MustCompile(`<%=\s*template\s+`)
 	templateRegExp       = regexp.MustCompile(`<%=\s*template\s+((\w+)\s*=\s*"?([^"]*)"?\s*)*%>`)
 	templateParamRegExp  = regexp.MustCompile(`(\w+)\s*=\s*"([^"]*)"`)
+	dynamicParamRegExp   = regexp.MustCompile(`\A\$\{(\w+)\}\z`)
 )
 
 func ApplyTemplates(refPath, content string) (string, error) {
@@ -68,13 +69,26 @@ func renderTemplate(refPath, tmplDefinition string) (string, error) {
 		return "", err
 	}
 
-	template, err := os.ReadFile(path)
+	tmpl, err := os.ReadFile(path)
 	if err != nil {
 		return "", err
 	}
 
-	fmt.Println(string(template))
-	return "", nil
+	template := string(tmpl)
+	for _, param := range params {
+		key := param[1]
+		value := param[2]
+
+		if dynamicParamRegExp.MatchString(value) {
+			value = dynamicParamRegExp.FindStringSubmatch(value)[1]
+		} else {
+			key = fmt.Sprintf("${%s}", key)
+		}
+
+		template = strings.ReplaceAll(template, key, value)
+	}
+
+	return template, nil
 }
 
 func validateParams(paramGroups [][]string) error {

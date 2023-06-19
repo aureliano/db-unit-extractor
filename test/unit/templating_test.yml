@@ -11,6 +11,6 @@ tables:
         value: ${customer_id}
   <%= template 
       path = "_domain-product.yml" 
-      param1="123"
+      productId="123"
       param2 = "${table.pk}"   param3= "abcd"
   %>

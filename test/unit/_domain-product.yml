@@ -1,8 +1,8 @@
   - name: reviews
     filters:
       - name: id
-        value: ${product_id}
+        value: ${productId}
   - name: categories
     filters:
       - name: id
-        value: ${product_id}
+        value: ${productId}
