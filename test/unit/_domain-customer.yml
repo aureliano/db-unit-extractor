@@ -1,0 +1,8 @@
+  - name: addresses
+    filters:
+      - name: id
+        value: ${customerId}
+  - name: preferences
+    filters:
+      - name: id
+        value: ${customerId}
