@@ -16,6 +16,36 @@ func TestApplyTemplates(t *testing.T) {
 
 	text := string(bytes)
 	schema, err := schema.ApplyTemplates(schemaPath, text)
+	expected := `---
+tables:
+  - name: customers
+    filters:
+      - name: id
+        value: ${customer_id}
+  - name: addresses
+    filters:
+      - name: id
+        value: ${customer_id}
+  - name: preferences
+    filters:
+      - name: id
+        value: ${customer_id}
+  - name: orders
+    filters:
+      - name: customer_id
+        value: ${customer_id}
+  - name: reviews
+    filters:
+      - name: id
+        value: 123
+  - name: categories
+    filters:
+      - name: id
+        value: 123
+  - name: product
+    filters:
+      - name: id
+        value: 123`
 	assert.Nil(t, err)
-	assert.NotEmpty(t, schema)
+	assert.Equal(t, expected, schema)
 }
