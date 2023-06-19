@@ -67,6 +67,18 @@ tables:
 		"path parameter is required `<%= template param=\"123\" %>'", err.Error())
 }
 
+func TestApplyTemplatesErrorPathNotFound(t *testing.T) {
+	schemaPath := "../test/unit/templating_test.yml"
+	text := `---
+tables:
+  - name: test
+  <%= template path="/path/to/nowhere" param="123" %>`
+
+	_, err := schema.ApplyTemplates(schemaPath, text)
+	assert.Equal(t,
+		"/path/to/nowhere not found", err.Error())
+}
+
 func TestApplyTemplates(t *testing.T) {
 	schemaPath := "../test/unit/templating_test.yml"
 	bytes, err := os.ReadFile(schemaPath)
