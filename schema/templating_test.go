@@ -5,6 +5,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/agiledragon/gomonkey/v2"
 	"github.com/aureliano/db-unit-extractor/schema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -86,6 +87,22 @@ tables:
 
 	_, err := schema.ApplyTemplates(schemaPath, text)
 	assert.Equal(t, fmt.Sprintf("%s is a directory", path), err.Error())
+}
+
+func TestApplyTemplatesErrorReadingTemplateFile(t *testing.T) {
+	patches := gomonkey.ApplyFunc(os.ReadFile, func(string) ([]byte, error) {
+		return nil, fmt.Errorf("reading error")
+	})
+	defer patches.Reset()
+
+	schemaPath := "../test/unit/templating_test.yml"
+	text := `---
+tables:
+  - name: test
+  <%= template path="_domain-customer.yml" param="123" %>`
+
+	_, err := schema.ApplyTemplates(schemaPath, text)
+	assert.Equal(t, "reading error", err.Error())
 }
 
 func TestApplyTemplates(t *testing.T) {
