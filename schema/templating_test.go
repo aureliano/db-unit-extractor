@@ -1,6 +1,7 @@
 package schema_test
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
@@ -39,8 +40,7 @@ tables:
   <%= template path="_domain-customer.yml" param="" %>`
 
 	_, err := schema.ApplyTemplates(schemaPath, text)
-	assert.Equal(t,
-		"template parameter 'param' is empty", err.Error())
+	assert.Equal(t, "template parameter 'param' is empty", err.Error())
 }
 
 func TestApplyTemplatesErrorRepeatedParameter(t *testing.T) {
@@ -51,8 +51,7 @@ tables:
   <%= template path="_domain-customer.yml" param="123" param="321" %>`
 
 	_, err := schema.ApplyTemplates(schemaPath, text)
-	assert.Equal(t,
-		"repeated parameter 'param'", err.Error())
+	assert.Equal(t, "repeated parameter 'param'", err.Error())
 }
 
 func TestApplyTemplatesErrorPathIsRequired(t *testing.T) {
@@ -63,8 +62,7 @@ tables:
   <%= template param="123" %>`
 
 	_, err := schema.ApplyTemplates(schemaPath, text)
-	assert.Equal(t,
-		"path parameter is required `<%= template param=\"123\" %>'", err.Error())
+	assert.Equal(t, "path parameter is required `<%= template param=\"123\" %>'", err.Error())
 }
 
 func TestApplyTemplatesErrorPathNotFound(t *testing.T) {
@@ -75,8 +73,19 @@ tables:
   <%= template path="/path/to/nowhere" param="123" %>`
 
 	_, err := schema.ApplyTemplates(schemaPath, text)
-	assert.Equal(t,
-		"/path/to/nowhere not found", err.Error())
+	assert.Equal(t, "/path/to/nowhere not found", err.Error())
+}
+
+func TestApplyTemplatesErrorPathIsDirectory(t *testing.T) {
+	schemaPath := "../test/unit/templating_test.yml"
+	path := os.TempDir()
+	text := fmt.Sprintf(`---
+tables:
+  - name: test
+  <%%= template path="%s" param="123" %%>`, path)
+
+	_, err := schema.ApplyTemplates(schemaPath, text)
+	assert.Equal(t, fmt.Sprintf("%s is a directory", path), err.Error())
 }
 
 func TestApplyTemplates(t *testing.T) {
