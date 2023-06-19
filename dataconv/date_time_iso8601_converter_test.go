@@ -17,11 +17,22 @@ func TestConvertTimeSourceIsNotTime(t *testing.T) {
 	assert.Nil(t, actual)
 }
 
-func TestConvertTime(t *testing.T) {
+func TestConvertDateAndTime(t *testing.T) {
 	c := dataconv.DateTimeISO8601Converter{}
 	location, _ := time.LoadLocation("America/Sao_Paulo")
 	source := time.Date(2023, time.June, 9, 14, 31, 16, 478587456, location)
 	expected := "2023-06-09T14:31:16.478 -0300"
+	actual, err := c.Convert(source)
+
+	assert.Nil(t, err)
+	assert.EqualValues(t, expected, actual)
+}
+
+func TestConvertDateOnly(t *testing.T) {
+	c := dataconv.DateTimeISO8601Converter{}
+	location, _ := time.LoadLocation("America/Sao_Paulo")
+	source := time.Date(2023, time.June, 19, 0, 0, 0, 0, location)
+	expected := "2023-06-19"
 	actual, err := c.Convert(source)
 
 	assert.Nil(t, err)
