@@ -256,6 +256,7 @@ func readDataSet(fields []DBColumn, rows *sql.Rows, converters []dataconv.Conver
 			value, err := fetchValue(values[i], converters)
 			if err != nil {
 				log.Printf("Oracle.readDataSet\nFetch value error: %s\n", err.Error())
+				log.Printf("Field: %s - Value: %v\n", columns[i], values[i])
 				return nil, err
 			}
 
