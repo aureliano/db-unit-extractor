@@ -253,7 +253,7 @@ func readDataSet(fields []DBColumn, rows *sql.Rows, converters []dataconv.Conver
 		}
 
 		for i := range columns {
-			value, err := fetchValue(values[i], converters)
+			value, err := fetchValue(row[i].Type, values[i], converters)
 			if err != nil {
 				log.Printf("Oracle.readDataSet\nFetch value error: %s\n", err.Error())
 				log.Printf("Field: %s - Value: %v\n", columns[i], values[i])
@@ -269,10 +269,10 @@ func readDataSet(fields []DBColumn, rows *sql.Rows, converters []dataconv.Conver
 	return data, rows.Err()
 }
 
-func fetchValue(value interface{}, converters []dataconv.Converter) (interface{}, error) {
+func fetchValue(dtype string, value interface{}, converters []dataconv.Converter) (interface{}, error) {
 	converter := findConverter(value, converters)
 	if converter != nil {
-		return converter.Convert(value)
+		return converter.Convert(dtype, value)
 	}
 
 	return value, nil

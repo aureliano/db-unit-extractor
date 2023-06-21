@@ -7,7 +7,7 @@ import (
 
 type BlobConverter struct{}
 
-func (BlobConverter) Convert(source interface{}) (interface{}, error) {
+func (BlobConverter) Convert(_ string, source interface{}) (interface{}, error) {
 	bts, isArrByte := source.([]byte)
 	if !isArrByte {
 		return nil, fmt.Errorf("'%v' is not []byte", source)

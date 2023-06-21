@@ -19,7 +19,7 @@ import (
 
 type DummyConverter struct{}
 
-func (DummyConverter) Convert(interface{}) (interface{}, error) {
+func (DummyConverter) Convert(string, interface{}) (interface{}, error) {
 	return nil, fmt.Errorf("converter error")
 }
 
