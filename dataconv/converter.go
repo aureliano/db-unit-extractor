@@ -1,7 +1,7 @@
 package dataconv
 
 type Converter interface {
-	Convert(interface{}) (interface{}, error)
+	Convert(string, interface{}) (interface{}, error)
 	Handle(interface{}) bool
 }
 

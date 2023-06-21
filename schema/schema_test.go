@@ -12,7 +12,7 @@ import (
 
 type DummyConverter string
 
-func (DummyConverter) Convert(interface{}) (interface{}, error) {
+func (DummyConverter) Convert(string, interface{}) (interface{}, error) {
 	return 0, nil
 }
 

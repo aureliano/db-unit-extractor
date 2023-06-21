@@ -3,6 +3,8 @@ package writer
 import (
 	"fmt"
 	"os"
+
+	"github.com/aureliano/db-unit-extractor/reader"
 )
 
 type ConsoleWriter struct{}
@@ -15,13 +17,13 @@ func (*ConsoleWriter) WriteFooter() error {
 	return nil
 }
 
-func (*ConsoleWriter) Write(table string, rows []map[string]interface{}) error {
+func (*ConsoleWriter) Write(table string, rows [][]*reader.DBColumn) error {
 	for _, row := range rows {
 		fmt.Fprintln(os.Stdout, " >", table)
 
-		for name, value := range row {
-			if value != nil {
-				fmt.Fprintf(os.Stdout, "   %s: %v\n", name, value)
+		for _, column := range row {
+			if column.Value != nil {
+				fmt.Fprintf(os.Stdout, "   %s: %v\n", column.Name, column.Value)
 			}
 		}
 	}
