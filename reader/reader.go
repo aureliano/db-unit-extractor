@@ -23,6 +23,7 @@ type DBColumn struct {
 	Nullable    bool
 	Length      int64
 	DecimalSize DecimalColumn
+	Value       interface{}
 }
 
 var ErrUnsupportedDBReader = errors.New("unsupported database")
@@ -31,7 +32,7 @@ const DBSnapshotDealy = time.Millisecond * 200
 
 type DBReader interface {
 	FetchColumnsMetadata(schema.Table) ([]DBColumn, error)
-	FetchData(string, []DBColumn, []dataconv.Converter, [][]interface{}) ([]map[string]interface{}, error)
+	FetchData(string, []DBColumn, []dataconv.Converter, [][]interface{}) ([][]*DBColumn, error)
 	ProfilerMode() bool
 	StartDBProfiler(context.Context)
 }

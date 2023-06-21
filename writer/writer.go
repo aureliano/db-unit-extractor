@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+
+	"github.com/aureliano/db-unit-extractor/reader"
 )
 
 type FileConf struct {
@@ -18,7 +20,7 @@ var ErrUnsupportedFileWriter = errors.New("unsupported file type")
 type FileWriter interface {
 	WriteHeader() error
 	WriteFooter() error
-	Write(table string, rows []map[string]interface{}) error
+	Write(table string, rows [][]*reader.DBColumn) error
 }
 
 func NewWriter(conf FileConf) (FileWriter, error) {

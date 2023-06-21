@@ -61,7 +61,7 @@ func (r OracleReader) FetchColumnsMetadata(table schema.Table) ([]DBColumn, erro
 }
 
 func (r OracleReader) FetchData(table string, fields []DBColumn, converters []dataconv.Converter,
-	filters [][]interface{}) ([]map[string]interface{}, error) {
+	filters [][]interface{}) ([][]*DBColumn, error) {
 	query := buildOracleSQLQueryColumns(table, fields, filters)
 
 	size := len(filters)
@@ -103,7 +103,7 @@ func (r OracleReader) FetchData(table string, fields []DBColumn, converters []da
 		return nil, fmt.Errorf("not all filters were bound for table %s `%v'", table, filters)
 	}
 
-	return fetchData(r.db, converters, arrValues, query)
+	return fetchData(r.db, fields, converters, arrValues, query)
 }
 
 func (r OracleReader) ProfilerMode() bool {
@@ -125,20 +125,20 @@ func (r OracleReader) StartDBProfiler(ctx context.Context) {
 	}(ctx)
 }
 
-func fetchData(db *sql.DB, converters []dataconv.Converter, arrValues [][]interface{},
-	query string) ([]map[string]interface{}, error) {
-	rows := make([]map[string]interface{}, 0, len(arrValues))
+func fetchData(db *sql.DB, fields []DBColumn, converters []dataconv.Converter, arrValues [][]interface{},
+	query string) ([][]*DBColumn, error) {
+	rows := make([][]*DBColumn, 0, len(arrValues))
 
 	if len(arrValues) > 0 {
 		for _, filterValues := range arrValues {
-			data, err := executeQuery(db, converters, filterValues, query)
+			data, err := executeQuery(db, fields, converters, filterValues, query)
 			if err != nil {
 				return nil, err
 			}
 			rows = append(rows, data...)
 		}
 	} else {
-		data, err := executeQuery(db, converters, []interface{}{}, query)
+		data, err := executeQuery(db, fields, converters, []interface{}{}, query)
 		if err != nil {
 			return nil, err
 		}
@@ -148,8 +148,8 @@ func fetchData(db *sql.DB, converters []dataconv.Converter, arrValues [][]interf
 	return rows, nil
 }
 
-func executeQuery(db *sql.DB, converters []dataconv.Converter, filters []interface{},
-	query string) ([]map[string]interface{}, error) {
+func executeQuery(db *sql.DB, fields []DBColumn, converters []dataconv.Converter, filters []interface{},
+	query string) ([][]*DBColumn, error) {
 	stmt, err := db.Prepare(query)
 	if err != nil {
 		log.Printf("Oracle.executeQuery\nQuery: %s\nPrepare statement error: %s\n", query, err.Error())
@@ -164,7 +164,7 @@ func executeQuery(db *sql.DB, converters []dataconv.Converter, filters []interfa
 	}
 	defer rows.Close()
 
-	return readDataSet(rows, converters)
+	return readDataSet(fields, rows, converters)
 }
 
 func strToBool(str string) bool {
@@ -231,13 +231,13 @@ func buildOracleSQLQueryColumns(table string, fields []DBColumn, filters [][]int
 	return query
 }
 
-func readDataSet(rows *sql.Rows, converters []dataconv.Converter) ([]map[string]interface{}, error) {
+func readDataSet(fields []DBColumn, rows *sql.Rows, converters []dataconv.Converter) ([][]*DBColumn, error) {
 	columns, _ := rows.Columns()
 	count := len(columns)
 	values := make([]interface{}, count)
 	valuePtrs := make([]interface{}, count)
 
-	data := make([]map[string]interface{}, 0)
+	data := make([][]*DBColumn, 0)
 
 	for rows.Next() {
 		for i := range columns {
@@ -246,7 +246,12 @@ func readDataSet(rows *sql.Rows, converters []dataconv.Converter) ([]map[string]
 
 		_ = rows.Scan(valuePtrs...)
 
-		row := make(map[string]interface{})
+		row := make([]*DBColumn, count)
+		for i, field := range fields {
+			f := field
+			row[i] = &f
+		}
+
 		for i := range columns {
 			value, err := fetchValue(values[i], converters)
 			if err != nil {
@@ -254,7 +259,7 @@ func readDataSet(rows *sql.Rows, converters []dataconv.Converter) ([]map[string]
 				return nil, err
 			}
 
-			row[columns[i]] = value
+			row[i].Value = value
 		}
 
 		data = append(data, row)
