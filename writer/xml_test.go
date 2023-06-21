@@ -14,7 +14,7 @@ import (
 	"github.com/agiledragon/gomonkey/v2"
 )
 
-func TestWriteHeaderMkdirAllError(t *testing.T) {
+func TestXMLWriteHeaderMkdirAllError(t *testing.T) {
 	patches := gomonkey.ApplyFunc(os.MkdirAll, func(string, fs.FileMode) error {
 		return fmt.Errorf("mkdir error")
 	})
@@ -25,7 +25,7 @@ func TestWriteHeaderMkdirAllError(t *testing.T) {
 	assert.Equal(t, "mkdir error", w.WriteHeader().Error())
 }
 
-func TestWriteHeaderFileCreationError(t *testing.T) {
+func TestXMLWriteHeaderFileCreationError(t *testing.T) {
 	patches := gomonkey.ApplyFunc(os.OpenFile, func(string, int, fs.FileMode) (*os.File, error) {
 		return nil, fmt.Errorf("file creation error")
 	})
@@ -35,7 +35,7 @@ func TestWriteHeaderFileCreationError(t *testing.T) {
 	assert.Equal(t, "file creation error", w.WriteHeader().Error())
 }
 
-func TestWriteHeaderFileWritingError(t *testing.T) {
+func TestXMLWriteHeaderFileWritingError(t *testing.T) {
 	patches := gomonkey.ApplyMethodFunc(&os.File{}, "Write", func([]byte) (int, error) {
 		return 0, fmt.Errorf("file writing error")
 	})
@@ -45,7 +45,7 @@ func TestWriteHeaderFileWritingError(t *testing.T) {
 	assert.Equal(t, "file writing error", w.WriteHeader().Error())
 }
 
-func TestWriteFooterFileWritingError(t *testing.T) {
+func TestXMLWriteFooterFileWritingError(t *testing.T) {
 	patches := gomonkey.ApplyMethodFunc(&os.File{}, "Write", func([]byte) (int, error) {
 		return 0, fmt.Errorf("file writing error")
 	})
@@ -55,7 +55,7 @@ func TestWriteFooterFileWritingError(t *testing.T) {
 	assert.Equal(t, "file writing error", w.WriteFooter().Error())
 }
 
-func TestWriteBodyFileWritingError(t *testing.T) {
+func TestXMLWriteBodyFileWritingError(t *testing.T) {
 	patches := gomonkey.ApplyMethodFunc(&os.File{}, "Write", func([]byte) (int, error) {
 		return 0, fmt.Errorf("file writing error")
 	})
@@ -65,7 +65,25 @@ func TestWriteBodyFileWritingError(t *testing.T) {
 	assert.Equal(t, "file writing error", w.Write("", make([][]*reader.DBColumn, 2)).Error())
 }
 
-func TestWriteUnformatted(t *testing.T) {
+func TestXMLWriteUnformattedEmptyData(t *testing.T) {
+	dir := filepath.Join(os.TempDir(), "db-unit-extractor", "writer")
+	w := writer.XMLWriter{
+		Formatted: false,
+		Directory: dir,
+		Name:      "test-write-unformatted",
+	}
+
+	assert.Nil(t, w.WriteHeader())
+
+	assert.Nil(t, w.Write("products", [][]*reader.DBColumn{}))
+
+	assert.Nil(t, w.WriteFooter())
+
+	bytes, _ := os.ReadFile(filepath.Join(dir, fmt.Sprintf("%s.xml", w.Name)))
+	assert.Equal(t, "<?xml version=\"1.0\" encoding=\"UTF-8\"?><dataset></dataset>", string(bytes))
+}
+
+func TestXMLWriteUnformatted(t *testing.T) {
 	dir := filepath.Join(os.TempDir(), "db-unit-extractor", "writer")
 	w := writer.XMLWriter{
 		Formatted: false,
@@ -98,7 +116,7 @@ func TestWriteUnformatted(t *testing.T) {
 	assert.Contains(t, xml, "/></dataset>")
 }
 
-func TestWriteFormatted(t *testing.T) {
+func TestXMLWriteFormatted(t *testing.T) {
 	dir := filepath.Join(os.TempDir(), "db-unit-extractor", "writer")
 	w := writer.XMLWriter{
 		Formatted: true,
