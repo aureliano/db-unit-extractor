@@ -28,7 +28,7 @@ type Conf struct {
 
 type dbResponse struct {
 	table string
-	data  []map[string]interface{}
+	data  [][]*reader.DBColumn
 	err   error
 }
 
@@ -191,18 +191,18 @@ func writeData(c chan dbResponse, w writer.FileWriter) {
 
 func updateReferences(model schema.Model, response dbResponse) {
 	for _, record := range response.data {
-		for k, v := range record {
-			key := strings.ToLower(fmt.Sprintf("%s.%s", response.table, k))
+		for _, column := range record {
+			key := strings.ToLower(fmt.Sprintf("%s.%s", response.table, column.Name))
 			if _, exist := model.Refs[key]; exist {
-				model.Refs[key] = v
+				model.Refs[key] = column.Value
 			} else {
-				key = strings.ToLower(fmt.Sprintf("%s.%s[@]", response.table, k))
+				key = strings.ToLower(fmt.Sprintf("%s.%s[@]", response.table, column.Name))
 				if _, exist = model.Refs[key]; exist {
 					if model.Refs[key] == nil {
 						model.Refs[key] = make([]interface{}, 0)
 					}
 
-					model.Refs[key] = append(model.Refs[key].([]interface{}), v)
+					model.Refs[key] = append(model.Refs[key].([]interface{}), column.Value)
 				}
 			}
 		}

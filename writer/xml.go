@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/aureliano/db-unit-extractor/reader"
 )
 
 type XMLWriter struct {
@@ -51,7 +53,7 @@ func (w *XMLWriter) WriteFooter() error {
 	return w.file.Close()
 }
 
-func (w *XMLWriter) Write(table string, rows []map[string]interface{}) error {
+func (w *XMLWriter) Write(table string, rows [][]*reader.DBColumn) error {
 	content := xmlFileBody(w.Formatted, table, rows)
 	_, err := w.file.Write(content)
 	if err != nil {
@@ -74,7 +76,7 @@ func xmlFileFooter() []byte {
 	return []byte("</dataset>")
 }
 
-func xmlFileBody(formatted bool, table string, rows []map[string]interface{}) []byte {
+func xmlFileBody(formatted bool, table string, rows [][]*reader.DBColumn) []byte {
 	if formatted {
 		return formattedXMLRecord(table, rows)
 	}
@@ -82,15 +84,15 @@ func xmlFileBody(formatted bool, table string, rows []map[string]interface{}) []
 	return unformattedXMLRecord(table, rows)
 }
 
-func formattedXMLRecord(table string, rows []map[string]interface{}) []byte {
+func formattedXMLRecord(table string, rows [][]*reader.DBColumn) []byte {
 	sb := strings.Builder{}
 
 	for _, row := range rows {
 		sb.WriteString(fmt.Sprintf("  <%s", table))
 
-		for name, value := range row {
-			if value != nil {
-				sb.WriteString(fmt.Sprintf("\n    %s=\"%v\"", name, value))
+		for _, column := range row {
+			if column.Value != nil {
+				sb.WriteString(fmt.Sprintf("\n    %s=\"%v\"", column.Name, column.Value))
 			}
 		}
 		sb.WriteString("/>\n")
@@ -99,14 +101,14 @@ func formattedXMLRecord(table string, rows []map[string]interface{}) []byte {
 	return []byte(sb.String())
 }
 
-func unformattedXMLRecord(table string, rows []map[string]interface{}) []byte {
+func unformattedXMLRecord(table string, rows [][]*reader.DBColumn) []byte {
 	sb := strings.Builder{}
 
 	for _, row := range rows {
 		sb.WriteString(fmt.Sprintf("<%s", table))
-		for name, value := range row {
-			if value != nil {
-				sb.WriteString(fmt.Sprintf(" %s=\"%v\"", name, value))
+		for _, column := range row {
+			if column.Value != nil {
+				sb.WriteString(fmt.Sprintf(" %s=\"%v\"", column.Name, column.Value))
 			}
 		}
 		sb.WriteString("/>")

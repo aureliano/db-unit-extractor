@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/aureliano/db-unit-extractor/reader"
 	"github.com/aureliano/db-unit-extractor/writer"
 	"github.com/stretchr/testify/assert"
 
@@ -61,7 +62,7 @@ func TestXMLWriteBodyFileWritingError(t *testing.T) {
 	defer patches.Reset()
 
 	w := writer.XMLWriter{Directory: filepath.Join(os.TempDir(), "db-unit-extractor", "writer")}
-	assert.Equal(t, "file writing error", w.Write("", make([]map[string]interface{}, 2)).Error())
+	assert.Equal(t, "file writing error", w.Write("", make([][]*reader.DBColumn, 2)).Error())
 }
 
 func TestXMLWriteUnformatted(t *testing.T) {
@@ -74,14 +75,13 @@ func TestXMLWriteUnformatted(t *testing.T) {
 
 	assert.Nil(t, w.WriteHeader())
 
-	row := make(map[string]interface{})
-	row["id"] = 1
-	row["name"] = "shirt"
-	row["description"] = "black shirt"
-	row["price"] = 14.50
-
-	rows := make([]map[string]interface{}, 2)
-	rows[0] = row
+	rows := make([][]*reader.DBColumn, 2)
+	rows[0] = []*reader.DBColumn{
+		{Name: "id", Value: 1},
+		{Name: "name", Value: "shirt"},
+		{Name: "description", Value: "black shirt"},
+		{Name: "price", Value: 14.50},
+	}
 
 	assert.Nil(t, w.Write("products", rows))
 
@@ -108,14 +108,13 @@ func TestXMLWriteFormatted(t *testing.T) {
 
 	assert.Nil(t, w.WriteHeader())
 
-	row := make(map[string]interface{})
-	row["id"] = 1
-	row["name"] = "shirt"
-	row["description"] = "black shirt"
-	row["price"] = 14.50
-
-	rows := make([]map[string]interface{}, 2)
-	rows[0] = row
+	rows := make([][]*reader.DBColumn, 2)
+	rows[0] = []*reader.DBColumn{
+		{Name: "id", Value: 1},
+		{Name: "name", Value: "shirt"},
+		{Name: "description", Value: "black shirt"},
+		{Name: "price", Value: 14.50},
+	}
 
 	assert.Nil(t, w.Write("products", rows))
 

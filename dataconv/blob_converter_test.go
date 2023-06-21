@@ -11,7 +11,7 @@ import (
 func TestConvertBytesSourceIsNotBytes(t *testing.T) {
 	c := dataconv.BlobConverter{}
 	source := "test"
-	actual, err := c.Convert(source)
+	actual, err := c.Convert("blob", source)
 
 	assert.Equal(t, "'test' is not []byte", err.Error())
 	assert.Nil(t, actual)
@@ -21,7 +21,7 @@ func TestConvertBytes(t *testing.T) {
 	c := dataconv.BlobConverter{}
 	source := []byte("test bytes converter")
 	expected := "dGVzdCBieXRlcyBjb252ZXJ0ZXI="
-	actual, err := c.Convert(source)
+	actual, err := c.Convert("blob", source)
 
 	assert.Nil(t, err)
 	assert.EqualValues(t, expected, actual)

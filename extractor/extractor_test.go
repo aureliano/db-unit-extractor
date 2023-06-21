@@ -18,7 +18,7 @@ import (
 
 type DummyConverter string
 
-func (DummyConverter) Convert(interface{}) (interface{}, error) {
+func (DummyConverter) Convert(string, interface{}) (interface{}, error) {
 	return 0, nil
 }
 
@@ -128,137 +128,124 @@ func (FetchDataErrorDummyReader) FetchColumnsMetadata(schema.Table) ([]reader.DB
 }
 
 func (DummyReader) FetchData(table string, _ []reader.DBColumn, _ []dataconv.Converter,
-	_ [][]interface{}) ([]map[string]interface{}, error) {
+	_ [][]interface{}) ([][]*reader.DBColumn, error) {
 	switch {
 	case table == "customers":
-		m := make(map[string]interface{})
-		m["id"] = 34
-		m["first_name"] = "Antonio"
-		m["last_name"] = "Vivaldi"
-		return []map[string]interface{}{m}, nil
+		return [][]*reader.DBColumn{{
+			{Name: "id", Value: 34},
+			{Name: "first_name", Value: "Antonio"},
+			{Name: "last_name", Value: "Vivaldi"},
+		}}, nil
 	case table == "orders":
-		m := make(map[string]interface{})
-		m["id"] = 63
-		m["status"] = "paid"
-		m["total"] = 165.88
-		m["tax"] = 15.08
-		return []map[string]interface{}{m}, nil
+		return [][]*reader.DBColumn{{
+			{Name: "id", Value: 63},
+			{Name: "status", Value: "paid"},
+			{Name: "total", Value: 165.88},
+			{Name: "tax", Value: 15.08},
+		}}, nil
 	case table == "orders_customers":
-		m := make(map[string]interface{})
-		m["order_id"] = 63
-		m["customer_id"] = 34
-		return []map[string]interface{}{m}, nil
+		return [][]*reader.DBColumn{{
+			{Name: "order_id", Value: 63},
+			{Name: "customer_id", Value: 34},
+		}}, nil
 	case table == "products":
-		m := make(map[string]interface{})
-		m["id"] = 3
-		m["name"] = "Holy Bible"
-		m["description"] = "Latin Vulgata from Saint Jerome"
-		m["price"] = 150.8
-		return []map[string]interface{}{m}, nil
+		return [][]*reader.DBColumn{{
+			{Name: "id", Value: 3},
+			{Name: "name", Value: "Holy Bible"},
+			{Name: "description", Value: "Latin Vulgata from Saint Jerome"},
+			{Name: "price", Value: 150.8},
+		}}, nil
 	default:
-		return []map[string]interface{}{}, nil
+		return [][]*reader.DBColumn{}, nil
 	}
 }
 
 func (HumanResourcesReader) FetchData(table string, _ []reader.DBColumn, _ []dataconv.Converter,
-	_ [][]interface{}) ([]map[string]interface{}, error) {
+	_ [][]interface{}) ([][]*reader.DBColumn, error) {
 	switch {
 	case table == "employees":
-		m1 := make(map[string]interface{})
-		m1["id"] = 100
-		m1["department_id"] = 90
-		m1["job_id"] = 5
-		m1["first_name"] = "Antonio"
-		m1["last_name"] = "Vivaldi"
-
-		m2 := make(map[string]interface{})
-		m2["id"] = 101
-		m2["department_id"] = 90
-		m2["job_id"] = 3
-		m2["first_name"] = "Johann"
-		m2["last_name"] = "Bach"
-
-		return []map[string]interface{}{m1, m2}, nil
+		return [][]*reader.DBColumn{{
+			{Name: "id", Value: 100},
+			{Name: "department_id", Value: 90},
+			{Name: "job_id", Value: 5},
+			{Name: "first_name", Value: "Antonio"},
+			{Name: "last_name", Value: "Vivaldi"},
+		}, {
+			{Name: "id", Value: 101},
+			{Name: "department_id", Value: 90},
+			{Name: "job_id", Value: 3},
+			{Name: "first_name", Value: "Johann"},
+			{Name: "last_name", Value: "Bach"},
+		}}, nil
 	case table == "departments":
-		m := make(map[string]interface{})
-		m["id"] = 90
-		m["location_id"] = 1700
-		m["name"] = "Sales"
-		return []map[string]interface{}{m}, nil
+		return [][]*reader.DBColumn{{
+			{Name: "id", Value: 90},
+			{Name: "location_id", Value: 1700},
+			{Name: "name", Value: "Sales"},
+		}}, nil
 	case table == "locations":
-		m := make(map[string]interface{})
-		m["id"] = 1700
-		m["country_id"] = 55
-		m["city"] = "Governador Valadares"
-		m["province"] = "Minas Gerais"
-		return []map[string]interface{}{m}, nil
+		return [][]*reader.DBColumn{{
+			{Name: "id", Value: 1700},
+			{Name: "country_id", Value: 55},
+			{Name: "city", Value: "Governador Valadares"},
+			{Name: "province", Value: "Minas Gerais"},
+		}}, nil
 	case table == "countries":
-		m := make(map[string]interface{})
-		m["id"] = 55
-		m["region_id"] = 3
-		m["name"] = "Brasil"
-		return []map[string]interface{}{m}, nil
+		return [][]*reader.DBColumn{{{Name: "id", Value: 55},
+			{Name: "region_id", Value: 3},
+			{Name: "name", Value: "Brasil"},
+		}}, nil
 	case table == "regions":
-		m := make(map[string]interface{})
-		m["id"] = 3
-		m["name"] = "América do Sul"
-		return []map[string]interface{}{m}, nil
+		return [][]*reader.DBColumn{{
+			{Name: "id", Value: 3},
+			{Name: "name", Value: "América do Sul"},
+		}}, nil
 	case table == "jobs":
-		m1 := make(map[string]interface{})
-		m1["id"] = 1
-		m1["title"] = "junior developer"
-
-		m2 := make(map[string]interface{})
-		m2["id"] = 2
-		m2["title"] = "full developer"
-
-		m3 := make(map[string]interface{})
-		m3["id"] = 3
-		m3["title"] = "senior developer"
-
-		m4 := make(map[string]interface{})
-		m4["id"] = 4
-		m4["title"] = "seller"
-
-		m5 := make(map[string]interface{})
-		m5["id"] = 5
-		m5["title"] = "sell manager"
-
-		return []map[string]interface{}{m1, m2, m3, m4, m5}, nil
+		return [][]*reader.DBColumn{{
+			{Name: "id", Value: 1},
+			{Name: "title", Value: "junior developer"},
+		}, {
+			{Name: "id", Value: 2},
+			{Name: "title", Value: "full developer"},
+		}, {
+			{Name: "id", Value: 3},
+			{Name: "title", Value: "senior developer"},
+		}, {
+			{Name: "id", Value: 4},
+			{Name: "title", Value: "seller"},
+		}, {
+			{Name: "id", Value: 5},
+			{Name: "title", Value: "sell manager"},
+		}}, nil
 	case table == "job_history":
-		m1 := make(map[string]interface{})
-		m1["employee_id"] = 100
-		m1["job_id"] = 4
-
-		m2 := make(map[string]interface{})
-		m2["employee_id"] = 100
-		m2["job_id"] = 5
-
-		m3 := make(map[string]interface{})
-		m3["employee_id"] = 101
-		m3["job_id"] = 1
-
-		m4 := make(map[string]interface{})
-		m4["employee_id"] = 101
-		m4["job_id"] = 2
-
-		m5 := make(map[string]interface{})
-		m5["employee_id"] = 101
-		m5["job_id"] = 3
-
-		return []map[string]interface{}{m1, m2, m3, m4, m5}, nil
+		return [][]*reader.DBColumn{{
+			{Name: "employee_id", Value: 100},
+			{Name: "job_id", Value: 4},
+		}, {
+			{Name: "employee_id", Value: 100},
+			{Name: "job_id", Value: 5},
+		}, {
+			{Name: "employee_id", Value: 101},
+			{Name: "job_id", Value: 1},
+		}, {
+			{Name: "employee_id", Value: 101},
+			{Name: "job_id", Value: 2},
+		}, {
+			{Name: "employee_id", Value: 101},
+			{Name: "job_id", Value: 3},
+		}}, nil
 	default:
-		return []map[string]interface{}{}, nil
+		return [][]*reader.DBColumn{}, nil
 	}
 }
 
 func (FetchMetadataErrorDummyReader) FetchData(string, []reader.DBColumn, []dataconv.Converter,
-	[][]interface{}) ([]map[string]interface{}, error) {
-	return []map[string]interface{}{}, nil
+	[][]interface{}) ([][]*reader.DBColumn, error) {
+	return [][]*reader.DBColumn{}, nil
 }
 
 func (FetchDataErrorDummyReader) FetchData(string, []reader.DBColumn, []dataconv.Converter,
-	[][]interface{}) ([]map[string]interface{}, error) {
+	[][]interface{}) ([][]*reader.DBColumn, error) {
 	return nil, fmt.Errorf("fetch data error")
 }
 
@@ -306,11 +293,11 @@ func (DummyWriter) Write(string, []map[string]interface{}) error {
 	return nil
 }
 
-func (WriteDataErrorDummyWriter) Write(string, []map[string]interface{}) error {
+func (WriteDataErrorDummyWriter) Write(string, [][]*reader.DBColumn) error {
 	return fmt.Errorf("write data error")
 }
 
-func (WriteDataHeaderErrorDummyWriter) Write(string, []map[string]interface{}) error {
+func (WriteDataHeaderErrorDummyWriter) Write(string, [][]*reader.DBColumn) error {
 	return nil
 }
 

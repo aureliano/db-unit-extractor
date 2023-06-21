@@ -3,6 +3,7 @@ package writer_test
 import (
 	"testing"
 
+	"github.com/aureliano/db-unit-extractor/reader"
 	"github.com/aureliano/db-unit-extractor/writer"
 	"github.com/stretchr/testify/assert"
 )
@@ -20,15 +21,9 @@ func TestConsoleWriteFooter(t *testing.T) {
 func TestConsoleWrite(t *testing.T) {
 	w := writer.ConsoleWriter{}
 
-	rows := make([]map[string]interface{}, 2)
-
-	row := make(map[string]interface{})
-	row["id"] = 1
-	rows[0] = row
-
-	row = make(map[string]interface{})
-	row["name"] = "Giovanni Pierluigi da Palestrina"
-	rows[1] = row
+	rows := make([][]*reader.DBColumn, 2)
+	rows[0] = []*reader.DBColumn{{Name: "id", Value: 1}, {}}
+	rows[1] = []*reader.DBColumn{{}, {Name: "name", Value: "Giovanni Pierluigi da Palestrina"}}
 
 	err := w.Write("", rows)
 	assert.Nil(t, err)

@@ -19,7 +19,7 @@ import (
 
 type DummyConverter struct{}
 
-func (DummyConverter) Convert(interface{}) (interface{}, error) {
+func (DummyConverter) Convert(string, interface{}) (interface{}, error) {
 	return nil, fmt.Errorf("converter error")
 }
 
@@ -275,12 +275,12 @@ func TestFetchData(t *testing.T) {
 	require.Nil(t, err)
 
 	assert.Len(t, data, 1)
-	assert.EqualValues(t, 4, data[0]["ID"])
-	assert.EqualValues(t, 375, data[0]["USER_ID"])
-	assert.Equal(t, "SOLD", data[0]["STATUS"])
-	assert.EqualValues(t, 2243.72, data[0]["TOTAL"])
-	assert.Equal(t, dateRec.Format("2006-01-02T15:04:05.999 -0700"), data[0]["DATE_REC"])
-	assert.Equal(t, "aGVsbG8gd29ybGQ=", data[0]["ATTACHMENT"])
+	assert.EqualValues(t, 4, data[0][0].Value)
+	assert.EqualValues(t, 375, data[0][1].Value)
+	assert.Equal(t, "SOLD", data[0][2].Value)
+	assert.EqualValues(t, 2243.72, data[0][3].Value)
+	assert.Equal(t, dateRec.Format("2006-01-02T15:04:05.999 -0700"), data[0][4].Value)
+	assert.Equal(t, "aGVsbG8gd29ybGQ=", data[0][5].Value)
 }
 
 func TestFetchDataNotAllFieldsWereBound(t *testing.T) {
@@ -350,10 +350,10 @@ func TestFetchDataFiltered(t *testing.T) {
 	require.Nil(t, err)
 
 	assert.Len(t, data, 1)
-	assert.EqualValues(t, 4, data[0]["ID"])
-	assert.EqualValues(t, 375, data[0]["USER_ID"])
-	assert.Equal(t, "SOLD", data[0]["STATUS"])
-	assert.EqualValues(t, 2243.72, data[0]["TOTAL"])
+	assert.EqualValues(t, 4, data[0][0].Value)
+	assert.EqualValues(t, 375, data[0][1].Value)
+	assert.Equal(t, "SOLD", data[0][2].Value)
+	assert.EqualValues(t, 2243.72, data[0][3].Value)
 }
 
 func TestFetchDataPrepareError(t *testing.T) {
