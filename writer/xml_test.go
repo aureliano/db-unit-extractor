@@ -65,6 +65,24 @@ func TestXMLWriteBodyFileWritingError(t *testing.T) {
 	assert.Equal(t, "file writing error", w.Write("", make([][]*reader.DBColumn, 2)).Error())
 }
 
+func TestXMLWriteUnformattedEmptyData(t *testing.T) {
+	dir := filepath.Join(os.TempDir(), "db-unit-extractor", "writer")
+	w := writer.XMLWriter{
+		Formatted: false,
+		Directory: dir,
+		Name:      "test-write-unformatted",
+	}
+
+	assert.Nil(t, w.WriteHeader())
+
+	assert.Nil(t, w.Write("products", [][]*reader.DBColumn{}))
+
+	assert.Nil(t, w.WriteFooter())
+
+	bytes, _ := os.ReadFile(filepath.Join(dir, fmt.Sprintf("%s.xml", w.Name)))
+	assert.Equal(t, "<?xml version=\"1.0\" encoding=\"UTF-8\"?><dataset></dataset>", string(bytes))
+}
+
 func TestXMLWriteUnformatted(t *testing.T) {
 	dir := filepath.Join(os.TempDir(), "db-unit-extractor", "writer")
 	w := writer.XMLWriter{

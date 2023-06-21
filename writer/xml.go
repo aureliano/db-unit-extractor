@@ -54,6 +54,10 @@ func (w *XMLWriter) WriteFooter() error {
 }
 
 func (w *XMLWriter) Write(table string, rows [][]*reader.DBColumn) error {
+	if len(rows) == 0 {
+		return nil
+	}
+
 	content := xmlFileBody(w.Formatted, table, rows)
 	_, err := w.file.Write(content)
 	if err != nil {

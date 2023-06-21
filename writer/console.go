@@ -18,6 +18,10 @@ func (*ConsoleWriter) WriteFooter() error {
 }
 
 func (*ConsoleWriter) Write(table string, rows [][]*reader.DBColumn) error {
+	if len(rows) == 0 {
+		return nil
+	}
+
 	for _, row := range rows {
 		fmt.Fprintln(os.Stdout, " >", table)
 

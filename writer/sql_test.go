@@ -34,6 +34,16 @@ func TestSQLWriteHeaderFileCreationError(t *testing.T) {
 	assert.Equal(t, "file creation error", w.WriteHeader().Error())
 }
 
+func TestSQLWriteBodyFileWritingError(t *testing.T) {
+	patches := gomonkey.ApplyMethodFunc(&os.File{}, "Write", func([]byte) (int, error) {
+		return 0, fmt.Errorf("file writing error")
+	})
+	defer patches.Reset()
+
+	w := writer.SQLWriter{Directory: filepath.Join(os.TempDir(), "db-unit-extractor", "writer")}
+	assert.Equal(t, "file writing error", w.Write("", [][]*reader.DBColumn{{}}).Error())
+}
+
 func TestSQLWriteUnformattedEmptyData(t *testing.T) {
 	dir := filepath.Join(os.TempDir(), "db-unit-extractor", "writer")
 	w := writer.SQLWriter{
@@ -50,16 +60,6 @@ func TestSQLWriteUnformattedEmptyData(t *testing.T) {
 
 	bytes, _ := os.ReadFile(filepath.Join(dir, fmt.Sprintf("%s.sql", w.Name)))
 	assert.Empty(t, string(bytes))
-}
-
-func TestSQLWriteBodyFileWritingError(t *testing.T) {
-	patches := gomonkey.ApplyMethodFunc(&os.File{}, "Write", func([]byte) (int, error) {
-		return 0, fmt.Errorf("file writing error")
-	})
-	defer patches.Reset()
-
-	w := writer.SQLWriter{Directory: filepath.Join(os.TempDir(), "db-unit-extractor", "writer")}
-	assert.Equal(t, "file writing error", w.Write("", [][]*reader.DBColumn{{}}).Error())
 }
 
 func TestSQLWriteUnformatted(t *testing.T) {

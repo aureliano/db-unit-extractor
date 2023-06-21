@@ -18,6 +18,14 @@ func TestConsoleWriteFooter(t *testing.T) {
 	assert.Nil(t, w.WriteFooter())
 }
 
+func TestConsoleWriteEmptyData(t *testing.T) {
+	w := writer.ConsoleWriter{}
+
+	assert.Nil(t, w.Write("products", [][]*reader.DBColumn{}))
+
+	assert.Nil(t, w.WriteFooter())
+}
+
 func TestConsoleWrite(t *testing.T) {
 	w := writer.ConsoleWriter{}
 
