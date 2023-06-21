@@ -91,7 +91,7 @@ func formattedXMLRecord(table string, rows [][]*reader.DBColumn) []byte {
 		sb.WriteString(fmt.Sprintf("  <%s", table))
 
 		for _, column := range row {
-			if column != nil {
+			if column.Value != nil {
 				sb.WriteString(fmt.Sprintf("\n    %s=\"%v\"", column.Name, column.Value))
 			}
 		}
@@ -107,7 +107,7 @@ func unformattedXMLRecord(table string, rows [][]*reader.DBColumn) []byte {
 	for _, row := range rows {
 		sb.WriteString(fmt.Sprintf("<%s", table))
 		for _, column := range row {
-			if column != nil {
+			if column.Value != nil {
 				sb.WriteString(fmt.Sprintf(" %s=\"%v\"", column.Name, column.Value))
 			}
 		}
