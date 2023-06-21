@@ -29,7 +29,7 @@ func (w *XMLWriter) WriteHeader() error {
 		return err
 	}
 
-	content := fileHeader(w.Formatted)
+	content := xmlFileHeader(w.Formatted)
 	_, err = w.file.Write(content)
 	if err != nil {
 		log.Printf("XML.WriteHeader\nWriting to file failed: `%s'\nContent: %s\n", err.Error(), content)
@@ -40,7 +40,7 @@ func (w *XMLWriter) WriteHeader() error {
 }
 
 func (w *XMLWriter) WriteFooter() error {
-	content := fileFooter()
+	content := xmlFileFooter()
 	_, err := w.file.Write(content)
 	if err != nil {
 		log.Printf("XML.WriteFooter\nWriting to file failed: `%s'\nContent: %s\n", err.Error(), content)
@@ -52,7 +52,7 @@ func (w *XMLWriter) WriteFooter() error {
 }
 
 func (w *XMLWriter) Write(table string, rows []map[string]interface{}) error {
-	content := fileBody(w.Formatted, table, rows)
+	content := xmlFileBody(w.Formatted, table, rows)
 	_, err := w.file.Write(content)
 	if err != nil {
 		log.Printf("XML.Write\nWriting to file failed: `%s'\nContent: %s\n", err.Error(), content)
@@ -62,7 +62,7 @@ func (w *XMLWriter) Write(table string, rows []map[string]interface{}) error {
 	return err
 }
 
-func fileHeader(formatted bool) []byte {
+func xmlFileHeader(formatted bool) []byte {
 	if formatted {
 		return []byte("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<dataset>\n")
 	}
@@ -70,11 +70,11 @@ func fileHeader(formatted bool) []byte {
 	return []byte("<?xml version=\"1.0\" encoding=\"UTF-8\"?><dataset>")
 }
 
-func fileFooter() []byte {
+func xmlFileFooter() []byte {
 	return []byte("</dataset>")
 }
 
-func fileBody(formatted bool, table string, rows []map[string]interface{}) []byte {
+func xmlFileBody(formatted bool, table string, rows []map[string]interface{}) []byte {
 	if formatted {
 		return formattedXMLRecord(table, rows)
 	}
