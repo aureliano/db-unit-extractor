@@ -3,6 +3,7 @@ package schema
 import (
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"regexp"
 	"strings"
@@ -69,10 +70,12 @@ func DigestSchema(fpath string) (Model, error) {
 
 	yml, err := ApplyTemplates(fpath, string(bytes))
 	if err != nil {
+		log.Printf("Could not parse template at %s\n", fpath)
 		return schema, fmt.Errorf("%w: %w", ErrSchemaFile, err)
 	}
 
 	if err = yaml.UnmarshalStrict([]byte(yml), &schema); err != nil {
+		log.Printf("Final data-set schema:\n%s\n", yml)
 		return schema, fmt.Errorf("%w: %w", ErrSchemaFile, err)
 	}
 
