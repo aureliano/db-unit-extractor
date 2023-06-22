@@ -89,7 +89,7 @@ func formattedSQLRecord(table string, rows [][]*reader.DBColumn) []byte {
 		}
 		sb.WriteString(")")
 	}
-	sb.WriteRune(';')
+	sb.WriteString(";\n")
 
 	return []byte(sb.String())
 }

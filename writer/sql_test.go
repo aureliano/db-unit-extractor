@@ -125,7 +125,7 @@ func TestSQLWriteFormatted(t *testing.T) {
 	bytes, _ := os.ReadFile(filepath.Join(dir, fmt.Sprintf("%s.sql", w.Name)))
 	actual := string(bytes)
 	expected := "INSERT INTO products(\n  id, name, description, price\n) " +
-		"VALUES\n  ('1', 'shirt', 'black shirt', '14.5')\n  ('2', 'pant', null, '26.35');"
+		"VALUES\n  ('1', 'shirt', 'black shirt', '14.5')\n  ('2', 'pant', null, '26.35');\n"
 
 	assert.Equal(t, expected, actual)
 }
