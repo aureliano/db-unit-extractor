@@ -61,13 +61,18 @@ type DataTable interface {
 
 func DigestSchema(fpath string) (Model, error) {
 	schema := Model{}
-	yml, err := os.ReadFile(fpath)
+	bytes, err := os.ReadFile(fpath)
 
 	if err != nil {
 		return schema, fmt.Errorf("%w: %w", ErrSchemaFile, err)
 	}
 
-	if err = yaml.UnmarshalStrict(yml, &schema); err != nil {
+	yml, err := ApplyTemplates(fpath, string(bytes))
+	if err != nil {
+		return schema, fmt.Errorf("%w: %w", ErrSchemaFile, err)
+	}
+
+	if err = yaml.UnmarshalStrict([]byte(yml), &schema); err != nil {
 		return schema, fmt.Errorf("%w: %w", ErrSchemaFile, err)
 	}
 
