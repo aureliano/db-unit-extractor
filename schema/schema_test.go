@@ -30,6 +30,14 @@ func TestDigestSchemaUnmarshalError(t *testing.T) {
 	assert.Contains(t, err.Error(), "yaml: unmarshal errors")
 }
 
+func TestDigestSchemaTemplatingError(t *testing.T) {
+	_, err := schema.DigestSchema("../test/unit/schema_test_templating_error.yml")
+	assert.ErrorIs(t, err, schema.ErrSchemaFile)
+	assert.Equal(t,
+		"schema-file: invalid template definition `<%= template path=\"_domain-customer.yml\" param 123 %>'",
+		err.Error())
+}
+
 func TestDigestSchemaUnmarshalErrorUnknownField(t *testing.T) {
 	_, err := schema.DigestSchema("../test/unit/schema_test_unmarshal_error_unknown_field.yml")
 	assert.Contains(t, err.Error(), "line 7: field ArbitraryField not found in type schema.Table")

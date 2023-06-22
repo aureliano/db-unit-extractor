@@ -1,0 +1,3 @@
+---
+tables:
+  <%= template path="_domain-customer.yml" param 123 %>
