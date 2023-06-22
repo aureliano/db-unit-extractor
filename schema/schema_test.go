@@ -33,7 +33,7 @@ func TestDigestSchemaUnmarshalError(t *testing.T) {
 func TestDigestSchemaTemplatingError(t *testing.T) {
 	_, err := schema.DigestSchema("../test/unit/schema_test_templating_error.yml")
 	assert.ErrorIs(t, err, schema.ErrSchemaFile)
-	assert.Contains(t,
+	assert.Equal(t,
 		"schema-file: invalid template definition `<%= template path=\"_domain-customer.yml\" param 123 %>'",
 		err.Error())
 }
