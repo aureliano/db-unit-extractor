@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -25,7 +26,7 @@ func main() {
 	args := os.Args[1:]
 
 	if len(args) != numExpectedParams {
-		panic("Expected two arguments: dataset and expectation.")
+		panic("Expected two arguments: expected and actual data-sets.")
 	}
 
 	expected, err := parseYAML(args[0])
@@ -33,7 +34,7 @@ func main() {
 		panic(err)
 	}
 
-	actual, err := parseXML(args[1])
+	actual, err := parseGeneratedDataSet(args[1])
 	if err != nil {
 		panic(err)
 	}
@@ -41,6 +42,19 @@ func main() {
 	if err = compare(expected, actual); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
+	}
+}
+
+func parseGeneratedDataSet(fpath string) (*DataSet, error) {
+	ext := filepath.Ext(fpath)
+
+	switch ext {
+	case ".xml":
+		return parseXML(fpath)
+	case ".sql":
+		return parseSQL(fpath)
+	default:
+		return nil, fmt.Errorf("unsupported file type %s", ext)
 	}
 }
 
