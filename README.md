@@ -247,9 +247,40 @@ This writer sends records to the standard output.
 
 This writer sends records to an XML file.
 
+**Formatted output sample**
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<dataset>
+  <table_1 column_1="v1"
+    column_2="v2"/>
+  <table_2 column_1="v1"
+    column_2="v2"/>
+</dataset>
+```
+
+**Unformatted output sample**
+```xml
+<?xml version="1.0" encoding="UTF-8"?><dataset><table_1 column_1="v1" column_2="v2"/><table_2 column_1="v1" column_2="v2"/></dataset>
+```
+
 ### SQL
 
 This writer sends records to an SQL file.
+
+**Formatted output sample**
+```sql
+INSERT INTO TABLE table_name(
+  c1, c2, c3
+) values
+  ('v1', 'v2', 'v3')
+  ('v1', 'v2', 'v3');
+INSERT INTO...
+```
+
+**Unformatted output sample**
+```sql
+insert into table_name(c1,c2,c3) values('v1','v2','v3')('v1','v2','v3');insert into...
+```
 
 ## Command line application
 
