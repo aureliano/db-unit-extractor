@@ -25,20 +25,7 @@ tables:
     filters:
       - name: department_id
         value: ${employees.department_id}
-  - name: locations
-    filters:
-      - name: location_id
-        value: ${departments.location_id}
-    ignore:
-      - postal_code
-  - name: countries
-    filters:
-      - name: country_id
-        value: ${locations.country_id}
-  - name: regions
-    filters:
-      - name: region_id
-        value: ${countries.region_id}
+  <%= template path = "_regions-domain-template.yml" locationId = "${departments.location_id}" %>
   - name: jobs
     filters:
       - name: job_id

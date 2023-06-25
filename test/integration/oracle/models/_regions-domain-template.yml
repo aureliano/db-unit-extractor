@@ -1,0 +1,14 @@
+  - name: locations
+    filters:
+      - name: location_id
+        value: ${locationId}
+    ignore:
+      - postal_code
+  - name: countries
+    filters:
+      - name: country_id
+        value: ${locations.country_id}
+  - name: regions
+    filters:
+      - name: region_id
+        value: ${countries.region_id}
