@@ -25,6 +25,7 @@ Supported [operating systems](https://en.wikipedia.org/wiki/Operating_system) ar
  3. [File writer](#file-writer)
     1. [Console](#console)
     2. [XML](#xml)
+    3. [SQL](#sql)
  4. [Command line application](#command-line-application)
  5. [Update program](#update-program)
  6. [Development](#development)
@@ -245,6 +246,10 @@ This writer sends records to the standard output.
 ### XML
 
 This writer sends records to an XML file.
+
+### SQL
+
+This writer sends records to an SQL file.
 
 ## Command line application
 
