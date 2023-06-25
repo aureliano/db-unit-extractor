@@ -19,11 +19,13 @@ Supported [operating systems](https://en.wikipedia.org/wiki/Operating_system) ar
         4. [Dynamic filter - command line parameter](#dynamic-filter---command-line-parameter)
         5. [Dynamic filter - referenced table](#dynamic-filter---referenced-table)
         6. [Dynamic filter - multivalued referenced table](#dynamic-filter---multivalued-referenced-table)
+    3. [Templating](#templating)
  2. [Database reader](#database-reader)
     1. [Oracle](#oracle)
  3. [File writer](#file-writer)
     1. [Console](#console)
     2. [XML](#xml)
+    3. [SQL](#sql)
  4. [Command line application](#command-line-application)
  5. [Update program](#update-program)
  6. [Development](#development)
@@ -193,6 +195,38 @@ tables:
 
 Above you might have noticed the use of `[@]` suffix, that means: this reference is multivalued. At the end, our data-set will have a customer with many orders with many products.
 
+### Templating
+
+Templating is a feature that enables the use of templates in the data schema file, so that you can organize the main file and distribute the schema to different partial files.
+
+The template is able to handle parameters, the number being variable. However, the path parameter - path to the template file - is mandatory. The path parameter can be absolute or relative. When relative, it is relative to the schema file path that included it.
+
+Example:
+
+```yaml
+---
+tables:
+  - name: customers
+    filters:
+      - name: id
+        value: ${customer_id}
+  - name: address
+    filters:
+      - name: customer_id
+        value: ${customer_id}
+  <%= template path = "domain-A-tables.yml" customerId = "${customer_id}" %>
+  <%= template path = "/home/user/templates/domain-B-tables.yml" param1 = "123" param2 = "${table.pk}" ... %>
+```
+
+**domain-A-tables.yml**
+
+```yaml
+  - name: tableA
+    filters:
+      - name: col1
+        value: ${customerId} # same name as passed in template definition.
+```
+
 ## Database reader
 
 Database reader is a component that handles data recovering. In the next subsections you'll see what database systems are supported by this project.
@@ -212,6 +246,41 @@ This writer sends records to the standard output.
 ### XML
 
 This writer sends records to an XML file.
+
+**Formatted output sample**
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<dataset>
+  <table_1 column_1="v1"
+    column_2="v2"/>
+  <table_2 column_1="v1"
+    column_2="v2"/>
+</dataset>
+```
+
+**Unformatted output sample**
+```xml
+<?xml version="1.0" encoding="UTF-8"?><dataset><table_1 column_1="v1" column_2="v2"/><table_2 column_1="v1" column_2="v2"/></dataset>
+```
+
+### SQL
+
+This writer sends records to an SQL file.
+
+**Formatted output sample**
+```sql
+INSERT INTO TABLE table_name(
+  c1, c2, c3
+) values
+  ('v1', 'v2', 'v3')
+  ('v1', 'v2', 'v3');
+INSERT INTO...
+```
+
+**Unformatted output sample**
+```sql
+insert into table_name(c1,c2,c3) values('v1','v2','v3')('v1','v2','v3');insert into...
+```
 
 ## Command line application
 
