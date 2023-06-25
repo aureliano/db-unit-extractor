@@ -24,9 +24,16 @@ func TestNewWriterXML(t *testing.T) {
 	assert.IsType(t, &writer.XMLWriter{}, w)
 }
 
+func TestNewWriterSQL(t *testing.T) {
+	w, err := writer.NewWriter(writer.FileConf{Type: "sql"})
+	assert.Nil(t, err)
+	assert.IsType(t, &writer.SQLWriter{}, w)
+}
+
 func TestSupportedTypes(t *testing.T) {
 	types := writer.SupportedTypes()
-	assert.Len(t, types, 2)
+	assert.Len(t, types, 3)
 	assert.Equal(t, "console", types[0])
 	assert.Equal(t, "xml", types[1])
+	assert.Equal(t, "sql", types[2])
 }

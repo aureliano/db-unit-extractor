@@ -36,12 +36,15 @@ func NewExtractCommand(cuf func(c caravela.Conf) (*provider.Release, error)) *co
   # Pass parameter expected in schema file.
   %s extract -s /path/to/schema.yml -n postgres://usr:pwd@127.0.0.1:5432/test -r customer_id=4329
 
-  # Write to xml file too.
+  # Write to xml file.
   %s extract -s /path/to/schema.yml -n postgres://usr:pwd@127.0.0.1:5432/test -r customer_id=4329 -t xml
 
-  # Format xml output.
-  %s extract -s /path/to/schema.yml -n postgres://usr:pwd@127.0.0.1:5432/test -r customer_id=4329 -t xml -f`,
-			project.binName, project.binName, project.binName, project.binName),
+  # Write to sql file.
+  %s extract -s /path/to/schema.yml -n postgres://usr:pwd@127.0.0.1:5432/test -r customer_id=4329 -t xml -t sql
+
+  # Formatted output.
+  %s extract -s /path/to/schema.yml -n postgres://usr:pwd@127.0.0.1:5432/test -r customer_id=4329 -t xml -t sql -f`,
+			project.binName, project.binName, project.binName, project.binName, project.binName),
 		Run: func(cmd *cobra.Command, args []string) {
 			extract(cmd, cuf)
 		},
@@ -52,7 +55,7 @@ func NewExtractCommand(cuf func(c caravela.Conf) (*provider.Release, error)) *co
 		"Data source name (aka connection string: <driver>://<username>:<password>@<host>:<port>/<database>).")
 	cmd.Flags().Int("max-open-conn", defaultMaxOpenConn, "Set the maximum number of concurrently open connections")
 	cmd.Flags().Int("max-idle-conn", defaultMaxIdleConn, "Set the maximum number of concurrently idle connections")
-	cmd.Flags().StringArrayP("output-type", "t", []string{"console"},
+	cmd.Flags().StringArrayP("output-type", "t", []string{"console", "xml", "sql"},
 		fmt.Sprintf("Extracted data output format type. Expected: %s", writer.SupportedTypes()))
 	cmd.Flags().BoolP("formatted-output", "f", false, "Whether the output should be formatted.")
 	cmd.Flags().StringP("directory", "d", ".", "Output directory.")

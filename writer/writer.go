@@ -29,11 +29,13 @@ func NewWriter(conf FileConf) (FileWriter, error) {
 		return &ConsoleWriter{}, nil
 	case strings.EqualFold(conf.Type, "xml"):
 		return &XMLWriter{Formatted: conf.Formatted, Directory: conf.Directory, Name: conf.Name}, nil
+	case strings.EqualFold(conf.Type, "sql"):
+		return &SQLWriter{Formatted: conf.Formatted, Directory: conf.Directory, Name: conf.Name}, nil
 	default:
 		return nil, fmt.Errorf("%w: %s", ErrUnsupportedFileWriter, conf.Type)
 	}
 }
 
 func SupportedTypes() []string {
-	return []string{"console", "xml"}
+	return []string{"console", "xml", "sql"}
 }
