@@ -19,6 +19,7 @@ Supported [operating systems](https://en.wikipedia.org/wiki/Operating_system) ar
         4. [Dynamic filter - command line parameter](#dynamic-filter---command-line-parameter)
         5. [Dynamic filter - referenced table](#dynamic-filter---referenced-table)
         6. [Dynamic filter - multivalued referenced table](#dynamic-filter---multivalued-referenced-table)
+    3. [Templating](#templating)
  2. [Database reader](#database-reader)
     1. [Oracle](#oracle)
  3. [File writer](#file-writer)
@@ -192,6 +193,38 @@ tables:
 ```
 
 Above you might have noticed the use of `[@]` suffix, that means: this reference is multivalued. At the end, our data-set will have a customer with many orders with many products.
+
+### Templating
+
+Templating is a feature that enables the use of templates in the data schema file, so that you can organize the main file and distribute the schema to different partial files.
+
+The template is able to handle parameters, the number being variable. However, the path parameter - path to the template file - is mandatory. The path parameter can be absolute or relative. When relative, it is relative to the schema file path that included it.
+
+Example:
+
+```yaml
+---
+tables:
+  - name: customers
+    filters:
+      - name: id
+        value: ${customer_id}
+  - name: address
+    filters:
+      - name: customer_id
+        value: ${customer_id}
+  <%= template path = "domain-A-tables.yml" customerId = "${customer_id}" %>
+  <%= template path = "/home/user/templates/domain-B-tables.yml" param1 = "123" param2 = "${table.pk}" ... %>
+```
+
+**domain-A-tables.yml**
+
+```yaml
+  - name: tableA
+    filters:
+      - name: col1
+        value: ${customerId} # same name as passed in template definition.
+```
 
 ## Database reader
 
