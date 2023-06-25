@@ -33,3 +33,13 @@ go run test/integration/*.go \
     test/integration/oracle/expectations/employees-ds-expectation.yml \
     /tmp/db-unit-extractor/integration-tests/oracle/employees-ds-model.sql
 ```
+
+### Automation
+
+```sh
+# Setup Oracle XE 21c.
+./config.sh
+
+# Execute integration tests.
+./execute-test-cases.sh
+```
